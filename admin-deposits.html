@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>QUANTUM — Admin Deposits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#060818; --surface:#0d1226; --surface-2:#121834;
+    --cyan:#00e5ff; --violet:#a855f7; --text:#e8ecf7; --muted:#8b93b8;
+    --success:#22e6a3; --error:#ff5470; --gold:#ffcf5c; --border:rgba(232,236,247,0.08);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{ background:var(--void); color:var(--text); font-family:'Inter', sans-serif; min-height:100vh; position:relative; padding-bottom:40px; }
+  a{ text-decoration:none; color:inherit; }
+  .bg-glow{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(600px circle at 15% 0%, rgba(168,85,247,0.10), transparent 55%),
+      radial-gradient(700px circle at 90% 40%, rgba(0,229,255,0.09), transparent 55%);
+  }
+  .container{ position:relative; z-index:1; max-width:560px; margin:0 auto; padding:20px 18px; }
+
+  .topbar{ display:flex; align-items:center; gap:14px; margin-bottom:16px; justify-content:space-between; }
+  .topbar-left{ display:flex; align-items:center; gap:14px; }
+  .back-btn, .icon-btn-round{
+    width:38px; height:38px; border-radius:50%; flex:none;
+    background:var(--surface); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer;
+  }
+  .icon-btn-round.spinning{ animation:spin .8s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .topbar h1{ font-family:'Space Grotesk', sans-serif; font-size:18px; font-weight:600; }
+
+  .tabs{ display:flex; gap:8px; margin-bottom:16px; background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:5px; }
+  .tab{ flex:1; text-align:center; padding:10px 6px; border-radius:10px; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; }
+  .tab.active{ background:linear-gradient(120deg, var(--cyan), var(--violet)); color:#040613; }
+  .tab .count-badge{ font-size:10.5px; opacity:0.85; margin-left:3px; }
+
+  .list-wrap{ display:flex; flex-direction:column; gap:12px; }
+  .req-card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:16px; }
+  .req-top{ display:flex; gap:12px; margin-bottom:12px; }
+  .receipt-thumb{
+    width:64px; height:64px; border-radius:10px; object-fit:cover; flex:none;
+    border:1px solid var(--border); cursor:pointer;
+  }
+  .req-info{ flex:1; min-width:0; }
+  .req-info p.name{ font-size:14.5px; font-weight:600; }
+  .req-info p.phone{ font-size:12px; color:var(--muted); font-family:'JetBrains Mono', monospace; margin-top:2px; }
+  .req-info p.time{ font-size:11px; color:var(--muted); margin-top:3px; }
+  .req-amount{
+    font-family:'Space Grotesk', sans-serif; font-size:17px; font-weight:700; color:var(--success);
+    flex:none; align-self:center;
+  }
+  .status-badge{
+    font-size:10.5px; font-weight:700; padding:4px 9px; border-radius:8px; display:inline-block;
+    background:rgba(255,207,92,0.14); color:var(--gold);
+  }
+  .status-badge.approved{ background:rgba(34,230,163,0.14); color:var(--success); }
+  .status-badge.rejected{ background:rgba(255,84,112,0.14); color:var(--error); }
+  .req-actions{ display:flex; gap:10px; margin-top:12px; }
+  .req-actions button{
+    flex:1; padding:11px; border-radius:10px; border:none; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13.5px;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  .btn-approve{ background:linear-gradient(120deg, var(--success), #17c98a); color:#04150e; }
+  .btn-reject{ background:var(--surface-2); border:1px solid rgba(255,84,112,0.3) !important; color:var(--error); }
+  .btn-approve:disabled, .btn-reject:disabled{ opacity:0.55; cursor:not-allowed; }
+  .rejection-note{ font-size:12px; color:var(--muted); margin-top:8px; font-style:italic; }
+
+  .empty-state{ text-align:center; padding:50px 20px; color:var(--muted); }
+  .empty-state .emoji{ font-size:38px; margin-bottom:10px; }
+  .skeleton{
+    background:var(--surface); border:1px solid var(--border); border-radius:16px; height:130px;
+    background-image:linear-gradient(90deg, var(--surface) 0%, var(--surface-2) 50%, var(--surface) 100%);
+    background-size:200% 100%; animation:shimmer 1.4s infinite; margin-bottom:12px;
+  }
+  @keyframes shimmer{ from{ background-position:200% 0;} to{ background-position:-200% 0;} }
+
+  /* Lightbox */
+  .lightbox{
+    position:fixed; inset:0; background:rgba(2,3,10,0.92); z-index:90;
+    display:none; align-items:center; justify-content:center; padding:20px;
+  }
+  .lightbox.open{ display:flex; }
+  .lightbox img{ max-width:100%; max-height:85vh; border-radius:12px; }
+  .lightbox-close{
+    position:absolute; top:20px; right:20px; width:40px; height:40px; border-radius:50%;
+    background:var(--surface); border:1px solid var(--border); color:var(--text); font-size:18px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+
+  /* Reject modal */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(2,3,10,0.75);
+    display:none; align-items:center; justify-content:center; z-index:80; padding:20px;
+  }
+  .modal-overlay.open{ display:flex; }
+  .modal{ background:var(--surface); border:1px solid var(--border); border-radius:18px; padding:24px 22px; max-width:400px; width:100%; }
+  .modal h2{ font-family:'Space Grotesk', sans-serif; font-size:17px; margin-bottom:12px; }
+  .modal textarea{
+    width:100%; background:var(--surface-2); border:1px solid var(--border); border-radius:10px;
+    padding:12px; color:var(--text); font-size:14px; font-family:'Inter', sans-serif; min-height:80px; resize:vertical; outline:none;
+  }
+  .modal textarea:focus{ border-color:var(--cyan); }
+  .modal-actions{ display:flex; gap:10px; margin-top:16px; }
+  .modal-actions button{
+    flex:1; padding:12px; border-radius:10px; border:none; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:14px;
+  }
+  .modal-actions .cancel{ background:var(--surface-2); color:var(--text); border:1px solid var(--border); }
+  .modal-actions .confirm{ background:linear-gradient(120deg, var(--error), #ff7a90); color:#1a0407; }
+
+  #toast-stack{
+    position:fixed; top:16px; left:50%; transform:translateX(-50%);
+    z-index:100; display:flex; flex-direction:column; gap:8px;
+    width:calc(100% - 32px); max-width:420px;
+  }
+  .toast{
+    background:var(--surface-2); border:1px solid var(--border); border-left:3px solid var(--cyan);
+    padding:12px 14px; border-radius:10px; font-size:13.5px; box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    animation:slideDown .25s ease;
+  }
+  .toast.error{ border-left-color:var(--error); }
+  .toast.success{ border-left-color:var(--success); }
+  @keyframes slideDown{ from{ opacity:0; transform:translateY(-10px);} to{ opacity:1; transform:translateY(0);} }
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div id="toast-stack"></div>
+
+<div class="container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="admin-dashboard.html" class="back-btn">←</a>
+      <h1>Deposit Requests</h1>
+    </div>
+    <div class="icon-btn-round" id="refreshBtn" title="Refresh">⟳</div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-status="pending">Pending</div>
+    <div class="tab" data-status="approved">Approved</div>
+    <div class="tab" data-status="rejected">Rejected</div>
+  </div>
+
+  <div id="listContainer" class="list-wrap">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-close" id="lightboxClose">✕</div>
+  <img id="lightboxImg" alt="Receipt full size">
+</div>
+
+<div class="modal-overlay" id="rejectModal">
+  <div class="modal">
+    <h2>Reject Deposit</h2>
+    <textarea id="rejectReason" placeholder="Optional reason (e.g. receipt unreadable, amount mismatch)…"></textarea>
+    <div class="modal-actions">
+      <button class="cancel" id="rejectCancel" type="button">Cancel</button>
+      <button class="confirm" id="rejectConfirm" type="button">Confirm Reject</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, collection, query, where, limit,
+    getDocs, writeBatch, increment, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI",
+    authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0",
+    storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094",
+    appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const PAGE_SIZE = 50;
+  let activeStatus = "pending";
+  let cache = { pending: null, approved: null, rejected: null };
+  let pendingRejectId = null;
+
+  function toast(message, type = "info", duration = 4000) {
+    const stack = document.getElementById("toast-stack");
+    const el = document.createElement("div");
+    el.className = `toast ${type}`;
+    el.textContent = message;
+    stack.appendChild(el);
+    setTimeout(() => {
+      el.style.transition = "opacity .25s ease";
+      el.style.opacity = "0";
+      setTimeout(() => el.remove(), 250);
+    }, duration);
+  }
+  function formatNaira(v) { return "₦" + (Number(v) || 0).toLocaleString("en-NG"); }
+  function formatTime(ts) {
+    if (!ts) return "—";
+    const date = ts.toDate ? ts.toDate() : new Date(ts);
+    return date.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" }) +
+      " · " + date.toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" });
+  }
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, s => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[s]));
+  }
+
+  /* =========================================================
+     AUTH + ROLE GUARD
+     ========================================================= */
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "admin-login.html"; return; }
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid));
+      const role = snap.exists() ? snap.data().role : null;
+      if (role !== "admin") { await signOut(auth); window.location.href = "admin-login.html"; return; }
+      loadList("pending");
+    } catch (e) {
+      window.location.href = "admin-login.html";
+    }
+  });
+
+  /* =========================================================
+     TABS
+     ========================================================= */
+  document.querySelectorAll(".tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      activeStatus = tab.dataset.status;
+      loadList(activeStatus);
+    });
+  });
+
+  /* =========================================================
+     LOAD LIST — single-field where clause (no orderBy) avoids
+     needing a composite index; sorted client-side instead.
+     ========================================================= */
+  async function loadList(status, force = false) {
+    const container = document.getElementById("listContainer");
+    if (!force && cache[status]) { renderList(cache[status], status); return; }
+
+    container.innerHTML = `<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>`;
+
+    try {
+      const q = query(collection(db, "deposits"), where("status", "==", status), limit(PAGE_SIZE));
+      const snap = await getDocs(q);
+      let items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      items.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+      cache[status] = items;
+      renderList(items, status);
+    } catch (e) {
+      container.innerHTML = `<div class="empty-state"><div class="emoji">⚠️</div><p>Couldn't load deposits. Please refresh.</p></div>`;
+    }
+  }
+
+  function renderList(items, status) {
+    const container = document.getElementById("listContainer");
+    if (!items.length) {
+      container.innerHTML = `<div class="empty-state"><div class="emoji">📭</div><p>No ${status} deposit requests.</p></div>`;
+      return;
+    }
+
+    container.innerHTML = items.map(item => `
+      <div class="req-card" data-id="${item.id}">
+        <div class="req-top">
+          <img class="receipt-thumb" src="${item.receiptBase64 || ""}" data-fullsrc="${item.receiptBase64 || ""}" alt="Receipt">
+          <div class="req-info">
+            <p class="name">${escapeHtml(item.username || "Unknown user")}</p>
+            <p class="phone">${escapeHtml(item.phone || "—")}</p>
+            <p class="time">${formatTime(item.createdAt)}</p>
+          </div>
+          <div class="req-amount">${formatNaira(item.amount)}</div>
+        </div>
+        ${status === "pending" ? `
+          <div class="req-actions">
+            <button class="btn-approve" data-action="approve" data-id="${item.id}" data-uid="${item.uid}" data-amount="${item.amount}">✓ Approve</button>
+            <button class="btn-reject" data-action="reject" data-id="${item.id}">✕ Reject</button>
+          </div>
+        ` : `
+          <span class="status-badge ${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+          ${item.rejectionReason ? `<p class="rejection-note">Reason: ${escapeHtml(item.rejectionReason)}</p>` : ""}
+        `}
+      </div>
+    `).join("");
+
+    // Thumbnail -> lightbox
+    container.querySelectorAll(".receipt-thumb").forEach(img => {
+      img.addEventListener("click", () => {
+        const src = img.dataset.fullsrc;
+        if (!src) return;
+        document.getElementById("lightboxImg").src = src;
+        document.getElementById("lightbox").classList.add("open");
+      });
+    });
+
+    // Approve / Reject buttons
+    container.querySelectorAll('[data-action="approve"]').forEach(btn => {
+      btn.addEventListener("click", () => approveDeposit(btn.dataset.id, btn.dataset.uid, Number(btn.dataset.amount), btn));
+    });
+    container.querySelectorAll('[data-action="reject"]').forEach(btn => {
+      btn.addEventListener("click", () => openRejectModal(btn.dataset.id));
+    });
+  }
+
+  /* =========================================================
+     LIGHTBOX
+     ========================================================= */
+  document.getElementById("lightboxClose").addEventListener("click", () => {
+    document.getElementById("lightbox").classList.remove("open");
+  });
+  document.getElementById("lightbox").addEventListener("click", (e) => {
+    if (e.target.id === "lightbox") document.getElementById("lightbox").classList.remove("open");
+  });
+
+  /* =========================================================
+     APPROVE
+     ========================================================= */
+  async function approveDeposit(depositId, uid, amount, btn) {
+    const card = btn.closest(".req-card");
+    card.querySelectorAll("button").forEach(b => b.disabled = true);
+
+    try {
+      const batch = writeBatch(db);
+      batch.update(doc(db, "deposits", depositId), {
+        status: "approved",
+        approvedAt: serverTimestamp()
+      });
+      batch.update(doc(db, "users", uid), {
+        balance: increment(amount),
+        totalDeposit: increment(amount)
+      });
+      batch.set(doc(collection(db, "adminActions")), {
+        adminUid: auth.currentUser.uid, targetUid: uid, action: "approve_deposit",
+        amount, referenceId: depositId, createdAt: serverTimestamp()
+      });
+      await batch.commit();
+
+      cache.pending = cache.pending.filter(i => i.id !== depositId);
+      cache.approved = null; // force refresh next time that tab is opened
+      renderList(cache.pending, "pending");
+      toast(`Deposit of ${formatNaira(amount)} approved and credited.`, "success");
+    } catch (e) {
+      toast("Couldn't approve this deposit. Please try again.", "error");
+      card.querySelectorAll("button").forEach(b => b.disabled = false);
+    }
+  }
+
+  /* =========================================================
+     REJECT
+     ========================================================= */
+  const rejectModal = document.getElementById("rejectModal");
+  function openRejectModal(depositId) {
+    pendingRejectId = depositId;
+    document.getElementById("rejectReason").value = "";
+    rejectModal.classList.add("open");
+  }
+  document.getElementById("rejectCancel").addEventListener("click", () => rejectModal.classList.remove("open"));
+  rejectModal.addEventListener("click", (e) => { if (e.target === rejectModal) rejectModal.classList.remove("open"); });
+
+  document.getElementById("rejectConfirm").addEventListener("click", async () => {
+    if (!pendingRejectId) return;
+    const reason = document.getElementById("rejectReason").value.trim();
+    const btn = document.getElementById("rejectConfirm");
+    btn.disabled = true;
+
+    try {
+      const batch = writeBatch(db);
+      batch.update(doc(db, "deposits", pendingRejectId), {
+        status: "rejected",
+        rejectedAt: serverTimestamp(),
+        rejectionReason: reason || null
+      });
+      batch.set(doc(collection(db, "adminActions")), {
+        adminUid: auth.currentUser.uid, action: "reject_deposit",
+        reason: reason || null, referenceId: pendingRejectId, createdAt: serverTimestamp()
+      });
+      await batch.commit();
+
+      cache.pending = cache.pending.filter(i => i.id !== pendingRejectId);
+      cache.rejected = null;
+      renderList(cache.pending, "pending");
+      toast("Deposit request rejected.", "success");
+      rejectModal.classList.remove("open");
+    } catch (e) {
+      toast("Couldn't reject this deposit. Please try again.", "error");
+    } finally {
+      btn.disabled = false;
+      pendingRejectId = null;
+    }
+  });
+
+  /* =========================================================
+     REFRESH
+     ========================================================= */
+  document.getElementById("refreshBtn").addEventListener("click", async () => {
+    const btn = document.getElementById("refreshBtn");
+    btn.classList.add("spinning");
+    await loadList(activeStatus, true);
+    btn.classList.remove("spinning");
+    toast("List updated", "success", 1800);
+  });
+</script>
+</body>
+</html>
