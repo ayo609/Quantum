@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>QUANTUM — Withdraw</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#060818;
+    --surface:#0d1226;
+    --surface-2:#121834;
+    --cyan:#00e5ff;
+    --violet:#a855f7;
+    --text:#e8ecf7;
+    --muted:#8b93b8;
+    --success:#22e6a3;
+    --error:#ff5470;
+    --border:rgba(232,236,247,0.08);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--void);
+    color:var(--text);
+    font-family:'Inter', sans-serif;
+    min-height:100vh;
+    position:relative;
+    padding-bottom:40px;
+  }
+  a{ text-decoration:none; color:inherit; }
+  .bg-glow{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(600px circle at 15% 0%, rgba(0,229,255,0.09), transparent 55%),
+      radial-gradient(700px circle at 90% 40%, rgba(168,85,247,0.10), transparent 55%);
+  }
+  .container{ position:relative; z-index:1; max-width:480px; margin:0 auto; padding:20px 18px; }
+
+  .topbar{ display:flex; align-items:center; gap:14px; margin-bottom:20px; }
+  .back-btn{
+    width:38px; height:38px; border-radius:50%; flex:none;
+    background:var(--surface); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer;
+  }
+  .topbar h1{ font-family:'Space Grotesk', sans-serif; font-size:19px; font-weight:600; }
+
+  .balance-strip{
+    background:linear-gradient(135deg, #0f1730, #161033);
+    border:1px solid var(--border); border-radius:14px;
+    padding:14px 16px; margin-bottom:16px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .balance-strip p.k{ font-size:11.5px; color:var(--muted); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.3px; }
+  .balance-strip p.v{ font-family:'Space Grotesk', sans-serif; font-size:20px; font-weight:700; }
+
+  .min-note{
+    display:flex; align-items:flex-start; gap:8px; font-size:12.5px; color:var(--muted);
+    background:rgba(0,229,255,0.06); border:1px solid rgba(0,229,255,0.18);
+    padding:10px 12px; border-radius:10px; margin-bottom:12px; line-height:1.5;
+  }
+  .hours-warning{
+    display:none; align-items:flex-start; gap:8px; font-size:12.5px; color:#ffcf8a;
+    background:rgba(255,159,67,0.08); border:1px solid rgba(255,159,67,0.25);
+    padding:10px 12px; border-radius:10px; margin-bottom:16px; line-height:1.5;
+  }
+  .hours-warning.show{ display:flex; }
+
+  .card{
+    background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    padding:18px; margin-bottom:16px;
+  }
+  .card-title{ font-family:'Space Grotesk', sans-serif; font-size:14.5px; font-weight:600; margin-bottom:12px; }
+
+  .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+  .field:last-child{ margin-bottom:0; }
+  .field label{
+    font-size:12.5px; font-weight:600; color:var(--muted);
+    letter-spacing:0.3px; text-transform:uppercase;
+  }
+  .input-shell input, .input-shell select{
+    width:100%;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:13px 14px;
+    color:var(--text);
+    font-size:15px;
+    font-family:'Inter', sans-serif;
+    outline:none;
+    transition:border-color .15s ease, box-shadow .15s ease;
+    appearance:none;
+    -webkit-appearance:none;
+  }
+  .input-shell select{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1l6 6 6-6' stroke='%238b93b8' stroke-width='1.6' fill='none' fill-rule='evenodd'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 14px center;
+    padding-right:36px;
+  }
+  .input-shell input::placeholder{ color:#5c6488; }
+  .input-shell input:focus, .input-shell select:focus{ border-color:var(--cyan); box-shadow:0 0 0 3px rgba(0,229,255,0.12); }
+  .input-shell input.error-state, .input-shell select.error-state{ border-color:var(--error); }
+  .status-line{ font-size:12px; min-height:14px; color:var(--error); }
+
+  .amount-prefix-shell{ position:relative; }
+  .amount-prefix-shell span{
+    position:absolute; left:14px; top:50%; transform:translateY(-50%);
+    font-family:'JetBrains Mono', monospace; color:var(--muted); font-size:15px;
+  }
+  .amount-prefix-shell input{ padding-left:30px; font-family:'JetBrains Mono', monospace; }
+
+  .breakdown{
+    background:rgba(255,255,255,0.03); border:1px solid var(--border);
+    border-radius:12px; padding:12px 14px; margin-top:4px; display:none;
+  }
+  .breakdown.show{ display:block; }
+  .breakdown-row{ display:flex; justify-content:space-between; font-size:13px; padding:5px 0; }
+  .breakdown-row.total{ border-top:1px solid var(--border); margin-top:4px; padding-top:9px; font-weight:700; color:var(--success); }
+  .breakdown-row span.k{ color:var(--muted); }
+
+  .submit-btn{
+    width:100%; margin-top:4px;
+    background:linear-gradient(120deg, var(--cyan), var(--violet));
+    border:none; border-radius:12px;
+    padding:15px; font-size:15.5px; font-weight:600; color:#040613;
+    font-family:'Space Grotesk', sans-serif;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    transition:opacity .15s ease, transform .1s ease;
+  }
+  .submit-btn:active{ transform:scale(0.98); }
+  .submit-btn:disabled{ opacity:0.55; cursor:not-allowed; }
+  .spinner{
+    width:16px; height:16px; border-radius:50%;
+    border:2px solid rgba(4,6,19,0.3); border-top-color:#040613;
+    animation:spin .7s linear infinite; display:none;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .submit-btn.loading .spinner{ display:inline-block; }
+  .submit-btn.loading .btn-text{ display:none; }
+
+  #toast-stack{
+    position:fixed; top:16px; left:50%; transform:translateX(-50%);
+    z-index:60; display:flex; flex-direction:column; gap:8px;
+    width:calc(100% - 32px); max-width:420px;
+  }
+  .toast{
+    background:var(--surface-2); border:1px solid var(--border);
+    border-left:3px solid var(--cyan);
+    padding:12px 14px; border-radius:10px; font-size:13.5px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    animation:slideDown .25s ease;
+  }
+  .toast.error{ border-left-color:var(--error); }
+  .toast.success{ border-left-color:var(--success); }
+  @keyframes slideDown{ from{ opacity:0; transform:translateY(-10px);} to{ opacity:1; transform:translateY(0);} }
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div id="toast-stack"></div>
+
+<div class="container">
+  <div class="topbar">
+    <a href="dashboard.html" class="back-btn">←</a>
+    <h1>Withdraw Funds</h1>
+  </div>
+
+  <div class="balance-strip">
+    <div>
+      <p class="k">Available Balance</p>
+      <p class="v" id="availableBalance">₦0.00</p>
+    </div>
+  </div>
+
+  <div class="min-note">
+    ℹ️ Minimum withdrawal is ₦1,500. A 15% processing fee applies. Withdrawals are processed 9:00 AM – 5:00 PM, Monday to Friday.
+  </div>
+  <div class="hours-warning" id="hoursWarning">
+    ⏰ It's currently outside processing hours. Your request will still be submitted and processed on the next business day.
+  </div>
+
+  <div class="card">
+    <div class="card-title">Withdrawal Details</div>
+    <form id="withdrawForm" novalidate>
+      <div class="field">
+        <label for="username">Username</label>
+        <div class="input-shell">
+          <input type="text" id="username" placeholder="Your registered username" autocomplete="off" required>
+        </div>
+        <div class="status-line" id="usernameStatus"></div>
+      </div>
+
+      <div class="field">
+        <label for="phone">Phone Number</label>
+        <div class="input-shell">
+          <input type="tel" id="phone" placeholder="08012345678" inputmode="numeric" maxlength="11" required>
+        </div>
+        <div class="status-line" id="phoneStatus"></div>
+      </div>
+
+      <div class="field">
+        <label for="amount">Withdrawal Amount</label>
+        <div class="input-shell amount-prefix-shell">
+          <span>₦</span>
+          <input type="text" id="amount" placeholder="1,500" inputmode="numeric" required>
+        </div>
+        <div class="status-line" id="amountStatus"></div>
+        <div class="breakdown" id="breakdown">
+          <div class="breakdown-row"><span class="k">Withdrawal Amount</span><span id="breakdownAmount">₦0</span></div>
+          <div class="breakdown-row"><span class="k">Processing Fee (15%)</span><span id="breakdownFee">₦0</span></div>
+          <div class="breakdown-row total"><span>You'll Receive</span><span id="breakdownNet">₦0</span></div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="bankName">Bank Name</label>
+        <div class="input-shell">
+          <select id="bankName" required>
+            <option value="" disabled selected>Select your bank</option>
+          </select>
+        </div>
+        <div class="status-line" id="bankStatus"></div>
+      </div>
+
+      <div class="field">
+        <label for="accountNumber">Account Number</label>
+        <div class="input-shell">
+          <input type="text" id="accountNumber" placeholder="0123456789" inputmode="numeric" maxlength="10" required>
+        </div>
+        <div class="status-line" id="accountNumberStatus"></div>
+      </div>
+
+      <div class="field">
+        <label for="accountName">Account Name</label>
+        <div class="input-shell">
+          <input type="text" id="accountName" placeholder="As it appears on your bank account" autocomplete="off" required>
+        </div>
+        <div class="status-line" id="accountNameStatus"></div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn" style="margin-top:6px;">
+        <span class="btn-text">Submit Withdrawal Request</span>
+        <span class="spinner"></span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, writeBatch, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI",
+    authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0",
+    storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094",
+    appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const DASHBOARD_CACHE_KEY = "quantum_dashboard_cache";
+  const MIN_WITHDRAWAL = 1500;
+  const FEE_RATE = 0.15;
+  let currentUser = null;
+  let availableBalance = 0;
+
+  /* ---------------- 50 widely-used Nigerian banks & fintech platforms ---------------- */
+  const BANKS = [
+    "Access Bank", "Citibank Nigeria", "Ecobank Nigeria", "Fidelity Bank", "First Bank of Nigeria",
+    "First City Monument Bank (FCMB)", "Globus Bank", "Guaranty Trust Bank (GTBank)", "Heritage Bank",
+    "Jaiz Bank", "Keystone Bank", "Optimus Bank", "Parallex Bank", "Polaris Bank", "PremiumTrust Bank",
+    "Providus Bank", "Signature Bank", "Stanbic IBTC Bank", "Standard Chartered Bank", "Sterling Bank",
+    "SunTrust Bank", "Titan Trust Bank", "Union Bank of Nigeria", "United Bank for Africa (UBA)",
+    "Unity Bank", "Wema Bank", "Zenith Bank",
+    "Coronation Merchant Bank", "FBNQuest Merchant Bank", "FSDH Merchant Bank", "Greenwich Merchant Bank",
+    "Nova Merchant Bank", "Rand Merchant Bank", "Alternative Bank",
+    "Kuda Bank", "Opay (Paycom)", "PalmPay", "Moniepoint MFB", "VFD Microfinance Bank",
+    "Sparkle Microfinance Bank", "Carbon (One Finance)", "FairMoney MFB", "Mint Finex MFB",
+    "Rubies Microfinance Bank", "TCF MFB", "AB Microfinance Bank", "Accion Microfinance Bank",
+    "Baobab Microfinance Bank", "LAPO Microfinance Bank", "Fina Trust Microfinance Bank",
+    "Personal Trust Microfinance Bank"
+  ];
+
+  const bankSelect = document.getElementById("bankName");
+  BANKS.forEach(bank => {
+    const opt = document.createElement("option");
+    opt.value = bank;
+    opt.textContent = bank;
+    bankSelect.appendChild(opt);
+  });
+
+  /* ---------------- Toast ---------------- */
+  function toast(message, type = "info", duration = 3800) {
+    const stack = document.getElementById("toast-stack");
+    const el = document.createElement("div");
+    el.className = `toast ${type}`;
+    el.textContent = message;
+    stack.appendChild(el);
+    setTimeout(() => {
+      el.style.transition = "opacity .25s ease";
+      el.style.opacity = "0";
+      setTimeout(() => el.remove(), 250);
+    }, duration);
+  }
+
+  function formatNaira(value) {
+    const n = Number(value) || 0;
+    return "₦" + n.toLocaleString("en-NG");
+  }
+
+  /* ---------------- Processing-hours check (client-side hint only; admin still governs approval) ---------------- */
+  function checkProcessingHours() {
+    const now = new Date();
+    const day = now.getDay(); // 0 = Sunday, 6 = Saturday
+    const hour = now.getHours();
+    const withinHours = day >= 1 && day <= 5 && hour >= 9 && hour < 17;
+    document.getElementById("hoursWarning").classList.toggle("show", !withinHours);
+  }
+  checkProcessingHours();
+
+  /* ---------------- Prefill username/phone/balance from dashboard cache (avoids an extra read) ---------------- */
+  const usernameEl = document.getElementById("username");
+  const phoneEl = document.getElementById("phone");
+  const amountEl = document.getElementById("amount");
+
+  phoneEl.addEventListener("input", () => {
+    phoneEl.value = phoneEl.value.replace(/\D/g, "").slice(0, 11);
+  });
+  amountEl.addEventListener("input", () => {
+    amountEl.value = amountEl.value.replace(/\D/g, "");
+    updateBreakdown();
+  });
+
+  async function prefillUserDetails(uid) {
+    const cached = sessionStorage.getItem(DASHBOARD_CACHE_KEY);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed.uid === uid) {
+          usernameEl.value = parsed.data.username || "";
+          phoneEl.value = parsed.data.phone || "";
+          availableBalance = Number(parsed.data.balance) || 0;
+          document.getElementById("availableBalance").textContent = formatNaira(availableBalance) + ".00";
+          return;
+        }
+      } catch (e) { /* fall through to fetch */ }
+    }
+    const snap = await getDoc(doc(db, "users", uid));
+    if (snap.exists()) {
+      const data = snap.data();
+      usernameEl.value = data.username || "";
+      phoneEl.value = data.phone || "";
+      availableBalance = Number(data.balance) || 0;
+      document.getElementById("availableBalance").textContent = formatNaira(availableBalance) + ".00";
+    }
+  }
+
+  /* ---------------- Auth guard ---------------- */
+  onAuthStateChanged(auth, (user) => {
+    if (!user) { window.location.href = "login.html"; return; }
+    currentUser = user;
+    prefillUserDetails(user.uid);
+  });
+
+  /* ---------------- Live fee breakdown ---------------- */
+  const breakdownEl = document.getElementById("breakdown");
+  function updateBreakdown() {
+    const amount = Number(amountEl.value) || 0;
+    if (amount <= 0) { breakdownEl.classList.remove("show"); return; }
+    const fee = Math.round(amount * FEE_RATE);
+    const net = amount - fee;
+    document.getElementById("breakdownAmount").textContent = formatNaira(amount);
+    document.getElementById("breakdownFee").textContent = formatNaira(fee);
+    document.getElementById("breakdownNet").textContent = formatNaira(net);
+    breakdownEl.classList.add("show");
+  }
+
+  /* ---------------- Submit ---------------- */
+  const form = document.getElementById("withdrawForm");
+  const submitBtn = document.getElementById("submitBtn");
+
+  function setStatus(id, msg) { document.getElementById(id).textContent = msg; }
+  function markInput(el, bad) { el.classList.toggle("error-state", !!bad); }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    ["usernameStatus", "phoneStatus", "amountStatus", "bankStatus", "accountNumberStatus", "accountNameStatus"]
+      .forEach(id => setStatus(id, ""));
+
+    const accountNumberEl = document.getElementById("accountNumber");
+    const accountNameEl = document.getElementById("accountName");
+    const amount = Number(amountEl.value) || 0;
+
+    let valid = true;
+
+    if (!usernameEl.value.trim()) { setStatus("usernameStatus", "Enter your username"); markInput(usernameEl, true); valid = false; } else markInput(usernameEl, false);
+    if (!/^0\d{10}$/.test(phoneEl.value.trim())) { setStatus("phoneStatus", "Enter a valid 11-digit phone number"); markInput(phoneEl, true); valid = false; } else markInput(phoneEl, false);
+
+    if (amount < MIN_WITHDRAWAL) {
+      setStatus("amountStatus", `Minimum withdrawal is ${formatNaira(MIN_WITHDRAWAL)}`);
+      markInput(amountEl, true); valid = false;
+    } else if (amount > availableBalance) {
+      setStatus("amountStatus", "Amount exceeds your available balance");
+      markInput(amountEl, true); valid = false;
+    } else {
+      markInput(amountEl, false);
+    }
+
+    if (!bankSelect.value) { setStatus("bankStatus", "Select your bank"); markInput(bankSelect, true); valid = false; } else markInput(bankSelect, false);
+    if (!/^\d{10}$/.test(accountNumberEl.value.trim())) { setStatus("accountNumberStatus", "Enter a valid 10-digit account number"); markInput(accountNumberEl, true); valid = false; } else markInput(accountNumberEl, false);
+    if (accountNameEl.value.trim().length < 3) { setStatus("accountNameStatus", "Enter the account name"); markInput(accountNameEl, true); valid = false; } else markInput(accountNameEl, false);
+
+    if (!currentUser) { toast("Please log in again", "error"); valid = false; }
+    if (!valid) return;
+
+    submitBtn.disabled = true;
+    submitBtn.classList.add("loading");
+
+    const fee = Math.round(amount * FEE_RATE);
+    const netAmount = amount - fee;
+
+    try {
+      // Reserve the funds now (atomic batch) so this amount can't be spent twice
+      // while the request is pending. Rejection later refunds it back.
+      const batch = writeBatch(db);
+      const withdrawalRef = doc(collection(db, "withdrawals"));
+
+      batch.set(withdrawalRef, {
+        uid: currentUser.uid,
+        username: usernameEl.value.trim(),
+        phone: phoneEl.value.trim(),
+        amount,
+        feeRate: FEE_RATE,
+        fee,
+        netAmount,
+        bankName: bankSelect.value,
+        accountNumber: accountNumberEl.value.trim(),
+        accountName: accountNameEl.value.trim(),
+        status: "pending",
+        createdAt: serverTimestamp()
+      });
+      batch.update(doc(db, "users", currentUser.uid), {
+        balance: increment(-amount)
+      });
+
+      await batch.commit();
+      sessionStorage.removeItem("quantum_dashboard_cache");
+
+      toast("Withdrawal request submitted! Awaiting admin approval.", "success");
+      setTimeout(() => { window.location.href = "history.html"; }, 1600);
+
+    } catch (err) {
+      toast("Couldn't submit your request. Please try again.", "error");
+      submitBtn.disabled = false;
+      submitBtn.classList.remove("loading");
+    }
+  });
+</script>
+</body>
+</html>
