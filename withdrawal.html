@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>QUANTUM — Withdraw</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #0a0e27;
+    --surface: #131837;
+    --surface-2: #1a1f42;
+    --surface-3: #1f2550;
+    --cyan: #00d4ff;
+    --cyan-dark: #0099cc;
+    --violet: #7c3aed;
+    --violet-light: #a78bfa;
+    --text: #e8ecf7;
+    --text-bright: #ffffff;
+    --muted: #8892b0;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --border: rgba(232, 236, 247, 0.1);
+    --border-hover: rgba(232, 236, 247, 0.2);
+    --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.2);
+    --nav-height: 72px;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    height: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--void);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: calc(var(--nav-height) + 20px);
+    overflow-x: hidden;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Background Effects */
+  .bg-glow {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(600px circle at 20% 10%, rgba(0, 212, 255, 0.08), transparent 55%),
+      radial-gradient(700px circle at 80% 50%, rgba(124, 58, 237, 0.09), transparent 55%);
+    animation: bgPulse 8s ease-in-out infinite;
+  }
+
+  @keyframes bgPulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 0.6; }
+  }
+
+  /* Main Container */
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 24px 20px 8px;
+    animation: fadeIn 0.5s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Top Bar */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    animation: slideDown 0.5s ease;
+  }
+
+  .back-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    flex: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.2s ease;
+  }
+
+  .back-btn:hover {
+    background: var(--surface-2);
+    border-color: var(--border-hover);
+    color: var(--text-bright);
+  }
+
+  .back-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .topbar h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-bright);
+  }
+
+  /* Balance Card */
+  .balance-strip {
+    background: linear-gradient(135deg, #0f1a3a, #1a1140);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    animation: slideUp 0.5s ease 0.1s both;
+  }
+
+  .balance-strip::before {
+    content: "";
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.12), transparent 70%);
+    top: -50px;
+    right: -50px;
+  }
+
+  .balance-strip p.k {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+  }
+
+  .balance-strip p.v {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-bright);
+    position: relative;
+    z-index: 1;
+  }
+
+  .balance-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(16, 185, 129, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    flex: none;
+  }
+
+  .balance-icon svg {
+    width: 24px;
+    height: 24px;
+    color: var(--success);
+  }
+
+  /* Info Notice */
+  .info-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 13.5px;
+    color: var(--muted);
+    background: rgba(0, 212, 255, 0.06);
+    border: 1px solid rgba(0, 212, 255, 0.18);
+    padding: 14px 16px;
+    border-radius: 14px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+    animation: slideUp 0.5s ease 0.2s both;
+  }
+
+  .info-notice svg {
+    flex: none;
+    margin-top: 2px;
+    color: var(--cyan);
+  }
+
+  /* Hours Warning */
+  .hours-warning {
+    display: none;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 13.5px;
+    color: #fbbf24;
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+    padding: 14px 16px;
+    border-radius: 14px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+    animation: slideUp 0.5s ease 0.2s both;
+  }
+
+  .hours-warning.show {
+    display: flex;
+  }
+
+  .hours-warning svg {
+    flex: none;
+    margin-top: 2px;
+    color: var(--warning);
+  }
+
+  /* Card Styles */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 22px;
+    margin-bottom: 18px;
+    transition: all 0.3s ease;
+    animation: slideUp 0.5s ease 0.3s both;
+  }
+
+  .card:hover {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 18px;
+    color: var(--text-bright);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-title svg {
+    color: var(--cyan);
+  }
+
+  /* Form Fields */
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .field:last-child {
+    margin-bottom: 0;
+  }
+
+  .field label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    transition: color 0.2s ease;
+  }
+
+  .field:focus-within label {
+    color: var(--cyan);
+  }
+
+  .input-shell input,
+  .input-shell select {
+    width: 100%;
+    background: var(--surface-2);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .input-shell select {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'><path d='M1 1l6 6 6-6' stroke='%238892b0' stroke-width='1.6' fill='none' fill-rule='evenodd'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+    cursor: pointer;
+  }
+
+  .input-shell input::placeholder {
+    color: #5c6488;
+    opacity: 0.8;
+  }
+
+  .input-shell input:hover,
+  .input-shell select:hover {
+    border-color: var(--border-hover);
+    background: var(--surface-3);
+  }
+
+  .input-shell input:focus,
+  .input-shell select:focus {
+    border-color: var(--cyan);
+    background: var(--surface-3);
+    box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .input-shell input.error-state,
+  .input-shell select.error-state {
+    border-color: var(--error);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+  }
+
+  .status-line {
+    font-size: 12px;
+    min-height: 18px;
+    color: var(--error);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* Amount Input with Prefix */
+  .amount-prefix-shell {
+    position: relative;
+  }
+
+  .amount-prefix-shell span {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .amount-prefix-shell input {
+    padding-left: 32px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Fee Breakdown */
+  .breakdown {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-top: 8px;
+    display: none;
+    animation: slideUp 0.3s ease;
+  }
+
+  .breakdown.show {
+    display: block;
+  }
+
+  .breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13.5px;
+    padding: 6px 0;
+    align-items: center;
+  }
+
+  .breakdown-row span.k {
+    color: var(--muted);
+  }
+
+  .breakdown-row span.v {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 500;
+  }
+
+  .breakdown-row.total {
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+    padding-top: 12px;
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  .breakdown-row.total span:last-child {
+    color: var(--success);
+  }
+
+  /* Submit Button */
+  .submit-btn {
+    width: 100%;
+    margin-top: 8px;
+    background: linear-gradient(135deg, var(--cyan), var(--violet));
+    border: none;
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+  }
+
+  .submit-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 212, 255, 0.4);
+  }
+
+  .submit-btn:hover:not(:disabled)::before {
+    left: 100%;
+  }
+
+  .submit-btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2.5px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    animation: spin 0.8s linear infinite;
+    display: none;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .submit-btn.loading .spinner {
+    display: inline-block;
+  }
+
+  .submit-btn.loading .btn-text {
+    display: none;
+  }
+
+  .submit-btn.loading {
+    pointer-events: none;
+  }
+
+  /* Bottom Navigation */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: rgba(13, 18, 39, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+    height: var(--nav-height);
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--muted);
+    flex: 1;
+    padding: 6px 4px;
+    border-radius: 14px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    cursor: pointer;
+  }
+
+  .nav-item svg {
+    width: 22px;
+    height: 22px;
+    transition: all 0.3s ease;
+  }
+
+  .nav-item span {
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .nav-item.active {
+    color: var(--cyan);
+  }
+
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 3px;
+    background: var(--cyan);
+    border-radius: 0 0 3px 3px;
+  }
+
+  .nav-item:active {
+    transform: scale(0.95);
+  }
+
+  .nav-item .nav-indicator {
+    position: absolute;
+    bottom: -2px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--cyan);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+
+  .nav-item.active .nav-indicator {
+    opacity: 1;
+  }
+
+  /* Toast Notifications */
+  #toast-stack {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: calc(100% - 40px);
+    max-width: 400px;
+  }
+
+  .toast {
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--cyan);
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    box-shadow: var(--shadow-lg);
+    animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    backdrop-filter: blur(10px);
+  }
+
+  .toast.error {
+    border-left-color: var(--error);
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  .toast.success {
+    border-left-color: var(--success);
+    background: rgba(16, 185, 129, 0.1);
+  }
+
+  @keyframes toastSlideIn {
+    from {
+      opacity: 0;
+      transform: translateX(100px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .container {
+      padding: 16px 14px 8px;
+    }
+
+    .balance-strip p.v {
+      font-size: 22px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container {
+      padding: 32px 24px 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div id="toast-stack"></div>
+
+<div class="container">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <a href="dashboard.html" class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="19" y1="12" x2="5" y2="12"/>
+        <polyline points="12,19 5,12 12,5"/>
+      </svg>
+    </a>
+    <h1>Withdraw Funds</h1>
+  </div>
+
+  <!-- Balance Card -->
+  <div class="balance-strip">
+    <div>
+      <p class="k">Available Balance</p>
+      <p class="v" id="availableBalance">₦0.00</p>
+    </div>
+    <div class="balance-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="1" x2="12" y2="23"/>
+        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Info Notice -->
+  <div class="info-notice">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <line x1="12" y1="16" x2="12" y2="12"/>
+      <line x1="12" y1="8" x2="12.01" y2="8"/>
+    </svg>
+    <span>Minimum withdrawal is <strong style="color: var(--cyan);">₦1,500</strong>. A <strong style="color: var(--warning);">15% processing fee</strong> applies. Withdrawals are processed 9AM–5PM, Mon–Fri.</span>
+  </div>
+
+  <!-- Hours Warning -->
+  <div class="hours-warning" id="hoursWarning">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12,6 12,12 16,14"/>
+    </svg>
+    <span>It's currently <strong>outside processing hours</strong>. Your request will be submitted and processed on the next business day.</span>
+  </div>
+
+  <!-- Withdrawal Form Card -->
+  <div class="card">
+    <div class="card-title">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="12" y1="19" x2="12" y2="5"/>
+        <polyline points="5,12 12,5 19,12"/>
+      </svg>
+      Withdrawal Details
+    </div>
+    <form id="withdrawForm" novalidate>
+      <div class="field">
+        <label for="username">Username</label>
+        <div class="input-shell">
+          <input type="text" id="username" placeholder="Your registered username" autocomplete="off" required>
+        </div>
+        <div class="status-line" id="usernameStatus"></div>
+      </div>
+
+      <div class="field">
+        <label for="phone">Phone Number</label>
+        <div class="input-shell">
+          <input type="tel" id="phone" placeholder="08012345678" inputmode="numeric" maxlength="11" required>
+        </div>
+        <div class="status-line" id="phoneStatus"></div>
+      </div>
+
+      <div class="field">
+        <label for="amount">Withdrawal Amount</label>
+        <div class="input-shell amount-prefix-shell">
+          <span>₦</span>
+          <input type="text" id="amount" placeholder="1,500" inputmode="numeric" required>
+        </div>
+        <div class="status-line" id="amountStatus"></div>
+        <div class="breakdown" id="breakdown">
+          <div class="breakdown-row">
+            <span class="k">Withdrawal Amount</span>
+            <span class="v" id="breakdownAmount">₦0</span>
+          </div>
+          <div class="breakdown-row">
+            <span class="k">Processing Fee (15%)</span>
+            <span class="v" id="breakdownFee" style="color: var(--error);">₦0</span>
+          </div>
+          <div class="breakdown-row total">
+            <span>You'll Receive</span>
+            <span id="breakdownNet">₦0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="bankName">Bank Name</label>
+        <div class="input-shell">
+          <select id="bankName" required>
+            <option value="" disabled selected>Select your bank</option>
+          </select>
+        </div>
+        <div class="status-line" id="bankStatus"></div>
+      </div>
+
+      <div class="field">
+        <label for="accountNumber">Account Number</label>
+        <div class="input-shell">
+          <input type="text" id="accountNumber" placeholder="0123456789" inputmode="numeric" maxlength="10" required>
+        </div>
+        <div class="status-line" id="accountNumberStatus"></div>
+      </div>
+
+      <div class="field">
+        <label for="accountName">Account Name</label>
+        <div class="input-shell">
+          <input type="text" id="accountName" placeholder="As it appears on your bank account" autocomplete="off" required>
+        </div>
+        <div class="status-line" id="accountNameStatus"></div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <span class="btn-text">Submit Withdrawal Request</span>
+        <span class="spinner"></span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9,22 9,12 15,12 15,22"/>
+    </svg>
+    <span>Home</span>
+    <span class="nav-indicator"></span>
+  </a>
+  <a href="plans.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+    </svg>
+    <span>Plans</span>
+    <span class="nav-indicator"></span>
+  </a>
+  <a href="history.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12,6 12,12 16,14"/>
+    </svg>
+    <span>History</span>
+    <span class="nav-indicator"></span>
+  </a>
+  <a href="profile.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+    <span>Profile</span>
+    <span class="nav-indicator"></span>
+  </a>
+</nav>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI",
+    authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0",
+    storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094",
+    appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const DASHBOARD_CACHE_KEY = "quantum_dashboard_cache";
+  const MIN_WITHDRAWAL = 1500;
+  const FEE_RATE = 0.15;
+  let currentUser = null;
+  let availableBalance = 0;
+
+  /* ---------------- 50 Nigerian Banks & Fintechs ---------------- */
+  const BANKS = [
+    "Access Bank", "Citibank Nigeria", "Ecobank Nigeria", "Fidelity Bank", "First Bank of Nigeria",
+    "First City Monument Bank (FCMB)", "Globus Bank", "Guaranty Trust Bank (GTBank)", "Heritage Bank",
+    "Jaiz Bank", "Keystone Bank", "Optimus Bank", "Parallex Bank", "Polaris Bank", "PremiumTrust Bank",
+    "Providus Bank", "Signature Bank", "Stanbic IBTC Bank", "Standard Chartered Bank", "Sterling Bank",
+    "SunTrust Bank", "Titan Trust Bank", "Union Bank of Nigeria", "United Bank for Africa (UBA)",
+    "Unity Bank", "Wema Bank", "Zenith Bank",
+    "Coronation Merchant Bank", "FBNQuest Merchant Bank", "FSDH Merchant Bank", "Greenwich Merchant Bank",
+    "Nova Merchant Bank", "Rand Merchant Bank", "Alternative Bank",
+    "Kuda Bank", "Opay (Paycom)", "PalmPay", "Moniepoint MFB", "VFD Microfinance Bank",
+    "Sparkle Microfinance Bank", "Carbon (One Finance)", "FairMoney MFB", "Mint Finex MFB",
+    "Rubies Microfinance Bank", "TCF MFB", "AB Microfinance Bank", "Accion Microfinance Bank",
+    "Baobab Microfinance Bank", "LAPO Microfinance Bank", "Fina Trust Microfinance Bank",
+    "Personal Trust Microfinance Bank"
+  ];
+
+  /* ---------------- Populate Bank Select ---------------- */
+  const bankSelect = document.getElementById("bankName");
+  BANKS.forEach(bank => {
+    const opt = document.createElement("option");
+    opt.value = bank;
+    opt.textContent = bank;
+    bankSelect.appendChild(opt);
+  });
+
+  /* ---------------- Enhanced Toast System ---------------- */
+  function showToast(message, type = "info", duration = 4000) {
+    const stack = document.getElementById("toast-stack");
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    
+    const icons = {
+      success: '✓',
+      error: '✕',
+      warning: '⚠',
+      info: 'ℹ'
+    };
+    
+    toast.innerHTML = `<span style="margin-right:8px;font-weight:bold;">${icons[type] || icons.info}</span>${message}`;
+    
+    if (stack.children.length >= 3) {
+      stack.removeChild(stack.firstChild);
+    }
+    
+    stack.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.transition = "all 0.3s ease";
+      toast.style.opacity = "0";
+      toast.style.transform = "translateX(100px)";
+      setTimeout(() => {
+        if (toast.parentNode) toast.remove();
+      }, 300);
+    }, duration);
+  }
+
+  function formatNaira(value) {
+    const n = Number(value) || 0;
+    return "₦" + n.toLocaleString("en-NG");
+  }
+
+  /* ---------------- Processing Hours Check ---------------- */
+  function checkProcessingHours() {
+    const now = new Date();
+    const day = now.getDay();
+    const hour = now.getHours();
+    const withinHours = day >= 1 && day <= 5 && hour >= 9 && hour < 17;
+    document.getElementById("hoursWarning").classList.toggle("show", !withinHours);
+  }
+  checkProcessingHours();
+
+  /* ---------------- Prefill User Details ---------------- */
+  const usernameEl = document.getElementById("username");
+  const phoneEl = document.getElementById("phone");
+  const amountEl = document.getElementById("amount");
+
+  phoneEl.addEventListener("input", () => {
+    phoneEl.value = phoneEl.value.replace(/\D/g, "").slice(0, 11);
+  });
+
+  amountEl.addEventListener("input", () => {
+    amountEl.value = amountEl.value.replace(/\D/g, "");
+    updateBreakdown();
+  });
+
+  async function prefillUserDetails(uid) {
+    // Try cache first
+    const cached = sessionStorage.getItem(DASHBOARD_CACHE_KEY);
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        if (parsed.uid === uid) {
+          usernameEl.value = parsed.data.username || "";
+          phoneEl.value = parsed.data.phone || "";
+          availableBalance = Number(parsed.data.balance) || 0;
+          document.getElementById("availableBalance").textContent = formatNaira(availableBalance) + ".00";
+          return;
+        }
+      } catch (e) {
+        console.warn("Cache parse error:", e);
+      }
+    }
+    
+    // Fetch from Firestore
+    try {
+      const snap = await getDoc(doc(db, "users", uid));
+      if (snap.exists()) {
+        const data = snap.data();
+        usernameEl.value = data.username || "";
+        phoneEl.value = data.phone || "";
+        availableBalance = Number(data.balance) || 0;
+        document.getElementById("availableBalance").textContent = formatNaira(availableBalance) + ".00";
+      }
+    } catch (e) {
+      console.error("Failed to fetch user details:", e);
+    }
+  }
+
+  /* ---------------- Auth Guard ---------------- */
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+    currentUser = user;
+    prefillUserDetails(user.uid);
+  });
+
+  /* ---------------- Live Fee Breakdown ---------------- */
+  const breakdownEl = document.getElementById("breakdown");
+
+  function updateBreakdown() {
+    const amount = Number(amountEl.value) || 0;
+    if (amount <= 0) {
+      breakdownEl.classList.remove("show");
+      return;
+    }
+    
+    const fee = Math.round(amount * FEE_RATE);
+    const net = amount - fee;
+    
+    document.getElementById("breakdownAmount").textContent = formatNaira(amount);
+    document.getElementById("breakdownFee").textContent = "-" + formatNaira(fee);
+    document.getElementById("breakdownNet").textContent = formatNaira(net);
+    breakdownEl.classList.add("show");
+  }
+
+  /* ---------------- Form Submission ---------------- */
+  const form = document.getElementById("withdrawForm");
+  const submitBtn = document.getElementById("submitBtn");
+
+  function setStatus(id, msg) {
+    document.getElementById(id).textContent = msg;
+  }
+
+  function markInput(el, isError) {
+    if (isError) {
+      el.classList.add("error-state");
+    } else {
+      el.classList.remove("error-state");
+    }
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    // Clear previous errors
+    ["usernameStatus", "phoneStatus", "amountStatus", "bankStatus", "accountNumberStatus", "accountNameStatus"]
+      .forEach(id => setStatus(id, ""));
+    
+    [usernameEl, phoneEl, amountEl, bankSelect, document.getElementById("accountNumber"), document.getElementById("accountName")]
+      .forEach(el => el.classList.remove("error-state"));
+
+    const accountNumberEl = document.getElementById("accountNumber");
+    const accountNameEl = document.getElementById("accountName");
+    const amount = Number(amountEl.value) || 0;
+    const fee = Math.round(amount * FEE_RATE);
+    const netAmount = amount - fee;
+
+    let valid = true;
+
+    // Validate username
+    if (!usernameEl.value.trim()) {
+      setStatus("usernameStatus", "Please enter your username");
+      markInput(usernameEl, true);
+      valid = false;
+    }
+
+    // Validate phone
+    if (!/^0\d{10}$/.test(phoneEl.value.trim())) {
+      setStatus("phoneStatus", "Enter a valid 11-digit phone number (e.g., 08012345678)");
+      markInput(phoneEl, true);
+      valid = false;
+    }
+
+    // Validate amount
+    if (amount < MIN_WITHDRAWAL) {
+      setStatus("amountStatus", `Minimum withdrawal is ${formatNaira(MIN_WITHDRAWAL)}`);
+      markInput(amountEl, true);
+      valid = false;
+    } else if (amount > availableBalance) {
+      setStatus("amountStatus", "Amount exceeds your available balance");
+      markInput(amountEl, true);
+      valid = false;
+    }
+
+    // Validate bank
+    if (!bankSelect.value) {
+      setStatus("bankStatus", "Please select your bank");
+      markInput(bankSelect, true);
+      valid = false;
+    }
+
+    // Validate account number
+    if (!/^\d{10}$/.test(accountNumberEl.value.trim())) {
+      setStatus("accountNumberStatus", "Enter a valid 10-digit account number");
+      markInput(accountNumberEl, true);
+      valid = false;
+    }
+
+    // Validate account name
+    if (accountNameEl.value.trim().length < 3) {
+      setStatus("accountNameStatus", "Enter the full account name");
+      markInput(accountNameEl, true);
+      valid = false;
+    }
+
+    // Validate auth
+    if (!currentUser) {
+      showToast("Please log in again to continue", "error");
+      valid = false;
+    }
+
+    if (!valid) return;
+
+    // Submit
+    submitBtn.disabled = true;
+    submitBtn.classList.add("loading");
+
+    try {
+      await addDoc(collection(db, "withdrawals"), {
+        uid: currentUser.uid,
+        username: usernameEl.value.trim(),
+        phone: phoneEl.value.trim(),
+        amount,
+        feeRate: FEE_RATE,
+        fee,
+        netAmount,
+        bankName: bankSelect.value,
+        accountNumber: accountNumberEl.value.trim(),
+        accountName: accountNameEl.value.trim(),
+        status: "pending",
+        createdAt: serverTimestamp()
+      });
+
+      showToast("Withdrawal request submitted successfully! Awaiting admin approval.", "success", 5000);
+      
+      setTimeout(() => {
+        window.location.href = "history.html";
+      }, 1800);
+
+    } catch (err) {
+      console.error("Withdrawal submission error:", err);
+      showToast("Couldn't submit your request. Please try again.", "error");
+      submitBtn.disabled = false;
+      submitBtn.classList.remove("loading");
+    }
+  });
+
+  console.log("🚀 Quantum Withdrawal - Ready");
+</script>
+
+</body>
+</html>
