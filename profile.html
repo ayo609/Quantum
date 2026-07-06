@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>QUANTUM — Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #0a0e27;
+    --surface: #131837;
+    --surface-2: #1a1f42;
+    --surface-3: #1f2550;
+    --cyan: #00d4ff;
+    --violet: #7c3aed;
+    --violet-light: #a78bfa;
+    --text: #e8ecf7;
+    --text-bright: #ffffff;
+    --muted: #8892b0;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --border: rgba(232, 236, 247, 0.1);
+    --border-hover: rgba(232, 236, 247, 0.2);
+    --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.2);
+    --nav-height: 72px;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%; scroll-behavior:smooth;}
+  body{
+    background:var(--void); color:var(--text); font-family:'Inter', sans-serif;
+    min-height:100vh; position:relative; padding-bottom:calc(var(--nav-height) + 40px); overflow-x:hidden;
+  }
+  a{text-decoration:none; color:inherit; -webkit-tap-highlight-color:transparent;}
+
+  .bg-glow{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(600px circle at 20% 10%, rgba(0,212,255,0.08), transparent 55%),
+      radial-gradient(700px circle at 80% 50%, rgba(124,58,237,0.09), transparent 55%);
+    animation:bgPulse 8s ease-in-out infinite;
+  }
+  @keyframes bgPulse{ 0%,100%{opacity:0.8;} 50%{opacity:0.6;} }
+
+  .container{ position:relative; z-index:1; max-width:520px; margin:0 auto; padding:24px 20px 80px; animation:fadeIn 0.5s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes slideDown{ from{opacity:0; transform:translateY(-10px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes slideUp{ from{opacity:0; transform:translateY(20px);} to{opacity:1; transform:translateY(0);} }
+
+  /* Top Bar */
+  .topbar{ display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; animation:slideDown 0.5s ease; }
+  .topbar-left{ display:flex; align-items:center; gap:14px; }
+  .back-btn, .icon-btn-round{
+    width:42px; height:42px; border-radius:14px; flex:none;
+    background:var(--surface); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--muted);
+    transition:all 0.2s ease;
+  }
+  .back-btn:hover, .icon-btn-round:hover{ background:var(--surface-2); border-color:var(--border-hover); color:var(--text-bright); }
+  .back-btn svg, .icon-btn-round svg{ width:20px; height:20px; }
+  .topbar h1{ font-family:'Space Grotesk', sans-serif; font-size:20px; font-weight:600; color:var(--text-bright); }
+
+  /* Profile Header */
+  .profile-header{
+    text-align:center; margin-bottom:24px; animation:slideUp 0.5s ease 0.1s both;
+  }
+  .profile-avatar{
+    width:80px; height:80px; border-radius:24px; margin:0 auto 14px;
+    background:linear-gradient(135deg, var(--cyan), var(--violet));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk', sans-serif; font-weight:700; color:#ffffff; font-size:32px;
+    box-shadow:0 8px 25px rgba(0,212,255,0.3);
+  }
+  .profile-name{ font-family:'Space Grotesk', sans-serif; font-size:22px; font-weight:700; color:var(--text-bright); margin-bottom:4px; }
+  .profile-username{ font-size:13px; color:var(--cyan); font-family:'JetBrains Mono', monospace; }
+  .profile-join-date{ font-size:12px; color:var(--muted); margin-top:4px; }
+
+  /* Info Cards */
+  .info-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:18px;
+    padding:20px; margin-bottom:14px; transition:all 0.3s ease;
+    animation:slideUp 0.5s ease 0.2s both;
+  }
+  .info-card:hover{ border-color:var(--border-hover); box-shadow:var(--shadow-md); }
+  .info-card-title{
+    font-family:'Space Grotesk', sans-serif; font-size:15px; font-weight:600;
+    margin-bottom:14px; color:var(--text-bright); display:flex; align-items:center; gap:8px;
+  }
+  .info-card-title svg{ color:var(--cyan); }
+
+  .info-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 0; border-bottom:1px solid var(--border);
+  }
+  .info-row:last-child{ border-bottom:none; }
+  .info-row span.k{ font-size:13px; color:var(--muted); }
+  .info-row span.v{ font-family:'JetBrains Mono', monospace; font-size:13.5px; font-weight:600; color:var(--text-bright); }
+  .info-row span.v.highlight{ color:var(--cyan); }
+  .copy-icon-btn{
+    background:none; border:none; color:var(--muted); cursor:pointer; padding:4px 8px;
+    border-radius:6px; transition:all 0.2s ease; font-size:13px;
+  }
+  .copy-icon-btn:hover{ color:var(--cyan); background:rgba(0,212,255,0.1); }
+
+  /* Stats Grid */
+  .stats-grid{ display:grid; grid-template-columns:repeat(2, 1fr); gap:10px; margin-bottom:14px; animation:slideUp 0.5s ease 0.3s both; }
+  .stat-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:16px;
+    padding:16px; text-align:center; transition:all 0.3s ease;
+  }
+  .stat-card:hover{ border-color:var(--border-hover); transform:translateY(-2px); box-shadow:var(--shadow-md); }
+  .stat-card .stat-icon{ font-size:24px; margin-bottom:8px; }
+  .stat-card p.label{ font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:0.4px; margin-bottom:4px; font-weight:600; }
+  .stat-card p.value{ font-family:'Space Grotesk', sans-serif; font-size:18px; font-weight:700; color:var(--text-bright); }
+
+  /* Action Buttons */
+  .action-list{ display:flex; flex-direction:column; gap:10px; animation:slideUp 0.5s ease 0.4s both; }
+  .profile-action-btn{
+    display:flex; align-items:center; gap:12px; padding:16px;
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    cursor:pointer; transition:all 0.3s ease; font-family:'Inter', sans-serif;
+  }
+  .profile-action-btn:hover{ border-color:var(--border-hover); transform:translateX(4px); box-shadow:var(--shadow-md); }
+  .profile-action-btn .action-icon-wrap{
+    width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex:none;
+  }
+  .profile-action-btn .action-icon-wrap.logout{ background:rgba(239,68,68,0.15); color:var(--error); }
+  .profile-action-btn .action-icon-wrap.deposit{ background:rgba(16,185,129,0.15); color:var(--success); }
+  .profile-action-btn .action-icon-wrap.withdraw{ background:rgba(239,68,68,0.15); color:var(--error); }
+  .profile-action-btn .action-icon-wrap.plans{ background:rgba(0,212,255,0.15); color:var(--cyan); }
+  .profile-action-btn .action-icon-wrap.referral{ background:rgba(124,58,237,0.15); color:var(--violet-light); }
+  .profile-action-btn .action-icon-wrap.history{ background:rgba(245,158,11,0.15); color:var(--warning); }
+  .profile-action-btn .action-icon-wrap.support{ background:rgba(16,185,129,0.15); color:#25D366; }
+  .profile-action-btn svg{ width:20px; height:20px; }
+  .action-text{ flex:1; }
+  .action-text .action-label{ font-size:14px; font-weight:600; color:var(--text-bright); margin-bottom:2px; }
+  .action-text .action-desc{ font-size:11.5px; color:var(--muted); }
+  .action-arrow{ color:var(--muted); flex:none; }
+
+  /* Logout Button (Top Left) */
+  .logout-top-btn{
+    display:flex; align-items:center; gap:8px; padding:10px 16px;
+    background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25);
+    border-radius:12px; color:var(--error); font-weight:600; font-size:13px;
+    cursor:pointer; transition:all 0.3s ease; font-family:'Space Grotesk', sans-serif;
+  }
+  .logout-top-btn:hover{ background:rgba(239,68,68,0.2); border-color:var(--error); transform:translateY(-2px); }
+  .logout-top-btn svg{ width:18px; height:18px; }
+
+  /* Bottom Navigation */
+  .bottom-nav{
+    position:fixed; bottom:0; left:0; right:0; z-index:50;
+    background:rgba(13,18,39,0.95); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px);
+    border-top:1px solid var(--border);
+    display:flex; justify-content:space-around; align-items:center;
+    padding:8px 8px calc(8px + env(safe-area-inset-bottom));
+    height:var(--nav-height);
+  }
+  .nav-item{
+    display:flex; flex-direction:column; align-items:center; gap:5px;
+    font-size:11px; color:var(--muted); flex:1; padding:6px 4px; border-radius:14px;
+    transition:all 0.3s cubic-bezier(0.4,0,0.2,1); position:relative; cursor:pointer;
+  }
+  .nav-item svg{ width:22px; height:22px; transition:all 0.3s ease; }
+  .nav-item span{ font-weight:500; }
+  .nav-item.active{ color:var(--cyan); }
+  .nav-item.active::before{ content:''; position:absolute; top:-8px; left:50%; transform:translateX(-50%); width:24px; height:3px; background:var(--cyan); border-radius:0 0 3px 3px; }
+  .nav-item:active{ transform:scale(0.95); }
+  .nav-item .nav-indicator{ position:absolute; bottom:-2px; width:4px; height:4px; border-radius:50%; background:var(--cyan); opacity:0; transition:all 0.3s ease; }
+  .nav-item.active .nav-indicator{ opacity:1; }
+
+  /* Toast */
+  #toast-stack{ position:fixed; top:20px; right:20px; z-index:100; display:flex; flex-direction:column; gap:10px; width:calc(100% - 40px); max-width:400px; }
+  .toast{
+    background:var(--surface-3); border:1px solid var(--border); border-left:4px solid var(--cyan);
+    padding:14px 16px; border-radius:12px; font-size:14px; box-shadow:var(--shadow-lg);
+    animation:toastSlideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55); backdrop-filter:blur(10px);
+  }
+  .toast.error{ border-left-color:var(--error); background:rgba(239,68,68,0.1); }
+  .toast.success{ border-left-color:var(--success); background:rgba(16,185,129,0.1); }
+  @keyframes toastSlideIn{ from{opacity:0; transform:translateX(100px);} to{opacity:1; transform:translateX(0);} }
+
+  @media (max-width:480px){ .container{padding:16px 14px 80px;} }
+  @media (min-width:768px){ .container{padding:32px 24px 80px;} }
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div id="toast-stack"></div>
+
+<div class="container">
+  <!-- Top Bar with Logout -->
+  <div class="topbar">
+    <a href="dashboard.html" class="back-btn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg>
+    </a>
+    <h1>My Profile</h1>
+    <button class="logout-top-btn" id="logoutTopBtn" title="Log out">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </button>
+  </div>
+
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="profile-avatar" id="profileAvatar">Q</div>
+    <div class="profile-name" id="profileName">Loading…</div>
+    <div class="profile-username" id="profileUsername">@username</div>
+    <div class="profile-join-date" id="profileJoinDate">Member since —</div>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <p class="label">Balance</p>
+      <p class="value" id="statBalance">₦0</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📊</div>
+      <p class="label">Total Invested</p>
+      <p class="value" id="statInvested">₦0</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">📈</div>
+      <p class="label">Total Earnings</p>
+      <p class="value" id="statEarnings">₦0</p>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🎁</div>
+      <p class="label">Referral Bonus</p>
+      <p class="value" id="statReferral">₦0</p>
+    </div>
+  </div>
+
+  <!-- Personal Information -->
+  <div class="info-card">
+    <div class="info-card-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Personal Information
+    </div>
+    <div class="info-row"><span class="k">Full Name</span><span class="v" id="infoName">—</span></div>
+    <div class="info-row"><span class="k">Username</span><span class="v highlight" id="infoUsername">—</span></div>
+    <div class="info-row"><span class="k">Email Address</span><span class="v" id="infoEmail">—</span></div>
+    <div class="info-row"><span class="k">Phone Number</span><span class="v" id="infoPhone">—</span></div>
+    <div class="info-row">
+      <span class="k">Referral Code</span>
+      <span class="v highlight" id="infoReferralCode">—</span>
+      <button class="copy-icon-btn" id="copyProfileCode" title="Copy code">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Account Information -->
+  <div class="info-card">
+    <div class="info-card-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      Account Information
+    </div>
+    <div class="info-row"><span class="k">Account Status</span><span class="v" style="color:var(--success);" id="infoStatus">Active</span></div>
+    <div class="info-row"><span class="k">Member Since</span><span class="v" id="infoJoinDate">—</span></div>
+    <div class="info-row"><span class="k">Total Deposits</span><span class="v" id="infoTotalDeposit">₦0</span></div>
+    <div class="info-row"><span class="k">Total Withdrawals</span><span class="v" id="infoTotalWithdrawal">₦0</span></div>
+    <div class="info-row"><span class="k">Active Investments</span><span class="v" id="infoActiveInvestments">0</span></div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="action-list">
+    <a href="deposit.html" class="profile-action-btn">
+      <div class="action-icon-wrap deposit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19,12 12,19 5,12"/></svg></div>
+      <div class="action-text"><div class="action-label">Make a Deposit</div><div class="action-desc">Fund your account to start earning</div></div>
+      <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>
+    </a>
+    <a href="withdrawal.html" class="profile-action-btn">
+      <div class="action-icon-wrap withdraw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5,12 12,5 19,12"/></svg></div>
+      <div class="action-text"><div class="action-label">Withdraw Funds</div><div class="action-desc">Cash out your earnings</div></div>
+      <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>
+    </a>
+    <a href="plans.html" class="profile-action-btn">
+      <div class="action-icon-wrap plans"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg></div>
+      <div class="action-text"><div class="action-label">Investment Plans</div><div class="action-desc">View and purchase investment plans</div></div>
+      <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>
+    </a>
+    <a href="referral.html" class="profile-action-btn">
+      <div class="action-icon-wrap referral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17,11 19,13 23,9"/></svg></div>
+      <div class="action-text"><div class="action-label">My Referrals</div><div class="action-desc">Track your downline & referral earnings</div></div>
+      <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>
+    </a>
+    <a href="history.html" class="profile-action-btn">
+      <div class="action-icon-wrap history"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></div>
+      <div class="action-text"><div class="action-label">Transaction History</div><div class="action-desc">View all your past transactions</div></div>
+      <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>
+    </a>
+    <a href="https://chat.whatsapp.com/yourgrouplinkhere" target="_blank" rel="noopener" class="profile-action-btn">
+      <div class="action-icon-wrap support"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg></div>
+      <div class="action-text"><div class="action-label">Customer Support</div><div class="action-desc">Join our WhatsApp group for help</div></div>
+      <svg class="action-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9,18 15,12 9,6"/></svg>
+    </a>
+  </div>
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    <span>Home</span><span class="nav-indicator"></span>
+  </a>
+  <a href="plans.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+    <span>Plans</span><span class="nav-indicator"></span>
+  </a>
+  <a href="history.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+    <span>History</span><span class="nav-indicator"></span>
+  </a>
+  <a href="profile.html" class="nav-item active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Profile</span><span class="nav-indicator"></span>
+  </a>
+</nav>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI",
+    authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0",
+    storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094",
+    appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const CACHE_KEY = "quantum_dashboard_cache";
+
+  function showToast(message, type = "info", duration = 4000) {
+    const stack = document.getElementById("toast-stack");
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    const icons = { success:'✓', error:'✕', warning:'⚠', info:'ℹ' };
+    toast.innerHTML = `<span style="margin-right:8px;font-weight:bold;">${icons[type]||icons.info}</span>${message}`;
+    if(stack.children.length>=3) stack.removeChild(stack.firstChild);
+    stack.appendChild(toast);
+    setTimeout(()=>{ toast.style.transition="all 0.3s ease"; toast.style.opacity="0"; toast.style.transform="translateX(100px)"; setTimeout(()=>{ if(toast.parentNode) toast.remove(); },300); }, duration);
+  }
+
+  function formatNaira(v){ const n=Number(v)||0; return "₦"+n.toLocaleString("en-NG"); }
+  function formatDate(ts){
+    if(!ts) return "—";
+    const date=ts.toDate?ts.toDate():new Date(ts);
+    return date.toLocaleDateString("en-NG",{day:"numeric",month:"long",year:"numeric"});
+  }
+
+  async function loadProfileData(uid){
+    try{
+      const snap=await getDoc(doc(db,"users",uid));
+      if(!snap.exists()){ showToast("Account not found.","error"); return; }
+      const data=snap.data();
+
+      // Profile header
+      document.getElementById("profileAvatar").textContent=(data.name||"Q").charAt(0).toUpperCase();
+      document.getElementById("profileName").textContent=data.name||"Investor";
+      document.getElementById("profileUsername").textContent="@"+(data.username||"user");
+      document.getElementById("profileJoinDate").textContent="Member since "+formatDate(data.createdAt);
+
+      // Stats
+      document.getElementById("statBalance").textContent=formatNaira(data.balance||0);
+      document.getElementById("statInvested").textContent=formatNaira(data.totalInvested||0);
+      document.getElementById("statEarnings").textContent=formatNaira(data.totalEarnings||0);
+      document.getElementById("statReferral").textContent=formatNaira(data.referralEarnings||0);
+
+      // Personal info
+      document.getElementById("infoName").textContent=data.name||"—";
+      document.getElementById("infoUsername").textContent=data.username||"—";
+      document.getElementById("infoEmail").textContent=data.email||"—";
+      document.getElementById("infoPhone").textContent=data.phone||"—";
+      document.getElementById("infoReferralCode").textContent=data.referralCode||"—";
+
+      // Account info
+      document.getElementById("infoStatus").textContent="Active";
+      document.getElementById("infoJoinDate").textContent=formatDate(data.createdAt);
+      document.getElementById("infoTotalDeposit").textContent=formatNaira(data.totalDeposit||0);
+
+      // Fetch withdrawals total
+      let totalWithdrawal=0;
+      try{
+        const wQuery=query(collection(db,"withdrawals"),where("uid","==",uid),where("status","==","approved"));
+        const wSnap=await getDocs(wQuery);
+        wSnap.forEach(d=>{ totalWithdrawal+=Number(d.data().amount)||0; });
+      }catch(e){}
+      document.getElementById("infoTotalWithdrawal").textContent=formatNaira(totalWithdrawal);
+
+      // Fetch active investments count
+      let activeCount=0;
+      try{
+        const iQuery=query(collection(db,"investments"),where("uid","==",uid),where("status","==","active"));
+        const iSnap=await getDocs(iQuery);
+        activeCount=iSnap.size;
+      }catch(e){}
+      document.getElementById("infoActiveInvestments").textContent=activeCount;
+
+    }catch(e){
+      console.error("Profile load error:",e);
+      showToast("Couldn't load profile.","error");
+    }
+  }
+
+  // Auth guard
+  onAuthStateChanged(auth,(user)=>{
+    if(!user){ window.location.href="login.html"; return; }
+    loadProfileData(user.uid);
+  });
+
+  // Copy referral code
+  document.getElementById("copyProfileCode").addEventListener("click",async()=>{
+    const code=document.getElementById("infoReferralCode").textContent;
+    if(!code||code==="—") return;
+    try{ await navigator.clipboard.writeText(code); showToast("Referral code copied!","success",2000); }
+    catch(e){ showToast("Couldn't copy.","error"); }
+  });
+
+  // Top logout button
+  document.getElementById("logoutTopBtn").addEventListener("click",async()=>{
+    if(confirm("Are you sure you want to log out?")){
+      try{
+        await signOut(auth);
+        sessionStorage.removeItem(CACHE_KEY);
+        window.location.href="login.html";
+      }catch(e){ showToast("Couldn't log out.","error"); }
+    }
+  });
+
+  console.log("🚀 Quantum Profile - Ready");
+</script>
+</body>
+</html>
