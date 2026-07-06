@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>QUANTUM — Transaction History</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #0a0e27;
+    --surface: #131837;
+    --surface-2: #1a1f42;
+    --surface-3: #1f2550;
+    --cyan: #00d4ff;
+    --cyan-dark: #0099cc;
+    --violet: #7c3aed;
+    --violet-light: #a78bfa;
+    --text: #e8ecf7;
+    --text-bright: #ffffff;
+    --muted: #8892b0;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --gold: #fbbf24;
+    --border: rgba(232, 236, 247, 0.1);
+    --border-hover: rgba(232, 236, 247, 0.2);
+    --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.2);
+    --nav-height: 72px;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    height: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--void);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: calc(var(--nav-height) + 20px);
+    overflow-x: hidden;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Background Effects */
+  .bg-glow {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(600px circle at 20% 10%, rgba(0, 212, 255, 0.08), transparent 55%),
+      radial-gradient(700px circle at 80% 50%, rgba(124, 58, 237, 0.09), transparent 55%);
+    animation: bgPulse 8s ease-in-out infinite;
+  }
+
+  @keyframes bgPulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 0.6; }
+  }
+
+  /* Main Container */
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 24px 20px 8px;
+    animation: fadeIn 0.5s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Top Bar */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 24px;
+    justify-content: space-between;
+    animation: slideDown 0.5s ease;
+  }
+
+  .topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .back-btn, .icon-btn-round {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    flex: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.2s ease;
+  }
+
+  .back-btn:hover, .icon-btn-round:hover {
+    background: var(--surface-2);
+    border-color: var(--border-hover);
+    color: var(--text-bright);
+  }
+
+  .back-btn svg, .icon-btn-round svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .icon-btn-round.spinning {
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .topbar h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-bright);
+  }
+
+  /* Filter Tabs */
+  .filter-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+    padding: 2px;
+    animation: slideUp 0.5s ease 0.1s both;
+  }
+
+  .filter-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .filter-tab {
+    flex: none;
+    padding: 9px 16px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  .filter-tab:hover {
+    border-color: var(--border-hover);
+    color: var(--text);
+  }
+
+  .filter-tab.active {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(124, 58, 237, 0.2));
+    border-color: var(--cyan);
+    color: var(--cyan);
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.15);
+  }
+
+  /* Transaction List */
+  .transaction-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    animation: slideUp 0.5s ease 0.2s both;
+  }
+
+  .transaction-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .transaction-item:hover {
+    border-color: var(--border-hover);
+    transform: translateX(4px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .transaction-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+
+  .transaction-icon.deposit {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+  }
+
+  .transaction-icon.withdrawal {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--error);
+  }
+
+  .transaction-icon.investment {
+    background: rgba(0, 212, 255, 0.15);
+    color: var(--cyan);
+  }
+
+  .transaction-icon.earning {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+  }
+
+  .transaction-icon.referral {
+    background: rgba(124, 58, 237, 0.15);
+    color: var(--violet-light);
+  }
+
+  .transaction-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .transaction-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .transaction-info .tx-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-bright);
+    margin-bottom: 3px;
+  }
+
+  .transaction-info .tx-meta {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .transaction-status {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.3px;
+  }
+
+  .transaction-status.pending {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+  }
+
+  .transaction-status.approved, .transaction-status.completed {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+  }
+
+  .transaction-status.rejected {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--error);
+  }
+
+  .transaction-amount {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    flex: none;
+    text-align: right;
+  }
+
+  .transaction-amount.credit {
+    color: var(--success);
+  }
+
+  .transaction-amount.debit {
+    color: var(--error);
+  }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    animation: fadeIn 0.5s ease;
+  }
+
+  .empty-state .empty-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 16px;
+    background: rgba(0, 212, 255, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+  }
+
+  .empty-state p {
+    font-size: 14px;
+    line-height: 1.6;
+    max-width: 280px;
+    margin: 0 auto;
+  }
+
+  /* Skeleton Loading */
+  .skeleton {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    height: 72px;
+    margin-bottom: 10px;
+    background-image: linear-gradient(90deg, var(--surface) 0%, var(--surface-2) 50%, var(--surface) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Load More Button */
+  .load-more-btn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    color: var(--cyan);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    transition: all 0.3s ease;
+    animation: slideUp 0.5s ease 0.3s both;
+  }
+
+  .load-more-btn:hover {
+    background: var(--surface-2);
+    border-color: var(--cyan);
+    transform: translateY(-2px);
+  }
+
+  .load-more-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Bottom Navigation */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: rgba(13, 18, 39, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+    height: var(--nav-height);
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--muted);
+    flex: 1;
+    padding: 6px 4px;
+    border-radius: 14px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    cursor: pointer;
+  }
+
+  .nav-item svg {
+    width: 22px;
+    height: 22px;
+    transition: all 0.3s ease;
+  }
+
+  .nav-item span {
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .nav-item.active {
+    color: var(--cyan);
+  }
+
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 3px;
+    background: var(--cyan);
+    border-radius: 0 0 3px 3px;
+  }
+
+  .nav-item:active {
+    transform: scale(0.95);
+  }
+
+  .nav-item .nav-indicator {
+    position: absolute;
+    bottom: -2px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--cyan);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+
+  .nav-item.active .nav-indicator {
+    opacity: 1;
+  }
+
+  /* Toast Notifications */
+  #toast-stack {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: calc(100% - 40px);
+    max-width: 400px;
+  }
+
+  .toast {
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--cyan);
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    box-shadow: var(--shadow-lg);
+    animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    backdrop-filter: blur(10px);
+  }
+
+  .toast.error {
+    border-left-color: var(--error);
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  .toast.success {
+    border-left-color: var(--success);
+    background: rgba(16, 185, 129, 0.1);
+  }
+
+  @keyframes toastSlideIn {
+    from {
+      opacity: 0;
+      transform: translateX(100px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .container {
+      padding: 16px 14px 8px;
+    }
+
+    .transaction-amount {
+      font-size: 14px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container {
+      padding: 32px 24px 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div id="toast-stack"></div>
+
+<div class="container">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="back-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="19" y1="12" x2="5" y2="12"/>
+          <polyline points="12,19 5,12 12,5"/>
+        </svg>
+      </a>
+      <h1>Transaction History</h1>
+    </div>
+    <button class="icon-btn-round" id="refreshBtn" title="Refresh history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="23,4 23,10 17,10"/>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Filter Tabs -->
+  <div class="filter-tabs">
+    <div class="filter-tab active" data-filter="all">All</div>
+    <div class="filter-tab" data-filter="deposit">Deposits</div>
+    <div class="filter-tab" data-filter="withdrawal">Withdrawals</div>
+    <div class="filter-tab" data-filter="investment">Investments</div>
+    <div class="filter-tab" data-filter="earning">Earnings</div>
+    <div class="filter-tab" data-filter="referral">Referrals</div>
+  </div>
+
+  <!-- Transaction List -->
+  <div id="transactionList" class="transaction-list">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </div>
+
+  <!-- Load More Button -->
+  <button class="load-more-btn" id="loadMoreBtn" style="display:none;">
+    Load More Transactions
+  </button>
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9,22 9,12 15,12 15,22"/>
+    </svg>
+    <span>Home</span>
+    <span class="nav-indicator"></span>
+  </a>
+  <a href="plans.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+    </svg>
+    <span>Plans</span>
+    <span class="nav-indicator"></span>
+  </a>
+  <a href="history.html" class="nav-item active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12,6 12,12 16,14"/>
+    </svg>
+    <span>History</span>
+    <span class="nav-indicator"></span>
+  </a>
+  <a href="profile.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+    <span>Profile</span>
+    <span class="nav-indicator"></span>
+  </a>
+</nav>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, collection, query, where, orderBy, limit,
+    getDocs, startAfter, Timestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI",
+    authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0",
+    storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094",
+    appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const PAGE_SIZE = 20;
+  let currentUser = null;
+  let allTransactions = [];
+  let activeFilter = "all";
+  let lastVisible = null;
+  let hasMore = true;
+  let isLoading = false;
+
+  /* ---------------- Enhanced Toast System ---------------- */
+  function showToast(message, type = "info", duration = 4000) {
+    const stack = document.getElementById("toast-stack");
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    
+    const icons = {
+      success: '✓',
+      error: '✕',
+      warning: '⚠',
+      info: 'ℹ'
+    };
+    
+    toast.innerHTML = `<span style="margin-right:8px;font-weight:bold;">${icons[type] || icons.info}</span>${message}`;
+    
+    if (stack.children.length >= 3) {
+      stack.removeChild(stack.firstChild);
+    }
+    
+    stack.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.transition = "all 0.3s ease";
+      toast.style.opacity = "0";
+      toast.style.transform = "translateX(100px)";
+      setTimeout(() => {
+        if (toast.parentNode) toast.remove();
+      }, 300);
+    }, duration);
+  }
+
+  /* ---------------- Utility Functions ---------------- */
+  function formatNaira(v) {
+    return "₦" + (Number(v) || 0).toLocaleString("en-NG");
+  }
+
+  function formatDate(timestamp) {
+    if (!timestamp) return "Unknown date";
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const now = new Date();
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+    
+    return date.toLocaleDateString("en-NG", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    }) + " · " + date.toLocaleTimeString("en-NG", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+
+  function getTransactionIcon(type) {
+    switch (type) {
+      case "deposit":
+        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <polyline points="19,12 12,19 5,12"/>
+        </svg>`;
+      case "withdrawal":
+        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="19" x2="12" y2="5"/>
+          <polyline points="5,12 12,5 19,12"/>
+        </svg>`;
+      case "investment":
+        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+        </svg>`;
+      case "earning":
+      case "roi":
+        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"/>
+          <polyline points="17,6 23,6 23,12"/>
+        </svg>`;
+      case "referral":
+      case "bonus":
+        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="8.5" cy="7" r="4"/>
+          <polyline points="17,11 19,13 23,9"/>
+        </svg>`;
+      default:
+        return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="12"/>
+          <line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>`;
+    }
+  }
+
+  function getTransactionTitle(tx) {
+    switch (tx.type) {
+      case "deposit":
+        return "Deposit";
+      case "withdrawal":
+        return "Withdrawal";
+      case "investment":
+        return tx.planCategory === "premium" 
+          ? `Premium Plan VIP${tx.vipTier}` 
+          : "Company Plan Investment";
+      case "earning":
+      case "roi":
+        return "ROI Earnings";
+      case "referral":
+      case "bonus":
+        return "Referral Bonus";
+      default:
+        return tx.description || "Transaction";
+    }
+  }
+
+  function getTransactionDescription(tx) {
+    switch (tx.type) {
+      case "deposit":
+        return `Deposit via bank transfer`;
+      case "withdrawal":
+        return `To: ${tx.bankName || "Bank"} - ${tx.accountNumber || "N/A"}`;
+      case "investment":
+        return tx.planCategory === "premium"
+          ? `Premium VIP${tx.vipTier} · ${tx.days || 3} day plan`
+          : `Company Plan · ${tx.days || 25} weekdays · ${formatNaira(tx.dailyROI || 0)}/day`;
+      case "earning":
+      case "roi":
+        return `Return on investment`;
+      case "referral":
+      case "bonus":
+        return `Referral commission`;
+      default:
+        return tx.description || "";
+    }
+  }
+
+  /* ---------------- Fetch All Transactions ---------------- */
+  async function fetchDeposits(uid) {
+    try {
+      const q = query(
+        collection(db, "deposits"),
+        where("uid", "==", uid),
+        orderBy("createdAt", "desc")
+      );
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({
+        id: d.id,
+        type: "deposit",
+        amount: d.data().amount || 0,
+        status: d.data().status || "pending",
+        createdAt: d.data().createdAt,
+        username: d.data().username,
+        ...d.data()
+      }));
+    } catch (e) {
+      console.error("Error fetching deposits:", e);
+      return [];
+    }
+  }
+
+  async function fetchWithdrawals(uid) {
+    try {
+      const q = query(
+        collection(db, "withdrawals"),
+        where("uid", "==", uid),
+        orderBy("createdAt", "desc")
+      );
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({
+        id: d.id,
+        type: "withdrawal",
+        amount: d.data().amount || 0,
+        status: d.data().status || "pending",
+        createdAt: d.data().createdAt,
+        bankName: d.data().bankName,
+        accountNumber: d.data().accountNumber,
+        fee: d.data().fee,
+        netAmount: d.data().netAmount,
+        ...d.data()
+      }));
+    } catch (e) {
+      console.error("Error fetching withdrawals:", e);
+      return [];
+    }
+  }
+
+  async function fetchInvestments(uid) {
+    try {
+      const q = query(
+        collection(db, "investments"),
+        where("uid", "==", uid),
+        orderBy("createdAt", "desc")
+      );
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({
+        id: d.id,
+        type: "investment",
+        amount: d.data().amount || 0,
+        status: d.data().status || "active",
+        createdAt: d.data().createdAt,
+        planCategory: d.data().planCategory,
+        vipTier: d.data().vipTier,
+        days: d.data().days,
+        dailyROI: d.data().dailyROI,
+        total: d.data().total,
+        ...d.data()
+      }));
+    } catch (e) {
+      console.error("Error fetching investments:", e);
+      return [];
+    }
+  }
+
+  async function fetchTransactions(uid) {
+    try {
+      // Fetch all transaction types in parallel
+      const [deposits, withdrawals, investments] = await Promise.all([
+        fetchDeposits(uid),
+        fetchWithdrawals(uid),
+        fetchInvestments(uid)
+      ]);
+
+      // Fetch user data for referral bonuses
+      const userDoc = await getDocs(query(
+        collection(db, "users"),
+        where("__name__", "==", uid)
+      ));
+      
+      let referralBonuses = [];
+      if (!userDoc.empty) {
+        const userData = userDoc.docs[0].data();
+        if (userData.referralEarnings > 0) {
+          // Create a synthetic referral bonus transaction
+          referralBonuses = [{
+            id: "referral-bonus",
+            type: "referral",
+            amount: userData.referralEarnings,
+            status: "completed",
+            createdAt: userData.createdAt || new Date(),
+            description: "Total referral earnings"
+          }];
+        }
+      }
+
+      // Combine all transactions
+      const allTx = [...deposits, ...withdrawals, ...investments, ...referralBonuses];
+      
+      // Sort by date (newest first)
+      allTx.sort((a, b) => {
+        const dateA = a.createdAt?.toDate?.() || new Date(a.createdAt || 0);
+        const dateB = b.createdAt?.toDate?.() || new Date(b.createdAt || 0);
+        return dateB - dateA;
+      });
+
+      return allTx;
+    } catch (e) {
+      console.error("Error fetching transactions:", e);
+      return [];
+    }
+  }
+
+  /* ---------------- Render Transactions ---------------- */
+  function renderTransactions(transactions) {
+    const listEl = document.getElementById("transactionList");
+    const loadMoreBtn = document.getElementById("loadMoreBtn");
+
+    if (transactions.length === 0) {
+      listEl.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📋</div>
+          <p>No transactions found${activeFilter !== "all" ? " for this category" : ""}.</p>
+          <p style="margin-top:8px;">Your transaction history will appear here once you start using your account.</p>
+        </div>`;
+      loadMoreBtn.style.display = "none";
+      return;
+    }
+
+    listEl.innerHTML = transactions.map(tx => {
+      const isCredit = tx.type === "deposit" || tx.type === "earning" || tx.type === "roi" || tx.type === "referral" || tx.type === "bonus";
+      const amountDisplay = tx.type === "withdrawal" && tx.netAmount 
+        ? formatNaira(tx.netAmount) 
+        : formatNaira(tx.amount);
+      
+      return `
+        <div class="transaction-item">
+          <div class="transaction-icon ${tx.type}">
+            ${getTransactionIcon(tx.type)}
+          </div>
+          <div class="transaction-info">
+            <div class="tx-title">${getTransactionTitle(tx)}</div>
+            <div class="tx-meta">
+              <span>${formatDate(tx.createdAt)}</span>
+              ${tx.status ? `<span class="transaction-status ${tx.status}">${tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}</span>` : ""}
+              ${getTransactionDescription(tx) ? `<span style="color: var(--muted);">• ${getTransactionDescription(tx)}</span>` : ""}
+            </div>
+          </div>
+          <div class="transaction-amount ${isCredit ? 'credit' : 'debit'}">
+            ${isCredit ? '+' : '-'}${amountDisplay}
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    loadMoreBtn.style.display = "none";
+  }
+
+  /* ---------------- Filter Transactions ---------------- */
+  function filterTransactions() {
+    if (activeFilter === "all") {
+      renderTransactions(allTransactions);
+    } else {
+      const filtered = allTransactions.filter(tx => {
+        if (activeFilter === "earning") return tx.type === "earning" || tx.type === "roi";
+        if (activeFilter === "referral") return tx.type === "referral" || tx.type === "bonus";
+        return tx.type === activeFilter;
+      });
+      renderTransactions(filtered);
+    }
+  }
+
+  /* ---------------- Filter Tab Handlers ---------------- */
+  document.querySelectorAll(".filter-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".filter-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      activeFilter = tab.dataset.filter;
+      filterTransactions();
+    });
+  });
+
+  /* ---------------- Refresh Handler ---------------- */
+  document.getElementById("refreshBtn").addEventListener("click", async () => {
+    if (!currentUser) return;
+    const btn = document.getElementById("refreshBtn");
+    btn.classList.add("spinning");
+    
+    try {
+      allTransactions = await fetchTransactions(currentUser.uid);
+      filterTransactions();
+      showToast("Transaction history updated", "success", 2500);
+    } catch (e) {
+      showToast("Couldn't refresh history. Please try again.", "error");
+    } finally {
+      setTimeout(() => btn.classList.remove("spinning"), 600);
+    }
+  });
+
+  /* ---------------- Auth Guard & Init ---------------- */
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+    currentUser = user;
+    
+    try {
+      allTransactions = await fetchTransactions(user.uid);
+      filterTransactions();
+    } catch (e) {
+      console.error("Init error:", e);
+      document.getElementById("transactionList").innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">⚠️</div>
+          <p>Couldn't load transaction history.</p>
+          <p style="margin-top:8px;">Please check your connection and try again.</p>
+        </div>`;
+    }
+  });
+
+  console.log("🚀 Quantum History - Ready");
+</script>
+
+</body>
+</html>
