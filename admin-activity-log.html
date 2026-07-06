@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>QUANTUM — Admin Activity Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#060818; --surface:#0d1226; --surface-2:#121834;
+    --cyan:#00e5ff; --violet:#a855f7; --text:#e8ecf7; --muted:#8b93b8;
+    --success:#22e6a3; --error:#ff5470; --gold:#ffcf5c; --border:rgba(232,236,247,0.08);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{ background:var(--void); color:var(--text); font-family:'Inter', sans-serif; min-height:100vh; position:relative; padding-bottom:40px; }
+  a{ text-decoration:none; color:inherit; }
+  .bg-glow{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:
+      radial-gradient(600px circle at 15% 0%, rgba(168,85,247,0.10), transparent 55%),
+      radial-gradient(700px circle at 90% 40%, rgba(0,229,255,0.09), transparent 55%);
+  }
+  .container{ position:relative; z-index:1; max-width:560px; margin:0 auto; padding:20px 18px; }
+
+  .topbar{ display:flex; align-items:center; gap:14px; margin-bottom:18px; justify-content:space-between; }
+  .topbar-left{ display:flex; align-items:center; gap:14px; }
+  .back-btn, .icon-btn-round{
+    width:38px; height:38px; border-radius:50%; flex:none;
+    background:var(--surface); border:1px solid var(--border);
+    display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer;
+  }
+  .icon-btn-round.spinning{ animation:spin .8s linear infinite; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .topbar h1{ font-family:'Space Grotesk', sans-serif; font-size:18px; font-weight:600; }
+
+  .section-title{ font-family:'Space Grotesk', sans-serif; font-size:14px; font-weight:600; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+
+  /* Promote/demote panel */
+  .promote-card{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:22px; }
+  .search-row{ display:flex; gap:8px; margin-bottom:12px; }
+  .search-row input{
+    flex:1; background:var(--surface-2); border:1px solid var(--border); border-radius:10px;
+    padding:11px 13px; color:var(--text); font-size:14px; font-family:'Inter', sans-serif; outline:none;
+  }
+  .search-row input:focus{ border-color:var(--cyan); }
+  .search-row button{
+    background:linear-gradient(120deg, var(--cyan), var(--violet)); border:none; border-radius:10px;
+    padding:0 16px; color:#040613; font-weight:600; font-size:13.5px; cursor:pointer; font-family:'Space Grotesk', sans-serif;
+  }
+  .found-user{
+    display:flex; align-items:center; gap:12px; background:var(--surface-2); border:1px solid var(--border);
+    border-radius:12px; padding:12px; display:none;
+  }
+  .found-user.show{ display:flex; }
+  .fu-avatar{
+    width:40px; height:40px; border-radius:50%; flex:none;
+    background:linear-gradient(135deg, var(--cyan), var(--violet));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Space Grotesk', sans-serif; font-weight:700; color:#040613; font-size:15px;
+  }
+  .fu-info{ flex:1; min-width:0; }
+  .fu-info p.name{ font-size:13.5px; font-weight:600; }
+  .fu-info p.username{ font-size:11.5px; color:var(--muted); font-family:'JetBrains Mono', monospace; }
+  .role-badge{ font-size:10px; font-weight:700; padding:3px 8px; border-radius:7px; background:rgba(139,147,184,0.16); color:var(--muted); margin-top:4px; display:inline-block; }
+  .role-badge.admin{ background:rgba(168,85,247,0.16); color:var(--violet); }
+  .role-toggle-btn{
+    flex:none; padding:9px 14px; border-radius:9px; border:none; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:12.5px;
+  }
+  .role-toggle-btn.promote{ background:linear-gradient(120deg, var(--violet), var(--cyan)); color:#040613; }
+  .role-toggle-btn.demote{ background:var(--surface); border:1px solid rgba(255,84,112,0.3); color:var(--error); }
+  .role-toggle-btn:disabled{ opacity:0.5; cursor:not-allowed; }
+  .no-result{ font-size:12.5px; color:var(--muted); padding:6px 2px; }
+
+  /* Log list */
+  .log-item{ background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:13px 15px; margin-bottom:9px; display:flex; gap:12px; align-items:flex-start; }
+  .log-icon{
+    width:34px; height:34px; border-radius:10px; flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:15px;
+    background:rgba(0,229,255,0.1); color:var(--cyan);
+  }
+  .log-icon.danger{ background:rgba(255,84,112,0.12); color:var(--error); }
+  .log-icon.success{ background:rgba(34,230,163,0.12); color:var(--success); }
+  .log-icon.warn{ background:rgba(255,207,92,0.14); color:var(--gold); }
+  .log-body{ flex:1; min-width:0; }
+  .log-body p.desc{ font-size:13px; font-weight:500; line-height:1.4; }
+  .log-body p.meta{ font-size:11px; color:var(--muted); margin-top:3px; }
+
+  .load-more-btn{
+    width:100%; padding:12px; border-radius:12px; border:1px solid var(--border);
+    background:var(--surface); color:var(--cyan); font-weight:600; font-size:13.5px; cursor:pointer;
+    font-family:'Space Grotesk', sans-serif; margin-top:6px;
+  }
+  .load-more-btn:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  .empty-state{ text-align:center; padding:50px 20px; color:var(--muted); }
+  .empty-state .emoji{ font-size:38px; margin-bottom:10px; }
+  .skeleton{
+    background:var(--surface); border:1px solid var(--border); border-radius:14px; height:64px;
+    background-image:linear-gradient(90deg, var(--surface) 0%, var(--surface-2) 50%, var(--surface) 100%);
+    background-size:200% 100%; animation:shimmer 1.4s infinite; margin-bottom:9px;
+  }
+  @keyframes shimmer{ from{ background-position:200% 0;} to{ background-position:-200% 0;} }
+
+  #toast-stack{
+    position:fixed; top:16px; left:50%; transform:translateX(-50%);
+    z-index:100; display:flex; flex-direction:column; gap:8px;
+    width:calc(100% - 32px); max-width:420px;
+  }
+  .toast{
+    background:var(--surface-2); border:1px solid var(--border); border-left:3px solid var(--cyan);
+    padding:12px 14px; border-radius:10px; font-size:13.5px; box-shadow:0 10px 30px rgba(0,0,0,0.4);
+    animation:slideDown .25s ease;
+  }
+  .toast.error{ border-left-color:var(--error); }
+  .toast.success{ border-left-color:var(--success); }
+  @keyframes slideDown{ from{ opacity:0; transform:translateY(-10px);} to{ opacity:1; transform:translateY(0);} }
+
+  .confirm-overlay{
+    position:fixed; inset:0; background:rgba(2,3,10,0.8);
+    display:none; align-items:center; justify-content:center; z-index:90; padding:20px;
+  }
+  .confirm-overlay.open{ display:flex; }
+  .confirm-box{ background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; max-width:360px; width:100%; }
+  .confirm-box p{ font-size:13.5px; line-height:1.5; margin-bottom:16px; }
+  .confirm-actions{ display:flex; gap:10px; }
+  .confirm-actions button{ flex:1; padding:11px; border-radius:10px; border:none; cursor:pointer; font-family:'Space Grotesk', sans-serif; font-weight:600; font-size:13.5px; }
+  .confirm-actions .cancel{ background:var(--surface-2); color:var(--text); border:1px solid var(--border); }
+  .confirm-actions .confirm{ background:linear-gradient(120deg, var(--violet), var(--cyan)); color:#040613; }
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div id="toast-stack"></div>
+
+<div class="container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="admin-dashboard.html" class="back-btn">←</a>
+      <h1>Activity Log</h1>
+    </div>
+    <div class="icon-btn-round" id="refreshBtn" title="Refresh">⟳</div>
+  </div>
+
+  <div class="promote-card">
+    <div class="section-title">👑 Promote / Demote Admin</div>
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="Search by username">
+      <button id="searchBtn">Search</button>
+    </div>
+    <div class="found-user" id="foundUser">
+      <div class="fu-avatar" id="fuAvatar">Q</div>
+      <div class="fu-info">
+        <p class="name" id="fuName">—</p>
+        <p class="username" id="fuUsername">@—</p>
+        <span class="role-badge" id="fuRoleBadge">Member</span>
+      </div>
+      <button class="role-toggle-btn" id="roleToggleBtn">Promote</button>
+    </div>
+    <div class="no-result" id="noResult" style="display:none;">No user found with that username.</div>
+  </div>
+
+  <div class="section-title">📜 All Admin Actions</div>
+  <div id="listContainer">
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+    <div class="skeleton"></div>
+  </div>
+  <button class="load-more-btn" id="loadMoreBtn" style="display:none;">Load More</button>
+</div>
+
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <p id="confirmText">Are you sure?</p>
+    <div class="confirm-actions">
+      <button class="cancel" id="confirmCancel" type="button">Cancel</button>
+      <button class="confirm" id="confirmYes" type="button">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc, updateDoc, collection, query, orderBy, limit,
+    startAfter, getDocs, setDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI",
+    authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0",
+    storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094",
+    appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const PAGE_SIZE = 40;
+  let adminUid = null;
+  let lastVisibleDoc = null;
+  let allLogs = [];
+  let foundUserData = null;
+
+  function toast(message, type = "info", duration = 4000) {
+    const stack = document.getElementById("toast-stack");
+    const el = document.createElement("div");
+    el.className = `toast ${type}`;
+    el.textContent = message;
+    stack.appendChild(el);
+    setTimeout(() => {
+      el.style.transition = "opacity .25s ease";
+      el.style.opacity = "0";
+      setTimeout(() => el.remove(), 250);
+    }, duration);
+  }
+  function formatNaira(v) { return "₦" + (Number(v) || 0).toLocaleString("en-NG"); }
+  function formatTime(ts) {
+    if (!ts) return "—";
+    const date = ts.toDate ? ts.toDate() : new Date(ts);
+    return date.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" }) +
+      " · " + date.toLocaleTimeString("en-NG", { hour: "2-digit", minute: "2-digit" });
+  }
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, s => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[s]));
+  }
+
+  /* ---------------- Auth + role guard ---------------- */
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "admin-login.html"; return; }
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid));
+      const role = snap.exists() ? snap.data().role : null;
+      if (role !== "admin") { await signOut(auth); window.location.href = "admin-login.html"; return; }
+      adminUid = user.uid;
+      loadLogs(true);
+    } catch (e) { window.location.href = "admin-login.html"; }
+  });
+
+  /* =========================================================
+     PROMOTE / DEMOTE ADMIN
+     ========================================================= */
+  document.getElementById("searchBtn").addEventListener("click", () => searchForPromotion());
+  document.getElementById("searchInput").addEventListener("keydown", (e) => { if (e.key === "Enter") searchForPromotion(); });
+
+  async function searchForPromotion() {
+    const term = document.getElementById("searchInput").value.trim().toLowerCase();
+    document.getElementById("foundUser").classList.remove("show");
+    document.getElementById("noResult").style.display = "none";
+    if (!term) return;
+
+    try {
+      const unameSnap = await getDoc(doc(db, "usernames", term));
+      if (!unameSnap.exists()) { document.getElementById("noResult").style.display = "block"; return; }
+      const userSnap = await getDoc(doc(db, "users", unameSnap.data().uid));
+      if (!userSnap.exists()) { document.getElementById("noResult").style.display = "block"; return; }
+
+      foundUserData = { id: userSnap.id, ...userSnap.data() };
+      renderFoundUser();
+    } catch (e) {
+      toast("Search failed. Please try again.", "error");
+    }
+  }
+
+  function renderFoundUser() {
+    const isAdmin = foundUserData.role === "admin";
+    document.getElementById("fuAvatar").textContent = (foundUserData.name || "Q").trim().charAt(0).toUpperCase();
+    document.getElementById("fuName").textContent = foundUserData.name || "Unnamed";
+    document.getElementById("fuUsername").textContent = "@" + (foundUserData.username || "—");
+    const badge = document.getElementById("fuRoleBadge");
+    badge.textContent = isAdmin ? "Admin" : "Member";
+    badge.className = "role-badge" + (isAdmin ? " admin" : "");
+
+    const btn = document.getElementById("roleToggleBtn");
+    const isSelf = foundUserData.id === adminUid;
+    btn.textContent = isAdmin ? "Demote" : "Promote";
+    btn.className = "role-toggle-btn " + (isAdmin ? "demote" : "promote");
+    btn.disabled = isSelf && isAdmin; // block self-demotion to avoid locking everyone out
+    btn.title = isSelf && isAdmin ? "You can't demote your own account" : "";
+
+    document.getElementById("foundUser").classList.add("show");
+  }
+
+  document.getElementById("roleToggleBtn").addEventListener("click", () => {
+    if (!foundUserData) return;
+    const isAdmin = foundUserData.role === "admin";
+    document.getElementById("confirmText").textContent = isAdmin
+      ? `Remove admin access from @${foundUserData.username}? They will immediately lose access to the admin panel.`
+      : `Grant admin access to @${foundUserData.username}? They will be able to log in to the admin panel with their existing account.`;
+    confirmOverlay.classList.add("open");
+    pendingConfirmAction = () => toggleRole(isAdmin);
+  });
+
+  async function toggleRole(currentlyAdmin) {
+    const btn = document.getElementById("roleToggleBtn");
+    btn.disabled = true; btn.textContent = "Processing…";
+
+    try {
+      const newRole = currentlyAdmin ? null : "admin";
+      await updateDoc(doc(db, "users", foundUserData.id), { role: newRole });
+      await setDoc(doc(collection(db, "adminActions")), {
+        adminUid, targetUid: foundUserData.id, targetUsername: foundUserData.username || null,
+        action: currentlyAdmin ? "demote_admin" : "promote_admin", createdAt: serverTimestamp()
+      });
+
+      foundUserData.role = newRole;
+      renderFoundUser();
+      toast(`@${foundUserData.username} has been ${currentlyAdmin ? "demoted from" : "promoted to"} admin.`, "success");
+      loadLogs(true);
+    } catch (e) {
+      toast("Couldn't update this user's role. Please try again.", "error");
+      btn.disabled = false;
+    }
+  }
+
+  /* ---------------- Confirmation dialog ---------------- */
+  const confirmOverlay = document.getElementById("confirmOverlay");
+  let pendingConfirmAction = null;
+  document.getElementById("confirmCancel").addEventListener("click", () => confirmOverlay.classList.remove("open"));
+  confirmOverlay.addEventListener("click", (e) => { if (e.target === confirmOverlay) confirmOverlay.classList.remove("open"); });
+  document.getElementById("confirmYes").addEventListener("click", () => {
+    confirmOverlay.classList.remove("open");
+    if (pendingConfirmAction) pendingConfirmAction();
+    pendingConfirmAction = null;
+  });
+
+  /* =========================================================
+     ACTIVITY LOG LIST — single orderBy, no where clause,
+     so no composite index is needed.
+     ========================================================= */
+  async function loadLogs(reset = true) {
+    const container = document.getElementById("listContainer");
+    if (reset) {
+      container.innerHTML = `<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>`;
+      allLogs = [];
+      lastVisibleDoc = null;
+    }
+
+    try {
+      const constraints = [orderBy("createdAt", "desc"), limit(PAGE_SIZE)];
+      if (lastVisibleDoc) constraints.push(startAfter(lastVisibleDoc));
+      const snap = await getDocs(query(collection(db, "adminActions"), ...constraints));
+
+      const newLogs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lastVisibleDoc = snap.docs[snap.docs.length - 1] || lastVisibleDoc;
+      allLogs = reset ? newLogs : [...allLogs, ...newLogs];
+
+      renderLogs(allLogs);
+      document.getElementById("loadMoreBtn").style.display = newLogs.length === PAGE_SIZE ? "block" : "none";
+    } catch (e) {
+      container.innerHTML = `<div class="empty-state"><div class="emoji">⚠️</div><p>Couldn't load the activity log. Please refresh.</p></div>`;
+    }
+  }
+
+  document.getElementById("loadMoreBtn").addEventListener("click", async () => {
+    const btn = document.getElementById("loadMoreBtn");
+    btn.disabled = true; btn.textContent = "Loading…";
+    await loadLogs(false);
+    btn.disabled = false; btn.textContent = "Load More";
+  });
+
+  const ACTION_META = {
+    approve_deposit: { icon: "✅", cls: "success", label: (l) => `Approved a deposit of ${formatNaira(l.amount)}` },
+    reject_deposit: { icon: "❌", cls: "danger", label: () => `Rejected a deposit request` },
+    approve_withdrawal: { icon: "✅", cls: "success", label: () => `Approved a withdrawal request` },
+    reject_withdrawal: { icon: "❌", cls: "danger", label: (l) => `Rejected a withdrawal of ${formatNaira(l.amount)} (refunded)` },
+    credit_funds: { icon: "➕", cls: "success", label: (l) => `Added ${formatNaira(l.amount)} to @${l.targetUsername || "a user"}` },
+    debit_funds: { icon: "➖", cls: "warn", label: (l) => `Deducted ${formatNaira(l.amount)} from @${l.targetUsername || "a user"}` },
+    suspend: { icon: "⏸", cls: "warn", label: (l) => `Suspended @${l.targetUsername || "a user"} for ${l.durationHours}h` },
+    unsuspend: { icon: "▶", cls: "success", label: (l) => `Removed suspension from @${l.targetUsername || "a user"}` },
+    delete_account: { icon: "🗑", cls: "danger", label: (l) => `Deleted the account @${l.targetUsername || "unknown"}` },
+    promote_admin: { icon: "👑", cls: "success", label: (l) => `Promoted @${l.targetUsername || "a user"} to admin` },
+    demote_admin: { icon: "⬇️", cls: "danger", label: (l) => `Demoted @${l.targetUsername || "a user"} from admin` },
+    update_settings: { icon: "⚙️", cls: "", label: () => `Updated platform settings` }
+  };
+
+  function renderLogs(logs) {
+    const container = document.getElementById("listContainer");
+    if (!logs.length) {
+      container.innerHTML = `<div class="empty-state"><div class="emoji">📭</div><p>No admin actions recorded yet.</p></div>`;
+      return;
+    }
+
+    container.innerHTML = logs.map(log => {
+      const meta = ACTION_META[log.action] || { icon: "📌", cls: "", label: () => log.action };
+      let desc;
+      try { desc = meta.label(log); } catch (e) { desc = log.action; }
+      if (log.reason) desc += ` — ${log.reason}`;
+      desc = escapeHtml(desc);
+      return `
+        <div class="log-item">
+          <div class="log-icon ${meta.cls}">${meta.icon}</div>
+          <div class="log-body">
+            <p class="desc">${desc}</p>
+            <p class="meta">${formatTime(log.createdAt)}</p>
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  /* ---------------- Refresh ---------------- */
+  document.getElementById("refreshBtn").addEventListener("click", async () => {
+    const btn = document.getElementById("refreshBtn");
+    btn.classList.add("spinning");
+    await loadLogs(true);
+    btn.classList.remove("spinning");
+    toast("Activity log updated", "success", 1800);
+  });
+</script>
+</body>
+</html>
