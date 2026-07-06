@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>QUANTUM — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #0a0e27;
+    --surface: #131837;
+    --surface-2: #1a1f42;
+    --surface-3: #1f2550;
+    --cyan: #00d4ff;
+    --cyan-dark: #0099cc;
+    --violet: #7c3aed;
+    --violet-light: #a78bfa;
+    --text: #e8ecf7;
+    --text-bright: #ffffff;
+    --muted: #8892b0;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --border: rgba(232, 236, 247, 0.1);
+    --border-hover: rgba(232, 236, 247, 0.2);
+    --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.2);
+    --nav-height: 72px;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    height: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--void);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    position: relative;
+    padding-bottom: calc(var(--nav-height) + 20px);
+    overflow-x: hidden;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Background Effects */
+  .bg-glow {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(600px circle at 20% 10%, rgba(0, 212, 255, 0.08), transparent 55%),
+      radial-gradient(700px circle at 80% 50%, rgba(124, 58, 237, 0.09), transparent 55%);
+    animation: bgPulse 8s ease-in-out infinite;
+  }
+
+  @keyframes bgPulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 0.6; }
+  }
+
+  /* Main Container */
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 24px 20px 8px;
+    animation: fadeIn 0.5s ease;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Top Bar */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    animation: slideDown 0.5s ease;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .greet {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    flex: none;
+    background: linear-gradient(135deg, var(--cyan), var(--violet));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    color: #ffffff;
+    font-size: 20px;
+    box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .avatar::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.2));
+  }
+
+  .greet-text p {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 3px;
+    letter-spacing: 0.3px;
+  }
+
+  .greet-text h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-bright);
+  }
+
+  .top-icons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .icon-btn-round {
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.2s ease;
+    position: relative;
+  }
+
+  .icon-btn-round:hover {
+    background: var(--surface-2);
+    border-color: var(--border-hover);
+    color: var(--text-bright);
+  }
+
+  .icon-btn-round:active {
+    transform: scale(0.95);
+  }
+
+  .icon-btn-round svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    background: var(--error);
+    border-radius: 50%;
+    border: 2px solid var(--surface);
+  }
+
+  /* Announcement Marquee */
+  .marquee-wrap {
+    background: linear-gradient(90deg, rgba(0, 212, 255, 0.1), rgba(124, 58, 237, 0.1));
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    padding: 12px 0;
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .marquee-wrap::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(90deg, var(--void), transparent);
+    z-index: 1;
+  }
+
+  .marquee-wrap::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(270deg, var(--void), transparent);
+    z-index: 1;
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: scrollLeft 25s linear infinite;
+  }
+
+  .marquee-track span {
+    padding: 0 32px;
+    font-size: 13.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .marquee-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--cyan);
+    flex: none;
+  }
+
+  @keyframes scrollLeft {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track { animation: none; overflow-x: auto; }
+  }
+
+  /* Balance Card */
+  .balance-card {
+    background: linear-gradient(135deg, #0f1a3a, #1a1140);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px 22px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    animation: slideUp 0.5s ease 0.1s both;
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .balance-card::before {
+    content: "";
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0, 212, 255, 0.15), transparent 70%);
+    top: -80px;
+    right: -80px;
+  }
+
+  .balance-card::after {
+    content: "";
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.1), transparent 70%);
+    bottom: -60px;
+    left: -60px;
+  }
+
+  .balance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .balance-label {
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+
+  .balance-visibility {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .balance-visibility:hover {
+    color: var(--text-bright);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .balance-value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 38px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 1;
+    color: var(--text-bright);
+  }
+
+  .refresh-btn {
+    font-size: 16px;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+  }
+
+  .refresh-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-bright);
+  }
+
+  .refresh-btn.spinning {
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .stat-pill {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .stat-pill:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: var(--border-hover);
+  }
+
+  .stat-pill .stat-icon {
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+
+  .stat-pill p {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .stat-pill strong {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    color: var(--text-bright);
+    font-weight: 600;
+  }
+
+  /* Quick Actions */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 24px 0 14px;
+  }
+
+  .section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-bright);
+  }
+
+  .section-link {
+    font-size: 13px;
+    color: var(--cyan);
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .section-link:hover {
+    color: var(--violet-light);
+  }
+
+  .quick-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    animation: slideUp 0.5s ease 0.2s both;
+  }
+
+  .action-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .action-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.03));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-4px);
+    border-color: var(--cyan);
+    box-shadow: 0 8px 25px rgba(0, 212, 255, 0.15);
+  }
+
+  .action-btn:hover::before {
+    opacity: 1;
+  }
+
+  .action-btn:active {
+    transform: translateY(-2px) scale(0.98);
+  }
+
+  .action-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    position: relative;
+  }
+
+  .action-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .action-btn.deposit .action-icon {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+  }
+
+  .action-btn.withdraw .action-icon {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--error);
+  }
+
+  .action-btn.plans .action-icon {
+    background: rgba(0, 212, 255, 0.15);
+    color: var(--cyan);
+  }
+
+  .action-btn span.label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .action-btn .action-desc {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.3;
+  }
+
+  /* Referral Card */
+  .referral-card {
+    margin-top: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    animation: slideUp 0.5s ease 0.3s both;
+    transition: all 0.3s ease;
+  }
+
+  .referral-card:hover {
+    border-color: var(--border-hover);
+    box-shadow: var(--shadow-md);
+  }
+
+  .referral-info {
+    flex: 1;
+  }
+
+  .referral-info .ref-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .referral-info .ref-code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--cyan);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .referral-earnings {
+    font-size: 12px;
+    color: var(--success);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  .copy-btn {
+    background: linear-gradient(135deg, var(--cyan), var(--violet));
+    border: none;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 18px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    flex: none;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .copy-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 212, 255, 0.3);
+  }
+
+  .copy-btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .copy-btn.copied {
+    background: var(--success);
+  }
+
+  /* Recent Activity */
+  .activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    animation: slideUp 0.5s ease 0.4s both;
+  }
+
+  .activity-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.2s ease;
+  }
+
+  .activity-item:hover {
+    border-color: var(--border-hover);
+  }
+
+  .activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+
+  .activity-icon.deposit {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+  }
+
+  .activity-icon.withdrawal {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--error);
+  }
+
+  .activity-icon.bonus {
+    background: rgba(0, 212, 255, 0.15);
+    color: var(--cyan);
+  }
+
+  .activity-info {
+    flex: 1;
+  }
+
+  .activity-info .activity-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .activity-info .activity-date {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .activity-amount {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .activity-amount.positive {
+    color: var(--success);
+  }
+
+  .activity-amount.negative {
+    color: var(--error);
+  }
+
+  /* Bottom Navigation */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: rgba(13, 18, 39, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+    height: var(--nav-height);
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    color: var(--muted);
+    flex: 1;
+    padding: 6px 4px;
+    border-radius: 14px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    cursor: pointer;
+  }
+
+  .nav-item svg {
+    width: 22px;
+    height: 22px;
+    transition: all 0.3s ease;
+  }
+
+  .nav-item span {
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+
+  .nav-item.active {
+    color: var(--cyan);
+  }
+
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 24px;
+    height: 3px;
+    background: var(--cyan);
+    border-radius: 0 0 3px 3px;
+  }
+
+  .nav-item:active {
+    transform: scale(0.95);
+  }
+
+  .nav-item .nav-indicator {
+    position: absolute;
+    bottom: -2px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--cyan);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+
+  .nav-item.active .nav-indicator {
+    opacity: 1;
+  }
+
+  /* Toast Notifications */
+  #toast-stack {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: calc(100% - 40px);
+    max-width: 400px;
+  }
+
+  .toast {
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--cyan);
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    box-shadow: var(--shadow-lg);
+    animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    backdrop-filter: blur(10px);
+  }
+
+  .toast.error {
+    border-left-color: var(--error);
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  .toast.success {
+    border-left-color: var(--success);
+    background: rgba(16, 185, 129, 0.1);
+  }
+
+  .toast.warning {
+    border-left-color: var(--warning);
+    background: rgba(245, 158, 11, 0.1);
+  }
+
+  @keyframes toastSlideIn {
+    from {
+      opacity: 0;
+      transform: translateX(100px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Welcome Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(2, 3, 10, 0.8);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 70;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.3s ease;
+  }
+
+  .modal-overlay.open {
+    display: flex;
+  }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 24px;
+    max-width: 420px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-lg);
+    animation: modalSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  @keyframes modalSlideIn {
+    from {
+      opacity: 0;
+      transform: scale(0.9) translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  .modal-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, var(--cyan), var(--violet));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+  }
+
+  .modal h2 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 22px;
+    margin-bottom: 8px;
+    color: var(--text-bright);
+  }
+
+  .modal > p.sub {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+
+  .info-row {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+    transition: all 0.2s ease;
+  }
+
+  .info-row:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .info-row .info-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-top: 4px;
+    flex: none;
+    background: var(--cyan);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  }
+
+  .info-row strong {
+    font-size: 14px;
+    display: block;
+    margin-bottom: 3px;
+  }
+
+  .info-row p {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .whatsapp-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: #25D366;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 14px;
+    border-radius: 14px;
+    margin-bottom: 12px;
+    font-family: 'Space Grotesk', sans-serif;
+    transition: all 0.3s ease;
+  }
+
+  .whatsapp-btn:hover {
+    background: #20bd5a;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
+  }
+
+  .modal-close {
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text);
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: 'Space Grotesk', sans-serif;
+    transition: all 0.3s ease;
+  }
+
+  .modal-close:hover {
+    background: var(--surface-3);
+    border-color: var(--border-hover);
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .container {
+      padding: 16px 14px 8px;
+    }
+
+    .balance-value {
+      font-size: 32px;
+    }
+
+    .stat-row {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .quick-actions {
+      gap: 8px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .container {
+      padding: 32px 24px 8px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div id="toast-stack"></div>
+
+<div class="container">
+  <!-- Top Bar -->
+  <div class="topbar">
+    <div class="greet">
+      <div class="avatar" id="avatarInitial">Q</div>
+      <div class="greet-text">
+        <p>Welcome back</p>
+        <h2 id="userName">Loading…</h2>
+      </div>
+    </div>
+    <div class="top-icons">
+      <button class="icon-btn-round" id="notificationBtn" title="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+        </svg>
+        <span class="notification-badge"></span>
+      </button>
+      <button class="icon-btn-round" id="logoutBtn" title="Log out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16,17 21,12 16,7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Announcement Marquee -->
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      <span><span class="marquee-dot"></span> Welcome to QUANTUM — smart investing made simple.</span>
+      <span><span class="marquee-dot"></span> Minimum deposit is ₦4,000.</span>
+      <span><span class="marquee-dot"></span> Withdrawals processed 9AM–5PM, Mon–Fri.</span>
+      <span><span class="marquee-dot"></span> Join our WhatsApp group for updates.</span>
+      <span><span class="marquee-dot"></span> Welcome to QUANTUM — smart investing made simple.</span>
+      <span><span class="marquee-dot"></span> Minimum deposit is ₦4,000.</span>
+      <span><span class="marquee-dot"></span> Withdrawals processed 9AM–5PM, Mon–Fri.</span>
+      <span><span class="marquee-dot"></span> Join our WhatsApp group for updates.</span>
+    </div>
+  </div>
+
+  <!-- Balance Card -->
+  <div class="balance-card">
+    <div class="balance-header">
+      <p class="balance-label">Total Balance</p>
+      <button class="balance-visibility" id="toggleBalance" title="Show/Hide balance">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+          <circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
+    <div class="balance-value">
+      <span id="balanceValue">₦0.00</span>
+      <button class="refresh-btn" id="refreshBtn" title="Refresh balance">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23,4 23,10 17,10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+      </button>
+    </div>
+    <div class="stat-row">
+      <div class="stat-pill">
+        <div class="stat-icon">📥</div>
+        <p>Total Deposits</p>
+        <strong id="totalDeposit">₦0</strong>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-icon">💰</div>
+        <p>Earnings</p>
+        <strong id="totalEarnings">₦0</strong>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-icon">🎁</div>
+        <p>Referral Bonus</p>
+        <strong id="referralBonus">₦0</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="section-header">
+    <h3 class="section-title">Quick Actions</h3>
+    <a href="plans.html" class="section-link">View All →</a>
+  </div>
+  <div class="quick-actions">
+    <a href="deposit.html" class="action-btn deposit">
+      <div class="action-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <polyline points="19,12 12,19 5,12"/>
+        </svg>
+      </div>
+      <span class="label">Deposit</span>
+      <span class="action-desc">Fund your account</span>
+    </a>
+    <a href="withdrawal.html" class="action-btn withdraw">
+      <div class="action-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="19" x2="12" y2="5"/>
+          <polyline points="5,12 12,5 19,12"/>
+        </svg>
+      </div>
+      <span class="label">Withdraw</span>
+      <span class="action-desc">Cash out earnings</span>
+    </a>
+    <a href="plans.html" class="action-btn plans">
+      <div class="action-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+        </svg>
+      </div>
+      <span class="label">Plans</span>
+      <span class="action-desc">Invest & earn</span>
+    </a>
+  </div>
+
+  <!-- Referral Card -->
+  <div class="referral-card">
+    <div class="referral-info">
+      <div class="ref-label">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="8.5" cy="7" r="4"/>
+          <polyline points="17,11 19,13 23,9"/>
+        </svg>
+        Your Referral Code
+      </div>
+      <div class="ref-code">
+        <span id="referralCodeText">—</span>
+      </div>
+      <div class="referral-earnings" id="referralEarnings"></div>
+    </div>
+    <button class="copy-btn" id="copyReferralBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+      </svg>
+      Copy Link
+    </button>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="section-header">
+    <h3 class="section-title">Recent Activity</h3>
+    <a href="history.html" class="section-link">See All →</a>
+  </div>
+  <div class="activity-list" id="activityList">
+    <div class="activity-item">
+      <div class="activity-icon deposit">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <polyline points="19,12 12,19 5,12"/>
+        </svg>
+      </div>
+      <div class="activity-info">
+        <div class="activity-title">Welcome to Quantum</div>
+        <div class="activity-date">Just now</div>
+      </div>
+      <div class="activity-amount positive">Start earning</div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Navigation -->
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="nav-item active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9,22 9,12 15,12 15,22"/>
+    </svg>
+    <span>Home</span>
+    <span class="nav-indicator"></span>
+  </a>
+  <a href="plans.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+    </svg>
+    <span>Plans</span>
+    <span class="nav-indicator"></span>
+  </a>
+  <a href="history.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"/>
+      <polyline points="12,6 12,12 16,14"/>
+    </svg>
+    <span>History</span>
+    <span class="nav-indicator"></span>
+  </a>
+  <a href="profile.html" class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+      <circle cx="12" cy="7" r="4"/>
+    </svg>
+    <span>Profile</span>
+    <span class="nav-indicator"></span>
+  </a>
+</nav>
+
+<!-- Welcome Modal -->
+<div class="modal-overlay" id="welcomeModal">
+  <div class="modal">
+    <div class="modal-icon">🚀</div>
+    <h2>You're all set!</h2>
+    <p class="sub">Here's everything you need to know before you start investing with QUANTUM.</p>
+
+    <div class="info-list">
+      <div class="info-row">
+        <span class="info-dot"></span>
+        <div>
+          <strong>Minimum Deposit</strong>
+          <p>The minimum amount you can deposit to start earning is ₦4,000.</p>
+        </div>
+      </div>
+      <div class="info-row">
+        <span class="info-dot"></span>
+        <div>
+          <strong>Withdrawal Fee</strong>
+          <p>A 15% processing fee applies to every withdrawal from your account.</p>
+        </div>
+      </div>
+      <div class="info-row">
+        <span class="info-dot"></span>
+        <div>
+          <strong>Processing Hours</strong>
+          <p>Withdrawals are processed 9:00 AM – 5:00 PM, Monday to Friday. No processing on weekends.</p>
+        </div>
+      </div>
+    </div>
+
+    <a href="https://chat.whatsapp.com/yourgrouplinkhere" target="_blank" rel="noopener" class="whatsapp-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+      </svg>
+      Join Official WhatsApp Group
+    </a>
+    <button class="modal-close" id="closeWelcomeModal">Got it, let's continue</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI",
+    authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0",
+    storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094",
+    appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const CACHE_KEY = "quantum_dashboard_cache";
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+  /* ---------------- Enhanced Toast System ---------------- */
+  function showToast(message, type = "info", duration = 4000) {
+    const stack = document.getElementById("toast-stack");
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    
+    const icons = {
+      success: '✓',
+      error: '✕',
+      warning: '⚠',
+      info: 'ℹ'
+    };
+    
+    toast.innerHTML = `<span style="margin-right:8px;font-weight:bold;">${icons[type] || icons.info}</span>${message}`;
+    
+    if (stack.children.length >= 3) {
+      stack.removeChild(stack.firstChild);
+    }
+    
+    stack.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.transition = "all 0.3s ease";
+      toast.style.opacity = "0";
+      toast.style.transform = "translateX(100px)";
+      setTimeout(() => {
+        if (toast.parentNode) toast.remove();
+      }, 300);
+    }, duration);
+  }
+
+  /* ---------------- Utility Functions ---------------- */
+  function formatNaira(value) {
+    const n = Number(value) || 0;
+    return "₦" + n.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function formatNairaShort(value) {
+    const n = Number(value) || 0;
+    return "₦" + n.toLocaleString("en-NG", { maximumFractionDigits: 0 });
+  }
+
+  function renderUser(data) {
+    const name = data.name || "Investor";
+    document.getElementById("userName").textContent = name;
+    document.getElementById("avatarInitial").textContent = name.trim().charAt(0).toUpperCase();
+    document.getElementById("balanceValue").textContent = formatNaira(data.balance);
+    document.getElementById("totalDeposit").textContent = formatNairaShort(data.totalDeposit || 0);
+    document.getElementById("totalEarnings").textContent = formatNairaShort(data.totalEarnings || 0);
+    document.getElementById("referralBonus").textContent = formatNairaShort(data.referralEarnings || 0);
+    document.getElementById("referralCodeText").textContent = data.referralCode || "—";
+    
+    if (data.referralEarnings > 0) {
+      document.getElementById("referralEarnings").textContent = `+${formatNaira(data.referralEarnings)} earned`;
+    }
+  }
+
+  /* ---------------- Load User Data (Cache-First Strategy) ---------------- */
+  async function loadUserData(uid, forceRefresh = false) {
+    // Check cache first
+    if (!forceRefresh) {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (parsed.uid === uid && (Date.now() - parsed.timestamp < CACHE_DURATION)) {
+            renderUser(parsed.data);
+            loadRecentActivity(uid);
+            return parsed.data;
+          }
+        } catch (e) {
+          console.warn("Cache parse error:", e);
+        }
+      }
+    }
+    
+    try {
+      const snap = await getDoc(doc(db, "users", uid));
+      if (!snap.exists()) {
+        showToast("Account not found. Please log in again.", "error");
+        return null;
+      }
+      
+      const data = snap.data();
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+        uid,
+        data,
+        timestamp: Date.now()
+      }));
+      
+      renderUser(data);
+      loadRecentActivity(uid);
+      return data;
+    } catch (error) {
+      console.error("Load user error:", error);
+      showToast("Failed to load account data. Check your connection.", "error");
+      return null;
+    }
+  }
+
+  /* ---------------- Load Recent Activity ---------------- */
+  async function loadRecentActivity(uid) {
+    const activityList = document.getElementById("activityList");
+    
+    try {
+      const transactionsRef = collection(db, "users", uid, "transactions");
+      const q = query(transactionsRef, orderBy("createdAt", "desc"), limit(5));
+      const snapshot = await getDocs(q);
+      
+      if (snapshot.empty) {
+        activityList.innerHTML = `
+          <div class="activity-item">
+            <div class="activity-icon deposit">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                <path d="M2 17l10 5 10-5"/>
+                <path d="M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+            <div class="activity-info">
+              <div class="activity-title">Welcome to Quantum</div>
+              <div class="activity-date">Start investing to see activity</div>
+            </div>
+            <div class="activity-amount positive">Get Started</div>
+          </div>`;
+        return;
+      }
+      
+      activityList.innerHTML = '';
+      snapshot.forEach(doc => {
+        const tx = doc.data();
+        const date = tx.createdAt?.toDate?.() || new Date();
+        const timeAgo = getTimeAgo(date);
+        
+        const item = document.createElement("div");
+        item.className = "activity-item";
+        
+        let iconClass = "deposit";
+        let amountClass = "positive";
+        let prefix = "+";
+        
+        if (tx.type === "withdrawal") {
+          iconClass = "withdrawal";
+          amountClass = "negative";
+          prefix = "-";
+        } else if (tx.type === "bonus" || tx.type === "referral") {
+          iconClass = "bonus";
+        }
+        
+        item.innerHTML = `
+          <div class="activity-icon ${iconClass}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              ${tx.type === "deposit" ? '<line x1="12" y1="5" x2="12" y2="19"/><polyline points="19,12 12,19 5,12"/>' : 
+                tx.type === "withdrawal" ? '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5,12 12,5 19,12"/>' :
+                '<polyline points="20,6 9,17 4,12"/>'}
+            </svg>
+          </div>
+          <div class="activity-info">
+            <div class="activity-title">${tx.description || tx.type}</div>
+            <div class="activity-date">${timeAgo}</div>
+          </div>
+          <div class="activity-amount ${amountClass}">${prefix}${formatNairaShort(tx.amount)}</div>
+        `;
+        
+        activityList.appendChild(item);
+      });
+    } catch (error) {
+      console.error("Load activity error:", error);
+      activityList.innerHTML = `
+        <div class="activity-item">
+          <div class="activity-info">
+            <div class="activity-title">Could not load activity</div>
+            <div class="activity-date">Pull down to refresh</div>
+          </div>
+        </div>`;
+    }
+  }
+
+  function getTimeAgo(date) {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    if (seconds < 60) return "Just now";
+    if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+    if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+    return `${Math.floor(seconds / 86400)}d ago`;
+  }
+
+  /* ---------------- Auth Guard ---------------- */
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+      return;
+    }
+    loadUserData(user.uid);
+    maybeShowWelcomeModal();
+  });
+
+  /* ---------------- Balance Visibility Toggle ---------------- */
+  let balanceVisible = true;
+  document.getElementById("toggleBalance").addEventListener("click", () => {
+    balanceVisible = !balanceVisible;
+    const balanceEl = document.getElementById("balanceValue");
+    if (balanceVisible) {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const data = JSON.parse(cached).data;
+        balanceEl.textContent = formatNaira(data.balance);
+      }
+    } else {
+      balanceEl.textContent = "****";
+    }
+  });
+
+  /* ---------------- Refresh Balance ---------------- */
+  document.getElementById("refreshBtn").addEventListener("click", async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+    
+    const btn = document.getElementById("refreshBtn");
+    btn.classList.add("spinning");
+    
+    await loadUserData(user.uid, true);
+    
+    setTimeout(() => {
+      btn.classList.remove("spinning");
+      showToast("Balance updated successfully", "success", 2500);
+    }, 600);
+  });
+
+  /* ---------------- Logout ---------------- */
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    if (confirm("Are you sure you want to log out?")) {
+      try {
+        await signOut(auth);
+        sessionStorage.removeItem(CACHE_KEY);
+        window.location.href = "login.html";
+      } catch (e) {
+        showToast("Couldn't log out. Please try again.", "error");
+      }
+    }
+  });
+
+  /* ---------------- Copy Referral Link ---------------- */
+  document.getElementById("copyReferralBtn").addEventListener("click", async () => {
+    const code = document.getElementById("referralCodeText").textContent;
+    if (!code || code === "—") return;
+    
+    const link = `${window.location.origin}${window.location.pathname.replace("dashboard.html", "index.html")}?ref=${code}`;
+    
+    try {
+      await navigator.clipboard.writeText(link);
+      const btn = document.getElementById("copyReferralBtn");
+      btn.classList.add("copied");
+      btn.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="20,6 9,17 4,12"/>
+        </svg>
+        Copied!
+      `;
+      showToast("Referral link copied to clipboard!", "success", 2500);
+      
+      setTimeout(() => {
+        btn.classList.remove("copied");
+        btn.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+          </svg>
+          Copy Link
+        `;
+      }, 2000);
+    } catch (e) {
+      showToast("Couldn't copy automatically. Your code: " + code, "error");
+    }
+  });
+
+  /* ---------------- Notification Button ---------------- */
+  document.getElementById("notificationBtn").addEventListener("click", () => {
+    showToast("No new notifications", "info", 2500);
+  });
+
+  /* ---------------- Welcome Modal ---------------- */
+  function maybeShowWelcomeModal() {
+    if (sessionStorage.getItem("quantum_show_welcome") === "1") {
+      setTimeout(() => {
+        document.getElementById("welcomeModal").classList.add("open");
+      }, 500);
+      sessionStorage.removeItem("quantum_show_welcome");
+    }
+  }
+
+  document.getElementById("closeWelcomeModal").addEventListener("click", () => {
+    document.getElementById("welcomeModal").classList.remove("open");
+  });
+
+  // Close modal on overlay click
+  document.getElementById("welcomeModal").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) {
+      e.currentTarget.classList.remove("open");
+    }
+  });
+
+  console.log("🚀 Quantum Dashboard - Ready");
+</script>
+
+</body>
+</html>
