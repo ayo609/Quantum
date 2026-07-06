@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>QUANTUM — Welcome Back</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --void: #0a0e27;
+    --surface: #131837;
+    --surface-2: #1a1f42;
+    --surface-3: #1f2550;
+    --cyan: #00d4ff;
+    --cyan-dark: #0099cc;
+    --violet: #7c3aed;
+    --violet-light: #a78bfa;
+    --text: #e8ecf7;
+    --text-bright: #ffffff;
+    --muted: #8892b0;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --border: rgba(232, 236, 247, 0.1);
+    --border-hover: rgba(232, 236, 247, 0.2);
+    --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.2);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html, body {
+    height: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--void);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated Background */
+  #particles {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  .bg-glow {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(800px circle at 80% 20%, rgba(124, 58, 237, 0.1), transparent 60%),
+      radial-gradient(700px circle at 20% 80%, rgba(0, 212, 255, 0.08), transparent 60%),
+      radial-gradient(500px circle at 50% 50%, rgba(0, 212, 255, 0.05), transparent 70%);
+    animation: bgPulse 8s ease-in-out infinite;
+  }
+
+  @keyframes bgPulse {
+    0%, 100% { opacity: 0.8; }
+    50% { opacity: 0.6; }
+  }
+
+  /* Main Container */
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px 24px;
+  }
+
+  /* Animated Brand */
+  .brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 48px;
+    animation: slideDown 0.6s ease;
+  }
+
+  .orbit {
+    position: relative;
+    width: 52px;
+    height: 52px;
+    flex: none;
+  }
+
+  .orbit-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(0, 212, 255, 0.3);
+    animation: spin 3s linear infinite;
+  }
+
+  .orbit-ring.r2 {
+    inset: 8px;
+    border-color: rgba(124, 58, 237, 0.4);
+    animation: spin 5s linear infinite reverse;
+  }
+
+  .orbit-ring.r3 {
+    inset: 16px;
+    border-color: rgba(0, 212, 255, 0.2);
+    animation: spin 7s linear infinite;
+  }
+
+  .orbit-dot {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cyan);
+    top: -4px;
+    left: 50%;
+    margin-left: -4px;
+    box-shadow: 0 0 14px var(--cyan), 0 0 28px var(--cyan);
+  }
+
+  .orbit-ring.r2 .orbit-dot {
+    background: var(--violet);
+    box-shadow: 0 0 14px var(--violet), 0 0 28px var(--violet);
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orbit-ring, .bg-glow { animation: none !important; }
+  }
+
+  .brand-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    background: linear-gradient(135deg, var(--cyan), var(--violet-light), var(--cyan));
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradientShift 3s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  /* Welcome Card */
+  .welcome-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px 28px;
+    animation: slideDown 0.6s ease 0.1s both;
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(10px);
+  }
+
+  .welcome-card h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-bright);
+    text-align: center;
+  }
+
+  .welcome-card .subtitle {
+    color: var(--muted);
+    font-size: 14.5px;
+    text-align: center;
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+
+  /* Form Elements */
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .field label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    transition: color 0.2s ease;
+  }
+
+  .field:focus-within label {
+    color: var(--cyan);
+  }
+
+  .input-shell {
+    position: relative;
+  }
+
+  .input-shell input {
+    width: 100%;
+    background: var(--surface-2);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .input-shell input::placeholder {
+    color: #5c6488;
+    opacity: 0.8;
+  }
+
+  .input-shell input:hover {
+    border-color: var(--border-hover);
+    background: var(--surface-3);
+  }
+
+  .input-shell input:focus {
+    border-color: var(--cyan);
+    background: var(--surface-3);
+    box-shadow: 0 0 0 4px rgba(0, 212, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .input-shell input.error-state {
+    border-color: var(--error);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+  }
+
+  .input-shell.has-icon input {
+    padding-right: 48px;
+  }
+
+  /* Icon Button */
+  .icon-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .icon-btn:hover {
+    color: var(--text-bright);
+    background: var(--surface-3);
+  }
+
+  .icon-btn:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+
+  /* Remember & Forgot Row */
+  .remember-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+  }
+
+  .remember-me {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .remember-me input {
+    accent-color: var(--cyan);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
+  .remember-me label {
+    font-size: 13.5px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+
+  .forgot-link {
+    font-size: 13.5px;
+    color: var(--cyan);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+
+  .forgot-link:hover {
+    color: var(--violet-light);
+    text-decoration: underline;
+  }
+
+  /* Submit Button */
+  .submit-btn {
+    margin-top: 8px;
+    background: linear-gradient(135deg, var(--cyan), var(--violet));
+    border: none;
+    border-radius: 14px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+  }
+
+  .submit-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+
+  .submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 212, 255, 0.4);
+  }
+
+  .submit-btn:hover:not(:disabled)::before {
+    left: 100%;
+  }
+
+  .submit-btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2.5px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #ffffff;
+    animation: spin 0.8s linear infinite;
+    display: none;
+  }
+
+  .submit-btn.loading .spinner {
+    display: inline-block;
+  }
+
+  .submit-btn.loading .btn-text {
+    display: none;
+  }
+
+  .submit-btn.loading {
+    pointer-events: none;
+  }
+
+  /* Footer Link */
+  .footer-link {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 14.5px;
+    color: var(--muted);
+    animation: slideDown 0.6s ease 0.2s both;
+  }
+
+  .footer-link a {
+    color: var(--cyan);
+    text-decoration: none;
+    font-weight: 600;
+    position: relative;
+  }
+
+  .footer-link a::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--cyan);
+    transition: width 0.3s ease;
+  }
+
+  .footer-link a:hover::after {
+    width: 100%;
+  }
+
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 8px 0;
+    opacity: 0.6;
+  }
+
+  .divider::before,
+  .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .divider span {
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* Toast Notifications */
+  #toast-stack {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: calc(100% - 40px);
+    max-width: 400px;
+  }
+
+  .toast {
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--cyan);
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    box-shadow: var(--shadow-lg);
+    animation: toastSlideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    backdrop-filter: blur(10px);
+  }
+
+  .toast.error {
+    border-left-color: var(--error);
+    background: rgba(239, 68, 68, 0.1);
+  }
+
+  .toast.success {
+    border-left-color: var(--success);
+    background: rgba(16, 185, 129, 0.1);
+  }
+
+  .toast.warning {
+    border-left-color: var(--warning);
+    background: rgba(245, 158, 11, 0.1);
+  }
+
+  @keyframes toastSlideIn {
+    from {
+      opacity: 0;
+      transform: translateX(100px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  /* Responsive Design */
+  @media (max-width: 480px) {
+    .wrap {
+      padding: 24px 16px;
+    }
+
+    .welcome-card {
+      padding: 28px 20px;
+    }
+
+    .welcome-card h1 {
+      font-size: 24px;
+    }
+
+    .brand-name {
+      font-size: 26px;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .wrap {
+      padding: 60px 24px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+<div class="bg-glow"></div>
+<div id="toast-stack"></div>
+
+<div class="wrap">
+  <!-- Animated Brand Logo -->
+  <div class="brand">
+    <div class="orbit">
+      <div class="orbit-ring r1"><span class="orbit-dot"></span></div>
+      <div class="orbit-ring r2"><span class="orbit-dot"></span></div>
+      <div class="orbit-ring r3"></div>
+    </div>
+    <span class="brand-name">QUANTUM</span>
+  </div>
+
+  <!-- Login Card -->
+  <div class="welcome-card">
+    <h1>Welcome back</h1>
+    <p class="subtitle">Sign in to access your Quantum dashboard and continue growing your portfolio.</p>
+
+    <!-- Login Form -->
+    <form id="loginForm" novalidate>
+      <!-- Email -->
+      <div class="field">
+        <label for="email">Email Address</label>
+        <div class="input-shell">
+          <input type="email" id="email" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+        <div class="status-line" id="emailStatus" style="font-size:12px;min-height:18px;"></div>
+      </div>
+
+      <!-- Password -->
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-shell has-icon">
+          <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required>
+          <button type="button" class="icon-btn" data-toggle="password" aria-label="Show password">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+        <div class="status-line" id="passwordStatus" style="font-size:12px;min-height:18px;"></div>
+      </div>
+
+      <!-- Remember Me & Forgot Password -->
+      <div class="remember-row">
+        <label class="remember-me">
+          <input type="checkbox" id="rememberMe">
+          <label for="rememberMe">Remember me</label>
+        </label>
+        <a href="#" class="forgot-link" id="forgotPassword">Forgot password?</a>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <span class="btn-text">Sign In</span>
+        <span class="spinner"></span>
+      </button>
+    </form>
+  </div>
+
+  <!-- Register Link -->
+  <div class="footer-link">
+    Don't have an account? <a href="index.html">Create one</a>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getAuth,
+    signInWithEmailAndPassword,
+    sendPasswordResetEmail,
+    setPersistence,
+    browserLocalPersistence,
+    browserSessionPersistence
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import {
+    getFirestore, doc, getDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  // Firebase Configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI",
+    authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0",
+    storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094",
+    appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  // Initialize Firebase with error handling
+  let app, auth, db;
+  try {
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+  } catch (error) {
+    console.error("Firebase initialization error:", error);
+    showToast("Failed to initialize application. Please refresh.", "error");
+  }
+
+  /* ---------------- Enhanced Toast System ---------------- */
+  function showToast(message, type = "info", duration = 4500) {
+    const stack = document.getElementById("toast-stack");
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    
+    const icons = {
+      success: '✓',
+      error: '✕',
+      warning: '⚠',
+      info: 'ℹ'
+    };
+    
+    toast.innerHTML = `<span style="margin-right:8px;font-weight:bold;">${icons[type] || icons.info}</span>${message}`;
+    
+    if (stack.children.length >= 3) {
+      stack.removeChild(stack.firstChild);
+    }
+    
+    stack.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.style.transition = "all 0.3s ease";
+      toast.style.opacity = "0";
+      toast.style.transform = "translateX(100px)";
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.remove();
+        }
+      }, 300);
+    }, duration);
+  }
+
+  /* ---------------- Optimized Particle System ---------------- */
+  (function initParticles() {
+    const canvas = document.getElementById("particles");
+    const ctx = canvas.getContext("2d");
+    let w, h, particles;
+    let animationId;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    
+    function createParticles() {
+      const count = Math.min(30, Math.floor((w * h) / 40000));
+      particles = Array.from({ length: count }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25,
+        radius: Math.random() * 1.5 + 0.5,
+        opacity: Math.random() * 0.5 + 0.3
+      }));
+    }
+    
+    function animate() {
+      if (reduceMotion) {
+        ctx.clearRect(0, 0, w, h);
+        return;
+      }
+      
+      ctx.clearRect(0, 0, w, h);
+      
+      for (const p of particles) {
+        p.x += p.vx;
+        p.y += p.vy;
+        
+        if (p.x < 0) p.x = w;
+        if (p.x > w) p.x = 0;
+        if (p.y < 0) p.y = h;
+        if (p.y > h) p.y = 0;
+      }
+      
+      for (let i = 0; i < particles.length; i++) {
+        for (let j = i + 1; j < particles.length; j++) {
+          const dx = particles[i].x - particles[j].x;
+          const dy = particles[i].y - particles[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          if (dist < 140) {
+            const opacity = 0.06 * (1 - dist / 140);
+            ctx.strokeStyle = `rgba(124, 58, 237, ${opacity})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(particles[i].x, particles[i].y);
+            ctx.lineTo(particles[j].x, particles[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+      
+      for (const p of particles) {
+        ctx.fillStyle = `rgba(0, 212, 255, ${p.opacity})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      animationId = requestAnimationFrame(animate);
+    }
+    
+    resize();
+    createParticles();
+    
+    let resizeTimeout;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        resize();
+        createParticles();
+      }, 250);
+    });
+    
+    if (!reduceMotion) {
+      animate();
+    }
+    
+    window.addEventListener("beforeunload", () => {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+      }
+    });
+  })();
+
+  /* ---------------- Password Visibility Toggle ---------------- */
+  document.querySelectorAll(".icon-btn[data-toggle]").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const input = document.getElementById(btn.dataset.toggle);
+      const isPassword = input.type === "password";
+      
+      input.type = isPassword ? "text" : "password";
+      
+      const svg = btn.querySelector("svg");
+      if (svg) {
+        if (isPassword) {
+          svg.innerHTML = `
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+          `;
+        } else {
+          svg.innerHTML = `
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          `;
+        }
+      }
+    });
+  });
+
+  /* ---------------- Check for Welcome Message ---------------- */
+  if (sessionStorage.getItem("quantum_show_welcome") === "1") {
+    sessionStorage.removeItem("quantum_show_welcome");
+    setTimeout(() => {
+      showToast("Account created successfully! Please sign in.", "success");
+    }, 500);
+  }
+
+  /* ---------------- Restore Remembered Email ---------------- */
+  const rememberedEmail = localStorage.getItem("quantum_remembered_email");
+  if (rememberedEmail) {
+    document.getElementById("email").value = rememberedEmail;
+    document.getElementById("rememberMe").checked = true;
+  }
+
+  /* ---------------- Form Elements Cache ---------------- */
+  const elements = {
+    email: document.getElementById("email"),
+    password: document.getElementById("password"),
+    rememberMe: document.getElementById("rememberMe"),
+    submitBtn: document.getElementById("submitBtn"),
+    statuses: {
+      email: document.getElementById("emailStatus"),
+      password: document.getElementById("passwordStatus")
+    }
+  };
+
+  /* ---------------- Validation ---------------- */
+  function validateEmail() {
+    const value = elements.email.value.trim();
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isValid = emailPattern.test(value);
+    
+    if (value.length === 0) {
+      elements.statuses.email.textContent = "";
+      return false;
+    }
+    
+    elements.statuses.email.textContent = isValid ? "✓ Valid email" : "Please enter a valid email";
+    elements.statuses.email.className = `status-line ${isValid ? 'ok' : 'bad'}`;
+    
+    return isValid;
+  }
+
+  function validatePassword() {
+    const value = elements.password.value;
+    
+    if (value.length === 0) {
+      elements.statuses.password.textContent = "";
+      return false;
+    }
+    
+    const isValid = value.length >= 6;
+    elements.statuses.password.textContent = isValid ? "" : "Password must be at least 6 characters";
+    elements.statuses.password.className = `status-line ${isValid ? '' : 'bad'}`;
+    
+    return isValid;
+  }
+
+  /* ---------------- Event Listeners ---------------- */
+  elements.email.addEventListener("blur", validateEmail);
+  elements.email.addEventListener("input", () => {
+    if (elements.statuses.email.classList.contains("bad")) {
+      validateEmail();
+    }
+  });
+
+  elements.password.addEventListener("blur", validatePassword);
+  elements.password.addEventListener("input", () => {
+    if (elements.statuses.password.classList.contains("bad")) {
+      validatePassword();
+    }
+  });
+
+  /* ---------------- Form Submission ---------------- */
+  const form = document.getElementById("loginForm");
+  
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    // Validate fields
+    const emailValid = validateEmail();
+    const passwordValid = validatePassword();
+    
+    if (!emailValid || !passwordValid) {
+      showToast("Please fill in all fields correctly", "error");
+      return;
+    }
+    
+    // Disable button and show loading
+    elements.submitBtn.disabled = true;
+    elements.submitBtn.classList.add("loading");
+    
+    try {
+      // Set persistence based on "Remember Me"
+      const persistence = elements.rememberMe.checked 
+        ? browserLocalPersistence 
+        : browserSessionPersistence;
+      
+      await setPersistence(auth, persistence);
+      
+      // Sign in user
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        elements.email.value.trim(),
+        elements.password.value
+      );
+      
+      const uid = userCredential.user.uid;
+      
+      // Remember email if checked
+      if (elements.rememberMe.checked) {
+        localStorage.setItem("quantum_remembered_email", elements.email.value.trim());
+      } else {
+        localStorage.removeItem("quantum_remembered_email");
+      }
+      
+      // Fetch user data
+      try {
+        const userDoc = await getDoc(doc(db, "users", uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          
+          // Cache user data
+          sessionStorage.setItem("quantum_user_cache", JSON.stringify({
+            uid,
+            name: userData.name,
+            username: userData.username,
+            referralCode: userData.referralCode,
+            balance: userData.balance || 0
+          }));
+          
+          showToast(`Welcome back, ${userData.name}!`, "success");
+        }
+      } catch (firestoreError) {
+        console.warn("Could not fetch user data:", firestoreError);
+        // Still allow login even if Firestore read fails
+      }
+      
+      // Redirect to dashboard
+      setTimeout(() => {
+        window.location.href = "dashboard.html";
+      }, 1000);
+      
+    } catch (error) {
+      console.error("Login error:", error);
+      
+      let errorMessage = "Login failed. Please try again.";
+      
+      switch (error.code) {
+        case "auth/invalid-credential":
+          errorMessage = "Invalid email or password. Please try again.";
+          break;
+        case "auth/invalid-email":
+          errorMessage = "Please enter a valid email address.";
+          break;
+        case "auth/user-disabled":
+          errorMessage = "This account has been disabled. Contact support.";
+          break;
+        case "auth/user-not-found":
+          errorMessage = "No account found with this email. Please sign up.";
+          break;
+        case "auth/wrong-password":
+          errorMessage = "Incorrect password. Please try again.";
+          break;
+        case "auth/too-many-requests":
+          errorMessage = "Too many login attempts. Please try again later.";
+          break;
+        case "auth/network-request-failed":
+          errorMessage = "Network error. Please check your connection.";
+          break;
+      }
+      
+      showToast(errorMessage, "error");
+      
+      // Reset button state
+      elements.submitBtn.disabled = false;
+      elements.submitBtn.classList.remove("loading");
+    }
+  });
+
+  /* ---------------- Forgot Password Handler ---------------- */
+  document.getElementById("forgotPassword").addEventListener("click", async (e) => {
+    e.preventDefault();
+    
+    const email = elements.email.value.trim();
+    
+    if (!email) {
+      showToast("Please enter your email address first", "warning");
+      elements.email.focus();
+      return;
+    }
+    
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      showToast("Please enter a valid email address", "error");
+      return;
+    }
+    
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showToast("Password reset email sent! Check your inbox.", "success");
+    } catch (error) {
+      console.error("Password reset error:", error);
+      
+      let errorMessage = "Failed to send reset email.";
+      
+      switch (error.code) {
+        case "auth/user-not-found":
+          errorMessage = "No account found with this email.";
+          break;
+        case "auth/invalid-email":
+          errorMessage = "Please enter a valid email address.";
+          break;
+        case "auth/too-many-requests":
+          errorMessage = "Too many requests. Please try again later.";
+          break;
+      }
+      
+      showToast(errorMessage, "error");
+    }
+  });
+
+  console.log("🚀 Quantum Login - Ready");
+</script>
+
+</body>
+</html>
