@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>VELTRIX — Admin Users</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0c; --surface: #111915; --surface-2: #1a241e; --surface-3: #243028;
+    --primary: #22c55e; --primary-dark: #16a34a; --primary-glow: rgba(34,197,94,0.25);
+    --gold: #f59e0b; --text: #f0fdf4; --text-bright: #ffffff; --muted: #9ca3a0;
+    --success: #22c55e; --warning: #f59e0b; --error: #ef4444;
+    --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+    --shadow-lg: 0 30px 60px rgba(0,0,0,0.6); --shadow-md: 0 15px 35px rgba(0,0,0,0.4);
+    --radius: 18px; --radius-sm: 13px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;position:relative;padding-bottom:40px;background-image:radial-gradient(ellipse at 50% 0%,rgba(34,197,94,0.04) 0%,transparent 50%);}
+  a{text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;}
+
+  .floating-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(90px);opacity:0.2;}
+  .floating-orb.orb-1{width:240px;height:240px;background:rgba(245,158,11,0.07);bottom:-60px;right:-50px;animation:float1 15s ease-in-out infinite;}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-20px,-15px) scale(1.05);}}
+
+  .container{position:relative;z-index:1;max-width:580px;margin:0 auto;padding:20px 18px 60px;animation:fadeUp 0.5s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:translateY(0);}}
+
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:16px;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .back-btn,.icon-btn{width:38px;height:38px;border-radius:11px;flex:none;background:var(--surface);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all 0.25s;}
+  .back-btn:hover,.icon-btn:hover{background:var(--surface-2);border-color:var(--border-hover);color:var(--text-bright);}
+  .back-btn svg,.icon-btn svg{width:17px;height:17px;}
+  .icon-btn.spinning{animation:spin 0.7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .topbar h1{font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;color:var(--text-bright);}
+
+  .search-row{display:flex;gap:8px;margin-bottom:14px;}
+  .search-row input{flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:all 0.3s;}
+  .search-row input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow);}
+  .search-row button{background:linear-gradient(135deg,var(--primary),#16a34a);border:none;border-radius:var(--radius-sm);padding:0 18px;color:#fff;font-weight:700;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+  .clear-search{font-size:11.5px;color:var(--primary);cursor:pointer;margin-bottom:10px;display:inline-block;font-weight:600;}
+
+  .user-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.3s;}
+  .user-card:hover{border-color:var(--border-hover);transform:translateX(3px);}
+  .u-avatar{width:42px;height:42px;border-radius:50%;flex:none;background:linear-gradient(135deg,var(--primary),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-weight:700;color:#fff;font-size:16px;box-shadow:0 4px 12px var(--primary-glow);}
+  .u-info{flex:1;min-width:0;}
+  .u-info p.name{font-size:13.5px;font-weight:700;color:var(--text-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .u-info p.sub{font-size:11px;color:var(--muted);margin-top:2px;}
+  .u-right{text-align:right;flex:none;}
+  .u-right p.balance{font-family:'DM Sans',sans-serif;font-size:13.5px;font-weight:800;color:var(--text-bright);}
+  .suspend-tag{font-size:9px;font-weight:700;color:var(--error);background:rgba(239,68,68,0.12);padding:2px 7px;border-radius:5px;margin-top:3px;display:inline-block;}
+
+  .load-more-btn{width:100%;padding:12px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--surface);color:var(--primary);font-weight:700;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:8px;transition:all 0.3s;}
+  .load-more-btn:hover{background:var(--surface-2);border-color:var(--primary);}
+  .load-more-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+  .empty-state{text-align:center;padding:50px 20px;color:var(--muted);}
+  .empty-state .empty-icon{font-size:36px;margin-bottom:10px;}
+  .skeleton{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);height:70px;margin-bottom:8px;background-image:linear-gradient(90deg,var(--surface) 0%,var(--surface-2) 50%,var(--surface) 100%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+  @keyframes shimmer{from{background-position:200% 0;}to{background-position:-200% 0;}}
+
+  /* Detail Sheet */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);display:none;align-items:flex-end;justify-content:center;z-index:80;}
+  .modal-overlay.show{display:flex;animation:fadeIn 0.3s ease;}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  .detail-sheet{background:var(--surface);border:1px solid var(--border);border-radius:20px 20px 0 0;padding:22px 20px calc(22px + env(safe-area-inset-bottom));max-width:520px;width:100%;max-height:90vh;overflow-y:auto;}
+  .detail-header{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+  .detail-header .u-avatar{width:48px;height:48px;font-size:18px;}
+  .detail-header h2{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:800;color:var(--text-bright);}
+  .detail-header p{font-size:11.5px;color:var(--muted);}
+  .close-sheet{margin-left:auto;width:32px;height:32px;border-radius:50%;background:var(--surface-2);border:1px solid var(--border);color:var(--text);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;flex:none;}
+
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px;}
+  .info-cell{background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;}
+  .info-cell p.k{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:2px;font-weight:600;}
+  .info-cell p.v{font-size:12.5px;font-weight:700;color:var(--text-bright);word-break:break-word;}
+
+  .section-title{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:var(--muted);margin:14px 0 8px;text-transform:uppercase;letter-spacing:0.4px;}
+
+  .action-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+  .action-btn{padding:12px;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.2s;}
+  .btn-credit{background:rgba(34,197,94,0.15);color:var(--primary);border:1px solid rgba(34,197,94,0.2);}
+  .btn-debit{background:rgba(245,158,11,0.1);color:var(--gold);border:1px solid rgba(245,158,11,0.2);}
+  .btn-suspend{background:rgba(239,68,68,0.08);color:var(--error);border:1px solid rgba(239,68,68,0.2);grid-column:span 2;}
+  .btn-unsuspend{background:linear-gradient(135deg,var(--primary),#16a34a);color:#fff;grid-column:span 2;}
+  .btn-delete{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);color:var(--error);grid-column:span 2;}
+  .suspended-banner{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:10px 12px;font-size:12px;color:var(--error);margin-bottom:12px;}
+
+  /* Sub-modals */
+  .sub-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);display:none;align-items:center;justify-content:center;z-index:90;padding:20px;}
+  .sub-modal-overlay.show{display:flex;}
+  .sub-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 20px;max-width:380px;width:100%;box-shadow:var(--shadow-lg);animation:popIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);}
+  @keyframes popIn{from{opacity:0;transform:scale(0.88) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+  .sub-modal h3{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:800;margin-bottom:14px;color:var(--text-bright);}
+  .sub-modal label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;font-weight:700;display:block;margin-bottom:4px;}
+  .sub-modal input,.sub-modal select,.sub-modal textarea{width:100%;background:var(--surface-2);border:1.5px solid var(--border);border-radius:10px;padding:11px 13px;color:var(--text);font-size:13.5px;font-family:'Inter',sans-serif;outline:none;margin-bottom:12px;transition:all 0.3s;}
+  .sub-modal textarea{min-height:65px;resize:vertical;}
+  .sub-modal input:focus,.sub-modal select:focus,.sub-modal textarea:focus{border-color:var(--primary);}
+  .sub-modal-actions{display:flex;gap:8px;}
+  .sub-modal-actions button{flex:1;padding:11px;border-radius:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;transition:all 0.2s;}
+  .sub-modal-actions .cancel{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
+  .sub-modal-actions .confirm{background:linear-gradient(135deg,var(--primary),#16a34a);color:#fff;}
+  .sub-modal-actions .confirm.danger{background:var(--error);}
+  .warn-text{font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5;}
+  .warn-text strong{color:var(--error);}
+
+  .toast-container{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:380px;}
+  .toast{background:var(--surface-3);border:1px solid var(--border);padding:13px 15px;border-radius:var(--radius-sm);font-size:13px;box-shadow:var(--shadow-lg);animation:slideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);display:flex;align-items:center;gap:9px;}
+  .toast.error{border-left:4px solid var(--error);}
+  .toast.success{border-left:4px solid var(--success);}
+  @keyframes slideIn{from{opacity:0;transform:translateX(80px);}to{opacity:1;transform:translateX(0);}}
+
+  @media(max-width:480px){.container{padding:16px 12px 60px;}}
+</style>
+</head>
+<body>
+
+<div class="floating-orb orb-1"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="admin-dashboard.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg></a>
+      <h1>Users</h1>
+    </div>
+    <button class="icon-btn" id="refreshBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+  </div>
+
+  <div class="search-row">
+    <input type="text" id="searchInput" placeholder="Search by username, email or phone">
+    <button id="searchBtn">Search</button>
+  </div>
+  <span class="clear-search" id="clearSearch" style="display:none;">✕ Clear search</span>
+
+  <div id="listContainer"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+  <button class="load-more-btn" id="loadMoreBtn" style="display:none;">Load More Users</button>
+</div>
+
+<!-- Detail Sheet -->
+<div class="modal-overlay" id="detailModal">
+  <div class="detail-sheet">
+    <div class="detail-header">
+      <div class="u-avatar" id="detailAvatar">V</div>
+      <div><h2 id="detailName">—</h2><p id="detailUsername">@—</p></div>
+      <div class="close-sheet" id="closeDetail">✕</div>
+    </div>
+    <div id="suspendedBanner" class="suspended-banner" style="display:none;"></div>
+    <div class="section-title">Registration</div>
+    <div class="info-grid">
+      <div class="info-cell"><p class="k">Email</p><p class="v" id="detailEmail">—</p></div>
+      <div class="info-cell"><p class="k">Phone</p><p class="v" id="detailPhone">—</p></div>
+      <div class="info-cell"><p class="k">Referral Code</p><p class="v" id="detailReferral">—</p></div>
+      <div class="info-cell"><p class="k">Joined</p><p class="v" id="detailJoined">—</p></div>
+    </div>
+    <div class="section-title">Financials</div>
+    <div class="info-grid">
+      <div class="info-cell"><p class="k">Balance</p><p class="v" id="detailBalance">₦0</p></div>
+      <div class="info-cell"><p class="k">Total Deposit</p><p class="v" id="detailDeposit">₦0</p></div>
+      <div class="info-cell"><p class="k">Invested</p><p class="v" id="detailInvested">₦0</p></div>
+      <div class="info-cell"><p class="k">Ref Earnings</p><p class="v" id="detailReferralEarnings">₦0</p></div>
+    </div>
+    <div class="section-title">Actions</div>
+    <div class="action-row">
+      <button class="action-btn btn-credit" id="btnCredit">➕ Add Funds</button>
+      <button class="action-btn btn-debit" id="btnDebit">➖ Deduct</button>
+    </div>
+    <div class="action-row" id="suspendRow">
+      <button class="action-btn btn-suspend" id="btnSuspend">⏸ Suspend</button>
+    </div>
+    <div class="action-row">
+      <button class="action-btn btn-delete" id="btnDelete">🗑 Delete Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- Funds Modal -->
+<div class="sub-modal-overlay" id="fundsModal">
+  <div class="sub-modal">
+    <h3 id="fundsModalTitle">Add Funds</h3>
+    <label>Amount (₦)</label><input type="text" id="fundsAmount" inputmode="numeric" placeholder="e.g. 5000">
+    <label>Reason</label><textarea id="fundsReason" placeholder="Required for audit trail"></textarea>
+    <div class="sub-modal-actions"><button class="cancel" id="fundsCancel">Cancel</button><button class="confirm" id="fundsConfirm">Confirm</button></div>
+  </div>
+</div>
+
+<!-- Suspend Modal -->
+<div class="sub-modal-overlay" id="suspendModal">
+  <div class="sub-modal">
+    <h3>Suspend User</h3>
+    <label>Duration</label>
+    <select id="suspendDuration"><option value="1">1 hour</option><option value="6">6 hours</option><option value="12">12 hours</option><option value="24" selected>1 day</option><option value="72">3 days</option><option value="168">7 days</option><option value="720">30 days</option></select>
+    <label>Reason</label><textarea id="suspendReason" placeholder="Required"></textarea>
+    <div class="sub-modal-actions"><button class="cancel" id="suspendCancel">Cancel</button><button class="confirm" id="suspendConfirm">Suspend</button></div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="sub-modal-overlay" id="deleteModal">
+  <div class="sub-modal">
+    <h3>Delete Account</h3>
+    <p class="warn-text">This will permanently erase <strong id="deleteUserLabel">this user</strong>. Type DELETE to confirm.</p>
+    <input type="text" id="deleteConfirmInput" placeholder="Type DELETE">
+    <div class="sub-modal-actions"><button class="cancel" id="deleteCancel">Cancel</button><button class="confirm danger" id="deleteConfirm">Delete</button></div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, deleteDoc, collection, query, where, orderBy, limit, startAfter, getDocs, writeBatch, increment, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI", authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0", storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094", appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const PAGE_SIZE = 30;
+  let adminUid = null, lastVisibleDoc = null, allLoadedUsers = [], isSearchMode = false, selectedUser = null;
+
+  function showToast(m, t = "info", d = 4000) {
+    const c = document.getElementById("toastContainer");
+    const el = document.createElement("div");
+    el.className = `toast ${t}`;
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    el.innerHTML = `<span>${icons[t]||icons.info}</span>${m}`;
+    if (c.children.length >= 3) c.removeChild(c.firstChild);
+    c.appendChild(el);
+    setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateX(80px)"; el.style.transition = "all 0.3s"; setTimeout(() => { if (el.parentNode) el.remove(); }, 300); }, d);
+  }
+
+  function formatNaira(v) { return "₦" + (Number(v) || 0).toLocaleString("en-NG"); }
+  function formatDate(ts) { if(!ts)return"—"; const d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString("en-NG",{day:"numeric",month:"short",year:"numeric"}); }
+  function formatDateTime(ts) { if(!ts)return"—"; const d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString("en-NG",{day:"numeric",month:"short"})+" · "+d.toLocaleTimeString("en-NG",{hour:"2-digit",minute:"2-digit"}); }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+  // ✅ AUTH GUARD
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "admin-login.html"; return; }
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (!snap.exists() || snap.data().role !== "admin") { await signOut(auth); window.location.href = "admin-login.html"; return; }
+      adminUid = user.uid;
+      loadUsersPage();
+    } catch(e) { window.location.href = "admin-login.html"; }
+  });
+
+  // ✅ LOAD ALL USERS WITH PAGINATION (no limit)
+  async function loadUsersPage(reset = true) {
+    const container = document.getElementById("listContainer");
+    if (reset) { container.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>'; allLoadedUsers = []; lastVisibleDoc = null; isSearchMode = false; document.getElementById("clearSearch").style.display = "none"; }
+    try {
+      const constraints = [orderBy("createdAt", "desc"), limit(PAGE_SIZE)];
+      if (lastVisibleDoc) constraints.push(startAfter(lastVisibleDoc));
+      const snap = await getDocs(query(collection(db, "users"), ...constraints));
+      const newUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      lastVisibleDoc = snap.docs[snap.docs.length - 1] || lastVisibleDoc;
+      allLoadedUsers = reset ? newUsers : [...allLoadedUsers, ...newUsers];
+      renderList(allLoadedUsers);
+      document.getElementById("loadMoreBtn").style.display = newUsers.length === PAGE_SIZE ? "block" : "none";
+    } catch(e) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Couldn\'t load users.</p></div>'; }
+  }
+
+  document.getElementById("loadMoreBtn").addEventListener("click", async () => {
+    const btn = document.getElementById("loadMoreBtn"); btn.disabled = true; btn.textContent = "Loading…";
+    await loadUsersPage(false); btn.disabled = false; btn.textContent = "Load More Users";
+  });
+
+  // ✅ SEARCH
+  async function searchUsers(term) {
+    const container = document.getElementById("listContainer");
+    container.innerHTML = '<div class="skeleton"></div>';
+    isSearchMode = true; document.getElementById("clearSearch").style.display = "inline-block"; document.getElementById("loadMoreBtn").style.display = "none";
+    const t = term.trim(); if (!t) { renderList([]); return; }
+    try {
+      const unameSnap = await getDoc(doc(db, "usernames", t.toLowerCase()));
+      if (unameSnap.exists()) { const u = await getDoc(doc(db, "users", unameSnap.data().uid)); if (u.exists()) { renderList([{id:u.id,...u.data()}]); return; } }
+      const emailSnap = await getDocs(query(collection(db, "users"), where("email", "==", t), limit(10)));
+      if (!emailSnap.empty) { renderList(emailSnap.docs.map(d=>({id:d.id,...d.data()}))); return; }
+      const phoneSnap = await getDocs(query(collection(db, "users"), where("phone", "==", t), limit(10)));
+      if (!phoneSnap.empty) { renderList(phoneSnap.docs.map(d=>({id:d.id,...d.data()}))); return; }
+      renderList([]);
+    } catch(e) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Search failed.</p></div>'; }
+  }
+
+  document.getElementById("searchBtn").addEventListener("click", () => searchUsers(document.getElementById("searchInput").value));
+  document.getElementById("searchInput").addEventListener("keydown", e => { if(e.key==="Enter") searchUsers(e.target.value); });
+  document.getElementById("clearSearch").addEventListener("click", () => { document.getElementById("searchInput").value = ""; loadUsersPage(true); });
+
+  function renderList(users) {
+    const container = document.getElementById("listContainer");
+    if (!users.length) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">👤</div><p>No users found.</p></div>'; return; }
+    container.innerHTML = users.map(u => {
+      const suspended = u.suspendedUntil && (u.suspendedUntil.toMillis?u.suspendedUntil.toMillis():new Date(u.suspendedUntil).getTime()) > Date.now();
+      return `<div class="user-card" data-id="${u.id}">
+        <div class="u-avatar">${(u.name||"V").trim().charAt(0).toUpperCase()}</div>
+        <div class="u-info"><p class="name">${escapeHtml(u.name||"Unnamed")}</p><p class="sub">@${escapeHtml(u.username||"—")} · ${escapeHtml(u.phone||"—")}</p></div>
+        <div class="u-right"><p class="balance">${formatNaira(u.balance)}</p>${suspended?'<span class="suspend-tag">Suspended</span>':''}</div>
+      </div>`;
+    }).join("");
+    container.querySelectorAll(".user-card").forEach(card => card.addEventListener("click", () => {
+      const user = users.find(u => u.id === card.dataset.id); if (user) openDetail(user);
+    }));
+  }
+
+  // ✅ DETAIL SHEET
+  const detailModal = document.getElementById("detailModal");
+  function openDetail(user) {
+    selectedUser = user;
+    document.getElementById("detailAvatar").textContent = (user.name||"V").trim().charAt(0).toUpperCase();
+    document.getElementById("detailName").textContent = user.name||"Unnamed";
+    document.getElementById("detailUsername").textContent = "@"+(user.username||"—");
+    document.getElementById("detailEmail").textContent = user.email||"—";
+    document.getElementById("detailPhone").textContent = user.phone||"—";
+    document.getElementById("detailReferral").textContent = user.referralCode||"—";
+    document.getElementById("detailJoined").textContent = formatDate(user.createdAt);
+    document.getElementById("detailBalance").textContent = formatNaira(user.balance);
+    document.getElementById("detailDeposit").textContent = formatNaira(user.totalDeposit);
+    document.getElementById("detailInvested").textContent = formatNaira(user.totalInvested);
+    document.getElementById("detailReferralEarnings").textContent = formatNaira(user.referralEarnings);
+    document.getElementById("deleteUserLabel").textContent = `@${user.username||"this user"}`;
+
+    const suspendedMs = user.suspendedUntil?(user.suspendedUntil.toMillis?user.suspendedUntil.toMillis():new Date(user.suspendedUntil).getTime()):0;
+    const isSuspended = suspendedMs > Date.now();
+    const banner = document.getElementById("suspendedBanner"), susRow = document.getElementById("suspendRow");
+    if (isSuspended) {
+      banner.style.display="block"; banner.textContent=`⏸ Suspended until ${formatDateTime(user.suspendedUntil)}${user.suspensionReason?" — "+user.suspensionReason:""}`;
+      susRow.innerHTML='<button class="action-btn btn-unsuspend" id="btnUnsuspend">▶ Remove Suspension</button>';
+      document.getElementById("btnUnsuspend").addEventListener("click", removeSuspension);
+    } else {
+      banner.style.display="none";
+      susRow.innerHTML='<button class="action-btn btn-suspend" id="btnSuspend">⏸ Suspend</button>';
+      document.getElementById("btnSuspend").addEventListener("click",()=>suspendModal.classList.add("show"));
+    }
+    detailModal.classList.add("show");
+  }
+  document.getElementById("closeDetail").addEventListener("click",()=>detailModal.classList.remove("show"));
+  detailModal.addEventListener("click",e=>{if(e.target===detailModal)detailModal.classList.remove("show");});
+
+  // ✅ FUNDS
+  const fundsModal=document.getElementById("fundsModal"); let fundsMode="credit";
+  document.getElementById("btnCredit").addEventListener("click",()=>{fundsMode="credit";document.getElementById("fundsModalTitle").textContent="Add Funds";document.getElementById("fundsAmount").value="";document.getElementById("fundsReason").value="";fundsModal.classList.add("show");});
+  document.getElementById("btnDebit").addEventListener("click",()=>{fundsMode="debit";document.getElementById("fundsModalTitle").textContent="Deduct Funds";document.getElementById("fundsAmount").value="";document.getElementById("fundsReason").value="";fundsModal.classList.add("show");});
+  document.getElementById("fundsCancel").addEventListener("click",()=>fundsModal.classList.remove("show"));
+  fundsModal.addEventListener("click",e=>{if(e.target===fundsModal)fundsModal.classList.remove("show");});
+  document.getElementById("fundsConfirm").addEventListener("click",async()=>{
+    const amount=Number(document.getElementById("fundsAmount").value),reason=document.getElementById("fundsReason").value.trim();
+    if(!amount||amount<=0){showToast("Enter valid amount","error");return;}if(!reason){showToast("Reason required","error");return;}
+    const btn=document.getElementById("fundsConfirm");btn.disabled=true;btn.textContent="Processing…";
+    try{
+      const delta=fundsMode==="credit"?amount:-amount;
+      const batch=writeBatch(db);
+      batch.update(doc(db,"users",selectedUser.id),{balance:increment(delta)});
+      batch.set(doc(collection(db,"adminActions")),{adminUid,targetUid:selectedUser.id,targetUsername:selectedUser.username||null,action:fundsMode==="credit"?"credit_funds":"debit_funds",amount,reason,createdAt:serverTimestamp()});
+      await batch.commit();
+      selectedUser.balance=(Number(selectedUser.balance)||0)+delta;
+      document.getElementById("detailBalance").textContent=formatNaira(selectedUser.balance);
+      showToast(`${fundsMode==="credit"?"Added":"Deducted"} ${formatNaira(amount)}.`,"success");fundsModal.classList.remove("show");
+    }catch(e){showToast("Couldn't process.","error");}finally{btn.disabled=false;btn.textContent="Confirm";}
+  });
+
+  // ✅ SUSPEND
+  const suspendModal=document.getElementById("suspendModal");
+  document.getElementById("suspendCancel").addEventListener("click",()=>suspendModal.classList.remove("show"));
+  suspendModal.addEventListener("click",e=>{if(e.target===suspendModal)suspendModal.classList.remove("show");});
+  document.getElementById("suspendConfirm").addEventListener("click",async()=>{
+    const hours=Number(document.getElementById("suspendDuration").value),reason=document.getElementById("suspendReason").value.trim();
+    if(!reason){showToast("Reason required","error");return;}
+    const btn=document.getElementById("suspendConfirm");btn.disabled=true;btn.textContent="Processing…";
+    try{
+      const until=new Date(Date.now()+hours*3600*1000);
+      const batch=writeBatch(db);
+      batch.update(doc(db,"users",selectedUser.id),{suspendedUntil:Timestamp.fromDate(until),suspensionReason:reason});
+      batch.set(doc(collection(db,"adminActions")),{adminUid,targetUid:selectedUser.id,targetUsername:selectedUser.username||null,action:"suspend",durationHours:hours,reason,createdAt:serverTimestamp()});
+      await batch.commit();
+      selectedUser.suspendedUntil=Timestamp.fromDate(until);selectedUser.suspensionReason=reason;
+      showToast(`User suspended until ${formatDateTime(selectedUser.suspendedUntil)}.`,"success");suspendModal.classList.remove("show");openDetail(selectedUser);
+    }catch(e){showToast("Couldn't suspend.","error");}finally{btn.disabled=false;btn.textContent="Suspend";}
+  });
+
+  async function removeSuspension(){
+    try{
+      const batch=writeBatch(db);
+      batch.update(doc(db,"users",selectedUser.id),{suspendedUntil:null,suspensionReason:null});
+      batch.set(doc(collection(db,"adminActions")),{adminUid,targetUid:selectedUser.id,targetUsername:selectedUser.username||null,action:"unsuspend",createdAt:serverTimestamp()});
+      await batch.commit();selectedUser.suspendedUntil=null;
+      showToast("Suspension removed.","success");openDetail(selectedUser);
+    }catch(e){showToast("Couldn't remove.","error");}
+  }
+
+  // ✅ DELETE
+  const deleteModal=document.getElementById("deleteModal");
+  document.getElementById("btnDelete").addEventListener("click",()=>{document.getElementById("deleteConfirmInput").value="";deleteModal.classList.add("show");});
+  document.getElementById("deleteCancel").addEventListener("click",()=>deleteModal.classList.remove("show"));
+  deleteModal.addEventListener("click",e=>{if(e.target===deleteModal)deleteModal.classList.remove("show");});
+  document.getElementById("deleteConfirm").addEventListener("click",async()=>{
+    if(document.getElementById("deleteConfirmInput").value.trim()!=="DELETE"){showToast('Type DELETE to confirm.',"error");return;}
+    const btn=document.getElementById("deleteConfirm");btn.disabled=true;btn.textContent="Deleting…";
+    try{
+      const batch=writeBatch(db);
+      batch.delete(doc(db,"users",selectedUser.id));
+      if(selectedUser.username)batch.delete(doc(db,"usernames",selectedUser.username));
+      if(selectedUser.referralCode)batch.delete(doc(db,"referralCodes",selectedUser.referralCode));
+      batch.set(doc(collection(db,"adminActions")),{adminUid,targetUid:selectedUser.id,targetUsername:selectedUser.username||null,action:"delete_account",createdAt:serverTimestamp()});
+      await batch.commit();
+      showToast(`Account deleted.`,"success");deleteModal.classList.remove("show");detailModal.classList.remove("show");
+      allLoadedUsers=allLoadedUsers.filter(u=>u.id!==selectedUser.id);renderList(allLoadedUsers);selectedUser=null;
+    }catch(e){showToast("Couldn't delete.","error");}finally{btn.disabled=false;btn.textContent="Delete";}
+  });
+
+  // ✅ REFRESH
+  document.getElementById("refreshBtn").addEventListener("click",async()=>{
+    const btn=document.getElementById("refreshBtn");btn.classList.add("spinning");
+    if(isSearchMode)await searchUsers(document.getElementById("searchInput").value);else await loadUsersPage(true);
+    btn.classList.remove("spinning");showToast("List updated","success",2000);
+  });
+
+  console.log("🚀 Veltrix Admin Users - Ready");
+</script>
+</body>
+</html>
