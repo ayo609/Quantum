@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>VELTRIX — Admin Deposits</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0c; --surface: #111915; --surface-2: #1a241e; --surface-3: #243028;
+    --primary: #22c55e; --primary-dark: #16a34a; --primary-glow: rgba(34,197,94,0.25);
+    --gold: #f59e0b; --text: #f0fdf4; --text-bright: #ffffff; --muted: #9ca3a0;
+    --success: #22c55e; --warning: #f59e0b; --error: #ef4444;
+    --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+    --shadow-lg: 0 30px 60px rgba(0,0,0,0.6); --shadow-md: 0 15px 35px rgba(0,0,0,0.4);
+    --radius: 18px; --radius-sm: 13px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;position:relative;padding-bottom:40px;background-image:radial-gradient(ellipse at 50% 0%,rgba(34,197,94,0.04) 0%,transparent 50%);}
+  a{text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;}
+
+  .floating-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(90px);opacity:0.2;}
+  .floating-orb.orb-1{width:240px;height:240px;background:rgba(34,197,94,0.07);top:-60px;right:-50px;animation:float1 14s ease-in-out infinite;}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-20px,15px) scale(1.05);}}
+
+  .container{position:relative;z-index:1;max-width:580px;margin:0 auto;padding:20px 18px 60px;animation:fadeUp 0.5s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:translateY(0);}}
+
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:16px;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .back-btn,.icon-btn{width:38px;height:38px;border-radius:11px;flex:none;background:var(--surface);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all 0.25s;}
+  .back-btn:hover,.icon-btn:hover{background:var(--surface-2);border-color:var(--border-hover);color:var(--text-bright);}
+  .back-btn svg,.icon-btn svg{width:17px;height:17px;}
+  .icon-btn.spinning{animation:spin 0.7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .topbar h1{font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;color:var(--text-bright);}
+
+  .tabs{display:flex;gap:5px;margin-bottom:14px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:5px;}
+  .tab{flex:1;text-align:center;padding:10px 6px;border-radius:10px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.3s;}
+  .tab:hover{color:var(--text);}
+  .tab.active{background:linear-gradient(135deg,var(--primary),#16a34a);color:#fff;box-shadow:0 4px 12px var(--primary-glow);}
+
+  .list-wrap{display:flex;flex-direction:column;gap:10px;}
+  .req-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;transition:all 0.3s;}
+  .req-card:hover{border-color:var(--border-hover);}
+  .req-top{display:flex;gap:12px;margin-bottom:12px;}
+  .receipt-thumb{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:none;border:1.5px solid var(--border);cursor:pointer;transition:all 0.3s;}
+  .receipt-thumb:hover{opacity:0.85;}
+  .req-info{flex:1;min-width:0;}
+  .req-info p.name{font-size:14px;font-weight:700;color:var(--text-bright);}
+  .req-info p.phone{font-size:11.5px;color:var(--muted);margin-top:2px;}
+  .req-info p.time{font-size:11px;color:var(--muted);margin-top:2px;}
+  .req-amount{font-family:'DM Sans',sans-serif;font-size:17px;font-weight:800;color:var(--success);flex:none;align-self:center;}
+  .status-badge{font-size:10px;font-weight:700;padding:4px 9px;border-radius:6px;display:inline-block;}
+  .status-badge.pending{background:rgba(245,158,11,0.15);color:var(--warning);}
+  .status-badge.approved{background:rgba(34,197,94,0.15);color:var(--success);}
+  .status-badge.rejected{background:rgba(239,68,68,0.12);color:var(--error);}
+  .req-actions{display:flex;gap:8px;margin-top:12px;}
+  .req-actions button{flex:1;padding:11px;border-radius:9px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;gap:5px;transition:all 0.2s;}
+  .btn-approve{background:linear-gradient(135deg,var(--primary),#16a34a);color:#fff;}
+  .btn-approve:hover{transform:translateY(-1px);box-shadow:0 6px 20px var(--primary-glow);}
+  .btn-reject{background:var(--surface-2);border:1.5px solid rgba(239,68,68,0.25);color:var(--error);}
+  .btn-reject:hover{background:rgba(239,68,68,0.08);}
+  .btn-approve:disabled,.btn-reject:disabled{opacity:0.4;cursor:not-allowed;transform:none;}
+  .rejection-note{font-size:11.5px;color:var(--muted);margin-top:8px;font-style:italic;}
+
+  .empty-state{text-align:center;padding:50px 20px;color:var(--muted);}
+  .empty-state .empty-icon{font-size:36px;margin-bottom:10px;}
+  .skeleton{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);height:130px;margin-bottom:10px;background-image:linear-gradient(90deg,var(--surface) 0%,var(--surface-2) 50%,var(--surface) 100%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+  @keyframes shimmer{from{background-position:200% 0;}to{background-position:-200% 0;}}
+
+  .lightbox{position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:90;display:none;align-items:center;justify-content:center;padding:20px;}
+  .lightbox.show{display:flex;}
+  .lightbox img{max-width:100%;max-height:85vh;border-radius:12px;}
+  .lightbox-close{position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:50%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);display:none;align-items:center;justify-content:center;z-index:80;padding:20px;}
+  .modal-overlay.show{display:flex;}
+  .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 20px;max-width:400px;width:100%;box-shadow:var(--shadow-lg);animation:popIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);}
+  @keyframes popIn{from{opacity:0;transform:scale(0.88) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+  .modal-box h2{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:800;margin-bottom:12px;color:var(--text-bright);}
+  .modal-box textarea{width:100%;background:var(--surface-2);border:1.5px solid var(--border);border-radius:10px;padding:12px;color:var(--text);font-size:13.5px;font-family:'Inter',sans-serif;min-height:75px;resize:vertical;outline:none;}
+  .modal-box textarea:focus{border-color:var(--primary);}
+  .modal-actions{display:flex;gap:8px;margin-top:14px;}
+  .modal-actions button{flex:1;padding:11px;border-radius:9px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;transition:all 0.2s;}
+  .modal-actions .cancel{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
+  .modal-actions .confirm{background:var(--error);color:#fff;}
+
+  .toast-container{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:380px;}
+  .toast{background:var(--surface-3);border:1px solid var(--border);padding:13px 15px;border-radius:var(--radius-sm);font-size:13px;box-shadow:var(--shadow-lg);animation:slideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);display:flex;align-items:center;gap:9px;}
+  .toast.error{border-left:4px solid var(--error);}
+  .toast.success{border-left:4px solid var(--success);}
+  @keyframes slideIn{from{opacity:0;transform:translateX(80px);}to{opacity:1;transform:translateX(0);}}
+
+  @media(max-width:480px){.container{padding:16px 12px 60px;}}
+</style>
+</head>
+<body>
+
+<div class="floating-orb orb-1"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="admin-dashboard.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg></a>
+      <h1>Deposit Requests</h1>
+    </div>
+    <button class="icon-btn" id="refreshBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-status="pending">Pending</div>
+    <div class="tab" data-status="approved">Approved</div>
+    <div class="tab" data-status="rejected">Rejected</div>
+  </div>
+
+  <div id="listContainer" class="list-wrap">
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-close" id="lightboxClose">✕</div>
+  <img id="lightboxImg" alt="Receipt">
+</div>
+
+<div class="modal-overlay" id="rejectModal">
+  <div class="modal-box">
+    <h2>Reject Deposit</h2>
+    <textarea id="rejectReason" placeholder="Optional reason (e.g. receipt unreadable)"></textarea>
+    <div class="modal-actions"><button class="cancel" id="rejectCancel">Cancel</button><button class="confirm" id="rejectConfirm">Confirm Reject</button></div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, query, where, limit, getDocs, writeBatch, increment, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI", authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0", storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094", appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const PAGE_SIZE = 100;
+  let activeStatus = "pending", cache = { pending: null, approved: null, rejected: null }, pendingRejectId = null;
+
+  function showToast(m, t = "info", d = 4000) {
+    const c = document.getElementById("toastContainer");
+    const el = document.createElement("div");
+    el.className = `toast ${t}`;
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    el.innerHTML = `<span>${icons[t]||icons.info}</span>${m}`;
+    if (c.children.length >= 3) c.removeChild(c.firstChild);
+    c.appendChild(el);
+    setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateX(80px)"; el.style.transition = "all 0.3s"; setTimeout(() => { if (el.parentNode) el.remove(); }, 300); }, d);
+  }
+
+  function formatNaira(v) { return "₦" + (Number(v) || 0).toLocaleString("en-NG"); }
+  function formatTime(ts) { if(!ts)return"—"; const d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString("en-NG",{day:"numeric",month:"short",year:"numeric"})+" · "+d.toLocaleTimeString("en-NG",{hour:"2-digit",minute:"2-digit"}); }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+  // ✅ AUTH GUARD
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "admin-login.html"; return; }
+    try { const snap = await getDoc(doc(db, "users", user.uid)); if (!snap.exists()||snap.data().role!=="admin"){await signOut(auth);window.location.href="admin-login.html";return;} loadList("pending"); }
+    catch(e) { window.location.href = "admin-login.html"; }
+  });
+
+  // ✅ TABS
+  document.querySelectorAll(".tab").forEach(tab => tab.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    tab.classList.add("active"); activeStatus = tab.dataset.status; loadList(activeStatus);
+  }));
+
+  // ✅ LOAD (no limit - loads all)
+  async function loadList(status, force = false) {
+    const container = document.getElementById("listContainer");
+    if (!force && cache[status]) { renderList(cache[status], status); return; }
+    container.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+    try {
+      const snap = await getDocs(query(collection(db, "deposits"), where("status", "==", status), limit(PAGE_SIZE)));
+      let items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      items.sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+      cache[status] = items; renderList(items, status);
+    } catch(e) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Couldn\'t load.</p></div>'; }
+  }
+
+  function renderList(items, status) {
+    const container = document.getElementById("listContainer");
+    if (!items.length) { container.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><p>No ${status} deposits.</p></div>`; return; }
+    container.innerHTML = items.map(item => `
+      <div class="req-card" data-id="${item.id}">
+        <div class="req-top">
+          <img class="receipt-thumb" src="${item.receiptBase64||''}" data-fullsrc="${item.receiptBase64||''}" alt="Receipt">
+          <div class="req-info"><p class="name">${escapeHtml(item.username||"Unknown")}</p><p class="phone">${escapeHtml(item.phone||"—")}</p><p class="time">${formatTime(item.createdAt)}</p></div>
+          <div class="req-amount">${formatNaira(item.amount)}</div>
+        </div>
+        ${status==="pending"?`<div class="req-actions"><button class="btn-approve" data-id="${item.id}" data-uid="${item.uid}" data-amount="${item.amount}">✓ Approve</button><button class="btn-reject" data-id="${item.id}">✕ Reject</button></div>`:`
+          <span class="status-badge ${status}">${status.charAt(0).toUpperCase()+status.slice(1)}</span>
+          ${item.rejectionReason?`<p class="rejection-note">Reason: ${escapeHtml(item.rejectionReason)}</p>`:""}
+        `}
+      </div>`).join("");
+
+    container.querySelectorAll(".receipt-thumb").forEach(img => img.addEventListener("click",()=>{
+      if(img.dataset.fullsrc){document.getElementById("lightboxImg").src=img.dataset.fullsrc;document.getElementById("lightbox").classList.add("show");}
+    }));
+    container.querySelectorAll(".btn-approve").forEach(b=>b.addEventListener("click",()=>approveDeposit(b.dataset.id,b.dataset.uid,Number(b.dataset.amount),b)));
+    container.querySelectorAll(".btn-reject").forEach(b=>b.addEventListener("click",()=>openRejectModal(b.dataset.id)));
+  }
+
+  document.getElementById("lightboxClose").addEventListener("click",()=>document.getElementById("lightbox").classList.remove("show"));
+  document.getElementById("lightbox").addEventListener("click",e=>{if(e.target.id==="lightbox")e.target.classList.remove("show");});
+
+  async function approveDeposit(id,uid,amount,btn){
+    const card=btn.closest(".req-card");card.querySelectorAll("button").forEach(b=>b.disabled=true);
+    try{
+      const batch=writeBatch(db);
+      batch.update(doc(db,"deposits",id),{status:"approved",approvedAt:serverTimestamp()});
+      batch.update(doc(db,"users",uid),{balance:increment(amount),totalDeposit:increment(amount)});
+      batch.set(doc(collection(db,"adminActions")),{adminUid:auth.currentUser.uid,targetUid:uid,action:"approve_deposit",amount,referenceId:id,createdAt:serverTimestamp()});
+      await batch.commit();
+      cache.pending=cache.pending.filter(i=>i.id!==id);cache.approved=null;renderList(cache.pending,"pending");
+      showToast(`Approved ${formatNaira(amount)}`,"success");
+    }catch(e){showToast("Couldn't approve.","error");card.querySelectorAll("button").forEach(b=>b.disabled=false);}
+  }
+
+  const rejectModal=document.getElementById("rejectModal");
+  function openRejectModal(id){pendingRejectId=id;document.getElementById("rejectReason").value="";rejectModal.classList.add("show");}
+  document.getElementById("rejectCancel").addEventListener("click",()=>rejectModal.classList.remove("show"));
+  rejectModal.addEventListener("click",e=>{if(e.target===rejectModal)rejectModal.classList.remove("show");});
+  document.getElementById("rejectConfirm").addEventListener("click",async()=>{
+    if(!pendingRejectId)return;
+    const reason=document.getElementById("rejectReason").value.trim(),btn=document.getElementById("rejectConfirm");btn.disabled=true;
+    try{
+      const batch=writeBatch(db);
+      batch.update(doc(db,"deposits",pendingRejectId),{status:"rejected",rejectedAt:serverTimestamp(),rejectionReason:reason||null});
+      batch.set(doc(collection(db,"adminActions")),{adminUid:auth.currentUser.uid,action:"reject_deposit",reason:reason||null,referenceId:pendingRejectId,createdAt:serverTimestamp()});
+      await batch.commit();
+      cache.pending=cache.pending.filter(i=>i.id!==pendingRejectId);cache.rejected=null;renderList(cache.pending,"pending");
+      showToast("Deposit rejected.","success");rejectModal.classList.remove("show");
+    }catch(e){showToast("Couldn't reject.","error");}finally{btn.disabled=false;pendingRejectId=null;}
+  });
+
+  document.getElementById("refreshBtn").addEventListener("click",async()=>{
+    const btn=document.getElementById("refreshBtn");btn.classList.add("spinning");
+    await loadList(activeStatus,true);btn.classList.remove("spinning");showToast("List updated","success",2000);
+  });
+
+  console.log("🚀 Veltrix Admin Deposits - Ready");
+</script>
+</body>
+</html>
