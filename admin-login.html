@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>VELTRIX — Admin Access</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0c; --surface: #111915; --surface-2: #1a241e; --surface-3: #243028;
+    --primary: #22c55e; --primary-dark: #16a34a; --primary-glow: rgba(34,197,94,0.25);
+    --gold: #f59e0b; --text: #f0fdf4; --text-bright: #ffffff; --muted: #9ca3a0;
+    --success: #22c55e; --warning: #f59e0b; --error: #ef4444;
+    --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+    --shadow-lg: 0 30px 60px rgba(0,0,0,0.6); --shadow-md: 0 15px 35px rgba(0,0,0,0.4);
+    --radius: 20px; --radius-sm: 14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
+    min-height:100vh;position:relative;display:flex;align-items:center;justify-content:center;
+    background-image:
+      radial-gradient(ellipse at 20% 20%,rgba(245,158,11,0.06) 0%,transparent 50%),
+      radial-gradient(ellipse at 80% 80%,rgba(34,197,94,0.06) 0%,transparent 50%),
+      radial-gradient(ellipse at 50% 50%,rgba(34,197,94,0.03) 0%,transparent 70%);
+  }
+
+  .floating-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(100px);opacity:0.3;}
+  .floating-orb.orb-1{width:300px;height:300px;background:rgba(34,197,94,0.1);top:-100px;right:-80px;animation:float1 14s ease-in-out infinite;}
+  .floating-orb.orb-2{width:250px;height:250px;background:rgba(245,158,11,0.08);bottom:-80px;left:-60px;animation:float2 16s ease-in-out infinite;}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-40px,30px) scale(1.1);}}
+  @keyframes float2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(30px,-20px) scale(1.1);}}
+
+  .wrap{position:relative;z-index:1;max-width:420px;width:100%;padding:24px 20px;animation:fadeUp 0.6s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(25px);}to{opacity:1;transform:translateY(0);}}
+
+  .brand-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px;}
+  .brand-icon{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--gold));display:flex;align-items:center;justify-content:center;box-shadow:0 8px 25px rgba(34,197,94,0.3);}
+  .brand-icon svg{width:22px;height:22px;color:#fff;}
+  .brand-name{font-family:'DM Sans',sans-serif;font-size:22px;font-weight:800;color:var(--text-bright);letter-spacing:-0.5px;}
+  .brand-name span{color:var(--primary);}
+  .admin-badge{font-size:10px;font-weight:700;letter-spacing:0.6px;color:var(--gold);border:1.5px solid rgba(245,158,11,0.3);padding:4px 10px;border-radius:7px;text-transform:uppercase;background:rgba(245,158,11,0.08);}
+  .subhead{text-align:center;color:var(--muted);font-size:13px;margin-bottom:28px;}
+
+  .card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:28px 24px;box-shadow:var(--shadow-lg);}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+  .field label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.5px;text-transform:uppercase;}
+  .input-wrap{position:relative;}
+  .input-wrap input{width:100%;background:var(--surface-2);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;color:var(--text);font-size:14.5px;font-family:'Inter',sans-serif;outline:none;transition:all 0.3s ease;}
+  .input-wrap input::placeholder{color:#4a524d;}
+  .input-wrap input:focus{border-color:var(--primary);background:var(--surface-3);box-shadow:0 0 0 4px var(--primary-glow);}
+  .input-wrap input.error{border-color:var(--error);box-shadow:0 0 0 4px rgba(239,68,68,0.15);}
+  .feedback{font-size:11px;min-height:14px;color:var(--error);}
+
+  .login-btn{width:100%;padding:15px;border:none;border-radius:var(--radius-sm);background:linear-gradient(135deg,var(--primary),#16a34a);color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.3s ease;box-shadow:0 8px 30px var(--primary-glow);position:relative;overflow:hidden;margin-top:6px;}
+  .login-btn::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);transition:left 0.6s ease;}
+  .login-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 15px 40px var(--primary-glow);}
+  .login-btn:hover:not(:disabled)::after{left:100%;}
+  .login-btn:active:not(:disabled){transform:scale(0.97);}
+  .login-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .btn-spinner{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;animation:spin 0.7s linear infinite;display:none;}
+  .login-btn.loading .btn-spinner{display:inline-block;}
+  .login-btn.loading .btn-label{display:none;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .footer-note{text-align:center;margin-top:18px;font-size:11.5px;color:var(--muted);}
+  .footer-note span{color:var(--warning);}
+
+  .toast-container{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:380px;}
+  .toast{background:var(--surface-3);border:1px solid var(--border);padding:13px 15px;border-radius:var(--radius-sm);font-size:13px;box-shadow:var(--shadow-lg);animation:slideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);display:flex;align-items:center;gap:9px;}
+  .toast.error{border-left:4px solid var(--error);}
+  .toast.success{border-left:4px solid var(--success);}
+  @keyframes slideIn{from{opacity:0;transform:translateX(80px);}to{opacity:1;transform:translateX(0);}}
+
+  @media(max-width:480px){.wrap{padding:16px 14px;}.card{padding:22px 18px;}}
+</style>
+</head>
+<body>
+
+<div class="floating-orb orb-1"></div>
+<div class="floating-orb orb-2"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="wrap">
+  <div class="brand-row">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+      </svg>
+    </div>
+    <span class="brand-name"><span>V</span>ELTRIX</span>
+    <span class="admin-badge">Admin</span>
+  </div>
+  <p class="subhead">Restricted access · Administrators only</p>
+
+  <div class="card">
+    <form id="adminLoginForm" novalidate>
+      <div class="field">
+        <label for="email">Admin Email</label>
+        <div class="input-wrap"><input type="email" id="email" placeholder="admin@veltrix.com" autocomplete="username" required></div>
+        <div class="feedback" id="emailFeedback"></div>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <div class="input-wrap"><input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required></div>
+        <div class="feedback" id="passwordFeedback"></div>
+      </div>
+      <button type="submit" class="login-btn" id="submitBtn">
+        <span class="btn-label">Access Admin Panel</span>
+        <span class="btn-spinner"></span>
+      </button>
+    </form>
+  </div>
+  <p class="footer-note"><span>⚠</span> Unauthorized access attempts are logged and monitored.</p>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI",
+    authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0",
+    storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094",
+    appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  function showToast(m, t = "info", d = 4000) {
+    const c = document.getElementById("toastContainer");
+    const el = document.createElement("div");
+    el.className = `toast ${t}`;
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    el.innerHTML = `<span>${icons[t]||icons.info}</span>${m}`;
+    if (c.children.length >= 3) c.removeChild(c.firstChild);
+    c.appendChild(el);
+    setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateX(80px)"; el.style.transition = "all 0.3s"; setTimeout(() => { if (el.parentNode) el.remove(); }, 300); }, d);
+  }
+
+  const form = document.getElementById("adminLoginForm");
+  const submitBtn = document.getElementById("submitBtn");
+  const emailEl = document.getElementById("email");
+  const passwordEl = document.getElementById("password");
+  const emailFb = document.getElementById("emailFeedback");
+  const passwordFb = document.getElementById("passwordFeedback");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    emailFb.textContent = ""; passwordFb.textContent = "";
+    emailEl.classList.remove("error"); passwordEl.classList.remove("error");
+
+    if (!emailEl.value.trim()) { emailFb.textContent = "Enter your admin email"; emailEl.classList.add("error"); return; }
+    if (!passwordEl.value) { passwordFb.textContent = "Enter your password"; passwordEl.classList.add("error"); return; }
+
+    submitBtn.disabled = true; submitBtn.classList.add("loading");
+
+    try {
+      const cred = await signInWithEmailAndPassword(auth, emailEl.value.trim(), passwordEl.value);
+      const uid = cred.user.uid;
+
+      const snap = await getDoc(doc(db, "users", uid));
+      const role = snap.exists() ? snap.data().role : null;
+
+      if (role !== "admin") {
+        await signOut(auth);
+        showToast("This account does not have admin access.", "error");
+        submitBtn.disabled = false; submitBtn.classList.remove("loading");
+        return;
+      }
+
+      sessionStorage.setItem("veltrix_admin_verified", "1");
+      showToast("Access granted. Redirecting…", "success");
+      setTimeout(() => { window.location.href = "admin-dashboard.html"; }, 1000);
+
+    } catch (err) {
+      let msg = "Couldn't sign in. Please try again.";
+      if (["auth/invalid-credential", "auth/wrong-password", "auth/user-not-found"].includes(err.code)) msg = "Incorrect email or password";
+      else if (err.code === "auth/too-many-requests") msg = "Too many attempts. Wait a moment.";
+      showToast(msg, "error");
+      submitBtn.disabled = false; submitBtn.classList.remove("loading");
+    }
+  });
+</script>
+</body>
+</html>
