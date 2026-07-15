@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>VELTRIX — Admin Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0c; --surface: #111915; --surface-2: #1a241e; --surface-3: #243028;
+    --primary: #22c55e; --primary-dark: #16a34a; --primary-glow: rgba(34,197,94,0.25);
+    --gold: #f59e0b; --text: #f0fdf4; --text-bright: #ffffff; --muted: #9ca3a0;
+    --success: #22c55e; --warning: #f59e0b; --error: #ef4444;
+    --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+    --shadow-lg: 0 30px 60px rgba(0,0,0,0.6); --shadow-md: 0 15px 35px rgba(0,0,0,0.4);
+    --radius: 18px; --radius-sm: 13px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;position:relative;padding-bottom:100px;background-image:radial-gradient(ellipse at 50% 0%,rgba(34,197,94,0.04) 0%,transparent 50%);}
+  a{text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;}
+
+  .floating-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(90px);opacity:0.18;}
+  .floating-orb.orb-1{width:240px;height:240px;background:rgba(34,197,94,0.06);top:-60px;right:-50px;animation:float1 14s ease-in-out infinite;}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-20px,15px) scale(1.05);}}
+
+  .container{position:relative;z-index:1;max-width:580px;margin:0 auto;padding:20px 18px 60px;animation:fadeUp 0.5s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:translateY(0);}}
+
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:6px;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .back-btn,.icon-btn{width:38px;height:38px;border-radius:11px;flex:none;background:var(--surface);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all 0.25s;}
+  .back-btn:hover,.icon-btn:hover{background:var(--surface-2);border-color:var(--border-hover);color:var(--text-bright);}
+  .back-btn svg,.icon-btn svg{width:17px;height:17px;}
+  .icon-btn.spinning{animation:spin 0.7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .topbar h1{font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;color:var(--text-bright);}
+  .subhead{color:var(--muted);font-size:12px;margin-bottom:18px;}
+
+  .card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;transition:all 0.3s;}
+  .card:hover{border-color:var(--border-hover);}
+  .card-title{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;color:var(--text-bright);display:flex;align-items:center;gap:7px;}
+  .card-title svg{color:var(--primary);}
+
+  .field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0.4px;text-transform:uppercase;}
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .input-wrap input,.input-wrap textarea,.input-wrap select{width:100%;background:var(--surface-2);border:1.5px solid var(--border);border-radius:10px;padding:11px 13px;color:var(--text);font-size:13.5px;font-family:'Inter',sans-serif;outline:none;transition:all 0.3s;}
+  .input-wrap textarea{min-height:85px;resize:vertical;}
+  .input-wrap input:focus,.input-wrap textarea:focus,.input-wrap select:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow);}
+  .field-hint{font-size:10.5px;color:var(--muted);}
+
+  .days-picker{display:flex;gap:5px;flex-wrap:wrap;}
+  .day-chip{padding:8px 12px;border-radius:8px;background:var(--surface-2);border:1.5px solid var(--border);font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+  .day-chip:hover{border-color:var(--border-hover);}
+  .day-chip.active{background:var(--primary);border-color:var(--primary);color:#fff;}
+
+  .save-bar{position:fixed;bottom:0;left:0;right:0;z-index:20;background:rgba(10,15,12,0.96);backdrop-filter:blur(10px);border-top:1px solid var(--border);padding:14px 18px calc(14px + env(safe-area-inset-bottom));}
+  .save-btn{max-width:580px;margin:0 auto;width:100%;background:linear-gradient(135deg,var(--primary),#16a34a);border:none;border-radius:var(--radius-sm);padding:14px;font-size:15px;font-weight:700;color:#fff;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;box-shadow:0 8px 30px var(--primary-glow);transition:all 0.3s;}
+  .save-btn:hover{transform:translateY(-2px);box-shadow:0 12px 35px var(--primary-glow);}
+  .save-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+  .btn-spinner{width:16px;height:16px;border-radius:50%;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;animation:spin 0.7s linear infinite;display:none;}
+  .save-btn.loading .btn-spinner{display:inline-block;}
+  .save-btn.loading .btn-label{display:none;}
+
+  .note-banner{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:10px 12px;font-size:11.5px;color:var(--warning);margin-bottom:16px;line-height:1.5;}
+
+  .toast-container{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:380px;}
+  .toast{background:var(--surface-3);border:1px solid var(--border);padding:13px 15px;border-radius:var(--radius-sm);font-size:13px;box-shadow:var(--shadow-lg);animation:slideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);display:flex;align-items:center;gap:9px;}
+  .toast.error{border-left:4px solid var(--error);}
+  .toast.success{border-left:4px solid var(--success);}
+  @keyframes slideIn{from{opacity:0;transform:translateX(80px);}to{opacity:1;transform:translateX(0);}}
+
+  @media(max-width:480px){.container{padding:16px 12px 60px;}}
+</style>
+</head>
+<body>
+
+<div class="floating-orb orb-1"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="admin-dashboard.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg></a>
+      <h1>Platform Settings</h1>
+    </div>
+    <button class="icon-btn" id="refreshBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+  </div>
+  <p class="subhead">Configuration used across the platform</p>
+
+  <div class="note-banner">⚠️ Settings are saved to Firestore. User-facing pages read from here.</div>
+
+  <div class="card">
+    <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg> Bank Details</div>
+    <div class="field"><label>Bank Name</label><div class="input-wrap"><input type="text" id="bankName" placeholder="Veltrix MFB"></div></div>
+    <div class="field"><label>Account Number</label><div class="input-wrap"><input type="text" id="accountNumber" placeholder="0123456789"></div></div>
+    <div class="field"><label>Account Name</label><div class="input-wrap"><input type="text" id="accountName" placeholder="Veltrix Investments Ltd"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg> Support</div>
+    <div class="field"><label>WhatsApp Group Link</label><div class="input-wrap"><input type="url" id="whatsappLink" placeholder="https://chat.whatsapp.com/..."></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Deposit & Withdrawal</div>
+    <div class="row-2">
+      <div class="field"><label>Min Deposit (₦)</label><div class="input-wrap"><input type="text" id="minDeposit" placeholder="4000"></div></div>
+      <div class="field"><label>Min Withdrawal (₦)</label><div class="input-wrap"><input type="text" id="minWithdrawal" placeholder="1500"></div></div>
+    </div>
+    <div class="field"><label>Withdrawal Fee (%)</label><div class="input-wrap"><input type="text" id="withdrawalFee" placeholder="15"></div></div>
+    <div class="row-2">
+      <div class="field"><label>Start Hour</label><div class="input-wrap"><select id="startHour"></select></div></div>
+      <div class="field"><label>End Hour</label><div class="input-wrap"><select id="endHour"></select></div></div>
+    </div>
+    <div class="field"><label>Processing Days</label><div class="days-picker" id="daysPicker">
+      <div class="day-chip" data-day="0">Sun</div><div class="day-chip" data-day="1">Mon</div><div class="day-chip" data-day="2">Tue</div><div class="day-chip" data-day="3">Wed</div><div class="day-chip" data-day="4">Thu</div><div class="day-chip" data-day="5">Fri</div><div class="day-chip" data-day="6">Sat</div>
+    </div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17,11 19,13 23,9"/></svg> Referral Rates</div>
+    <div class="row-2">
+      <div class="field"><label>Level 1 (%)</label><div class="input-wrap"><input type="text" id="refL1" placeholder="10"></div></div>
+      <div class="field"><label>Level 2 (%)</label><div class="input-wrap"><input type="text" id="refL2" placeholder="3"></div></div>
+    </div>
+    <div class="field"><label>Level 3 (%)</label><div class="input-wrap"><input type="text" id="refL3" placeholder="1"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg> Legal</div>
+    <div class="field"><label>Terms of Service</label><div class="input-wrap"><textarea id="termsText" placeholder="Paste ToS here…"></textarea></div></div>
+    <div class="field"><label>Privacy Policy</label><div class="input-wrap"><textarea id="privacyText" placeholder="Paste Privacy Policy here…"></textarea></div></div>
+  </div>
+</div>
+
+<div class="save-bar">
+  <button class="save-btn" id="saveBtn"><span class="btn-label">Save All Settings</span><span class="btn-spinner"></span></button>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI", authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0", storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094", appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  let adminUid = null;
+
+  function showToast(m, t = "info", d = 4000) {
+    const c = document.getElementById("toastContainer");
+    const el = document.createElement("div");
+    el.className = `toast ${t}`;
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    el.innerHTML = `<span>${icons[t]||icons.info}</span>${m}`;
+    if (c.children.length >= 3) c.removeChild(c.firstChild);
+    c.appendChild(el);
+    setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateX(80px)"; el.style.transition = "all 0.3s"; setTimeout(() => { if (el.parentNode) el.remove(); }, 300); }, d);
+  }
+
+  // ✅ AUTH
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "admin-login.html"; return; }
+    try { const snap = await getDoc(doc(db, "users", user.uid)); if (!snap.exists()||snap.data().role!=="admin"){await signOut(auth);window.location.href="admin-login.html";return;} adminUid = user.uid; populateHours(); loadSettings(); }
+    catch(e) { window.location.href = "admin-login.html"; }
+  });
+
+  function populateHours() {
+    const s = document.getElementById("startHour"), e = document.getElementById("endHour");
+    for (let h = 0; h < 24; h++) { const l = h===0?"12AM":h<12?`${h}AM`:h===12?"12PM":`${h-12}PM`; s.appendChild(new Option(l,h)); e.appendChild(new Option(l,h)); }
+  }
+
+  let selectedDays = [1,2,3,4,5];
+  document.querySelectorAll(".day-chip").forEach(c => c.addEventListener("click", () => {
+    const d = Number(c.dataset.day);
+    selectedDays.includes(d) ? selectedDays = selectedDays.filter(x => x !== d) : selectedDays.push(d);
+    c.classList.toggle("active", selectedDays.includes(d));
+  }));
+
+  const DEFAULTS = {
+    bankName:"Veltrix MFB", accountNumber:"0123456789", accountName:"Veltrix Investments Ltd",
+    whatsappLink:"https://chat.whatsapp.com/yourlink", minDeposit:4000, minWithdrawal:1500,
+    withdrawalFeeRate:0.15, processingStartHour:9, processingEndHour:17, processingDays:[1,2,3,4,5],
+    referralRateL1:0.10, referralRateL2:0.03, referralRateL3:0.01, termsText:"", privacyText:""
+  };
+
+  async function loadSettings() {
+    try {
+      const snap = await getDoc(doc(db, "settings", "platform"));
+      const data = snap.exists() ? { ...DEFAULTS, ...snap.data() } : DEFAULTS;
+      document.getElementById("bankName").value = data.bankName;
+      document.getElementById("accountNumber").value = data.accountNumber;
+      document.getElementById("accountName").value = data.accountName;
+      document.getElementById("whatsappLink").value = data.whatsappLink;
+      document.getElementById("minDeposit").value = data.minDeposit;
+      document.getElementById("minWithdrawal").value = data.minWithdrawal;
+      document.getElementById("withdrawalFee").value = Math.round(data.withdrawalFeeRate*100);
+      document.getElementById("startHour").value = data.processingStartHour;
+      document.getElementById("endHour").value = data.processingEndHour;
+      document.getElementById("refL1").value = Math.round(data.referralRateL1*100);
+      document.getElementById("refL2").value = Math.round(data.referralRateL2*100);
+      document.getElementById("refL3").value = Math.round(data.referralRateL3*100);
+      document.getElementById("termsText").value = data.termsText;
+      document.getElementById("privacyText").value = data.privacyText;
+      selectedDays = data.processingDays;
+      document.querySelectorAll(".day-chip").forEach(c => c.classList.toggle("active", selectedDays.includes(Number(c.dataset.day))));
+    } catch(e) { showToast("Couldn't load settings.", "error"); }
+  }
+
+  document.getElementById("saveBtn").addEventListener("click", async () => {
+    const btn = document.getElementById("saveBtn"); btn.disabled = true; btn.classList.add("loading");
+    try {
+      const data = {
+        bankName: document.getElementById("bankName").value.trim(), accountNumber: document.getElementById("accountNumber").value.trim(),
+        accountName: document.getElementById("accountName").value.trim(), whatsappLink: document.getElementById("whatsappLink").value.trim(),
+        minDeposit: Number(document.getElementById("minDeposit").value)||0, minWithdrawal: Number(document.getElementById("minWithdrawal").value)||0,
+        withdrawalFeeRate: (Number(document.getElementById("withdrawalFee").value)||0)/100,
+        processingStartHour: Number(document.getElementById("startHour").value), processingEndHour: Number(document.getElementById("endHour").value),
+        processingDays: selectedDays,
+        referralRateL1: (Number(document.getElementById("refL1").value)||0)/100,
+        referralRateL2: (Number(document.getElementById("refL2").value)||0)/100,
+        referralRateL3: (Number(document.getElementById("refL3").value)||0)/100,
+        termsText: document.getElementById("termsText").value, privacyText: document.getElementById("privacyText").value,
+        updatedAt: serverTimestamp(), updatedBy: adminUid
+      };
+      await setDoc(doc(db, "settings", "platform"), data, { merge: true });
+      await setDoc(doc(collection(db, "adminActions")), { adminUid, action: "update_settings", createdAt: serverTimestamp() });
+      showToast("Settings saved!", "success");
+    } catch(e) { showToast("Couldn't save.", "error"); }
+    finally { btn.disabled = false; btn.classList.remove("loading"); }
+  });
+
+  document.getElementById("refreshBtn").addEventListener("click", async () => { const btn = document.getElementById("refreshBtn"); btn.classList.add("spinning"); await loadSettings(); btn.classList.remove("spinning"); showToast("Reloaded", "success", 2000); });
+
+  console.log("🚀 Veltrix Admin Settings - Ready");
+</script>
+</body>
+</html>
