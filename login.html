@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>VELTRIX — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0c; --surface: #111915; --surface-2: #1a241e; --surface-3: #243028;
+    --primary: #22c55e; --primary-dark: #16a34a; --primary-glow: rgba(34,197,94,0.25);
+    --gold: #f59e0b; --gold-dark: #d97706; --gold-glow: rgba(245,158,11,0.25);
+    --text: #f0fdf4; --text-bright: #ffffff; --muted: #9ca3a0;
+    --success: #22c55e; --warning: #f59e0b; --error: #ef4444;
+    --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+    --shadow-lg: 0 30px 60px rgba(0,0,0,0.6); --shadow-md: 0 15px 35px rgba(0,0,0,0.4);
+    --radius: 20px; --radius-sm: 14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
+    min-height:100vh;overflow-x:hidden;position:relative;
+    background-image:
+      radial-gradient(ellipse at 80% 0%,rgba(245,158,11,0.06) 0%,transparent 50%),
+      radial-gradient(ellipse at 20% 100%,rgba(34,197,94,0.06) 0%,transparent 50%),
+      radial-gradient(ellipse at 50% 50%,rgba(34,197,94,0.03) 0%,transparent 70%);
+  }
+
+  .floating-orb{
+    position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(90px);opacity:0.35;
+  }
+  .floating-orb.orb-1{width:320px;height:320px;background:rgba(34,197,94,0.12);top:-120px;right:-100px;animation:float1 14s ease-in-out infinite;}
+  .floating-orb.orb-2{width:260px;height:260px;background:rgba(245,158,11,0.1);bottom:-100px;left:-80px;animation:float2 16s ease-in-out infinite;}
+  .floating-orb.orb-3{width:160px;height:160px;background:rgba(34,197,94,0.08);top:40%;left:55%;animation:float3 11s ease-in-out infinite;}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(-50px,30px) scale(1.12);}66%{transform:translate(30px,-20px) scale(0.88);}}
+  @keyframes float2{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(40px,-25px) scale(1.1);}66%{transform:translate(-25px,35px) scale(0.9);}}
+  @keyframes float3{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-30px,-20px) scale(1.08);}}
+
+  .main-container{
+    position:relative;z-index:1;max-width:440px;margin:0 auto;
+    min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+    padding:32px 20px;
+  }
+
+  /* Header */
+  .brand-section{text-align:center;margin-bottom:28px;animation:fadeUp 0.7s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+  .brand-icon{
+    width:52px;height:52px;margin:0 auto 14px;
+    background:linear-gradient(135deg,var(--primary),var(--gold));
+    border-radius:16px;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 10px 30px rgba(34,197,94,0.3);
+  }
+  .brand-icon svg{width:26px;height:26px;color:#fff;}
+  .brand-section h2{
+    font-family:'DM Sans',sans-serif;font-size:26px;font-weight:800;
+    color:var(--text-bright);letter-spacing:-0.5px;margin-bottom:4px;
+  }
+  .brand-section h2 span{color:var(--primary);}
+  .brand-section p{color:var(--muted);font-size:13.5px;}
+
+  /* Login Card */
+  .login-card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:28px 22px;
+    box-shadow:var(--shadow-lg);animation:fadeUp 0.7s ease 0.15s both;
+  }
+
+  .input-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+  .input-group label{
+    font-size:11px;font-weight:700;color:var(--muted);
+    letter-spacing:0.6px;text-transform:uppercase;
+  }
+  .input-wrapper{position:relative;}
+  .input-wrapper input{
+    width:100%;background:var(--surface-2);border:1.5px solid var(--border);
+    border-radius:var(--radius-sm);padding:14px 16px;color:var(--text);
+    font-size:14.5px;font-family:'Inter',sans-serif;outline:none;
+    transition:all 0.3s ease;
+  }
+  .input-wrapper input::placeholder{color:#4a524d;}
+  .input-wrapper input:focus{
+    border-color:var(--primary);background:var(--surface-3);
+    box-shadow:0 0 0 4px var(--primary-glow);
+  }
+  .input-wrapper input.error{border-color:var(--error);box-shadow:0 0 0 4px rgba(239,68,68,0.15);}
+  .input-wrapper .eye-toggle{
+    position:absolute;right:8px;top:50%;transform:translateY(-50%);
+    background:none;border:none;cursor:pointer;padding:8px;color:var(--muted);
+    border-radius:8px;transition:all 0.2s;
+  }
+  .input-wrapper .eye-toggle:hover{color:var(--text-bright);background:var(--surface-3);}
+  .feedback-text{font-size:11px;min-height:14px;color:var(--error);}
+
+  .row-between{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:18px;margin-top:-4px;
+  }
+  .remember-row{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;cursor:pointer;}
+  .remember-row input{accent-color:var(--primary);width:16px;height:16px;cursor:pointer;}
+  .forgot-link{color:var(--gold);text-decoration:none;font-size:12.5px;font-weight:600;background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif;}
+  .forgot-link:hover{text-decoration:underline;color:var(--gold-dark);}
+
+  .login-btn{
+    width:100%;padding:15px;border:none;border-radius:var(--radius-sm);
+    background:linear-gradient(135deg,var(--primary),#16a34a);
+    color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+    transition:all 0.3s ease;box-shadow:0 8px 30px var(--primary-glow);
+    position:relative;overflow:hidden;
+  }
+  .login-btn::after{
+    content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);
+    transition:left 0.6s ease;
+  }
+  .login-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 15px 40px var(--primary-glow);}
+  .login-btn:hover:not(:disabled)::after{left:100%;}
+  .login-btn:active:not(:disabled){transform:scale(0.97);}
+  .login-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .btn-spinner{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;animation:spin 0.7s linear infinite;display:none;}
+  .login-btn.loading .btn-spinner{display:inline-block;}
+  .login-btn.loading .btn-label{display:none;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .divider-row{
+    display:flex;align-items:center;gap:12px;margin:18px 0;
+    color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:600;
+  }
+  .divider-row::before,.divider-row::after{content:"";flex:1;height:1px;background:var(--border);}
+
+  .register-link{text-align:center;font-size:13.5px;color:var(--muted);animation:fadeUp 0.7s ease 0.3s both;}
+  .register-link a{color:var(--primary);text-decoration:none;font-weight:700;}
+  .register-link a:hover{text-decoration:underline;}
+
+  /* Toast */
+  .toast-container{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:380px;}
+  .toast{
+    background:var(--surface-3);border:1px solid var(--border);
+    padding:14px 16px;border-radius:var(--radius-sm);font-size:13px;
+    box-shadow:var(--shadow-lg);animation:slideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);
+    display:flex;align-items:center;gap:10px;
+  }
+  .toast.error{border-left:4px solid var(--error);}
+  .toast.success{border-left:4px solid var(--success);}
+  .toast-icon{font-size:18px;flex:none;}
+  @keyframes slideIn{from{opacity:0;transform:translateX(80px);}to{opacity:1;transform:translateX(0);}}
+
+  /* Modal */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);
+    display:none;align-items:center;justify-content:center;z-index:150;
+    padding:20px;animation:fadeIn 0.3s ease;
+  }
+  .modal-overlay.show{display:flex;}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  .modal-box{
+    background:var(--surface-2);border:1px solid var(--border);
+    border-radius:var(--radius);padding:28px 22px;max-width:380px;width:100%;
+    box-shadow:var(--shadow-lg);
+    animation:popIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);
+  }
+  @keyframes popIn{from{opacity:0;transform:scale(0.85) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+  .modal-box h3{font-family:'DM Sans',sans-serif;font-size:19px;font-weight:800;color:var(--text-bright);margin-bottom:8px;}
+  .modal-box p{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:18px;}
+  .modal-box .input-group{margin-bottom:14px;}
+  .modal-actions{display:flex;gap:10px;}
+  .modal-actions button{
+    flex:1;padding:13px;border:none;border-radius:var(--radius-sm);
+    font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;
+  }
+  .modal-actions .btn-cancel{background:var(--surface-3);color:var(--text);border:1px solid var(--border);}
+  .modal-actions .btn-cancel:hover{background:var(--border);}
+  .modal-actions .btn-send{background:linear-gradient(135deg,var(--primary),#16a34a);color:#fff;}
+
+  @media(max-width:480px){.main-container{padding:24px 14px;}.login-card{padding:22px 16px;}}
+</style>
+</head>
+<body>
+
+<div class="floating-orb orb-1"></div>
+<div class="floating-orb orb-2"></div>
+<div class="floating-orb orb-3"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="main-container">
+  <!-- Brand -->
+  <div class="brand-section">
+    <div class="brand-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+      </svg>
+    </div>
+    <h2>Welcome to <span>Veltrix</span></h2>
+    <p>Sign in to your investment dashboard</p>
+  </div>
+
+  <!-- Login Card -->
+  <div class="login-card">
+    <form id="loginForm" novalidate>
+      <div class="input-group">
+        <label for="identifier">Email or Username</label>
+        <div class="input-wrapper">
+          <input type="text" id="identifier" placeholder="you@example.com" autocomplete="username" required>
+        </div>
+        <div class="feedback-text" id="identifierFeedback"></div>
+      </div>
+
+      <div class="input-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <input type="password" id="password" placeholder="Enter your password" autocomplete="current-password" required>
+          <button type="button" class="eye-toggle" id="togglePassword" aria-label="Toggle password">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="feedback-text" id="passwordFeedback"></div>
+      </div>
+
+      <div class="row-between">
+        <label class="remember-row">
+          <input type="checkbox" id="rememberMe" checked>
+          Remember me
+        </label>
+        <button type="button" class="forgot-link" id="forgotBtn">Forgot password?</button>
+      </div>
+
+      <button type="submit" class="login-btn" id="submitBtn">
+        <span class="btn-label">Sign In</span>
+        <span class="btn-spinner"></span>
+      </button>
+    </form>
+
+    <div class="divider-row">or</div>
+  </div>
+
+  <div class="register-link">
+    Don't have an account? <a href="index.html">Create one free</a>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="modal-overlay" id="resetModal">
+  <div class="modal-box">
+    <h3>Reset Password</h3>
+    <p>Enter your email address and we'll send you a reset link.</p>
+    <div class="input-group">
+      <label for="resetEmail">Email Address</label>
+      <div class="input-wrapper"><input type="email" id="resetEmail" placeholder="you@example.com"></div>
+      <div class="feedback-text" id="resetFeedback"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" id="resetCancel" type="button">Cancel</button>
+      <button class="btn-send" id="resetConfirm" type="button">Send Link</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, setPersistence, browserLocalPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI",
+    authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0",
+    storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094",
+    appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  function showToast(msg, type = "info", dur = 4000) {
+    const container = document.getElementById("toastContainer");
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    toast.innerHTML = `<span class="toast-icon">${icons[type] || icons.info}</span>${msg}`;
+    if (container.children.length >= 3) container.removeChild(container.firstChild);
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = "0"; toast.style.transform = "translateX(80px)"; toast.style.transition = "all 0.3s"; setTimeout(() => { if (toast.parentNode) toast.remove(); }, 300); }, dur);
+  }
+
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const identifierEl = document.getElementById("identifier");
+  const passwordEl = document.getElementById("password");
+  const identifierFeedback = document.getElementById("identifierFeedback");
+  const passwordFeedback = document.getElementById("passwordFeedback");
+  const rememberEl = document.getElementById("rememberMe");
+  const submitBtn = document.getElementById("submitBtn");
+  const form = document.getElementById("loginForm");
+
+  // Password toggle
+  document.getElementById("togglePassword").addEventListener("click", function() {
+    const isPwd = passwordEl.type === "password";
+    passwordEl.type = isPwd ? "text" : "password";
+    this.innerHTML = isPwd
+      ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+      : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+  });
+
+  function setFeedback(el, msg) { if (el) { el.textContent = msg; } }
+  function markInput(el, isErr) { if (el) { el.classList.toggle("error", !!isErr); } }
+
+  async function resolveEmail(identifier) {
+    if (emailPattern.test(identifier)) return identifier;
+    const uname = identifier.trim().toLowerCase();
+    const unameSnap = await getDoc(doc(db, "usernames", uname));
+    if (!unameSnap.exists()) return null;
+    const uid = unameSnap.data().uid;
+    const userSnap = await getDoc(doc(db, "users", uid));
+    return userSnap.exists() ? (userSnap.data().email || null) : null;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    setFeedback(identifierFeedback, ""); setFeedback(passwordFeedback, "");
+    markInput(identifierEl, false); markInput(passwordEl, false);
+
+    const identifier = identifierEl.value.trim();
+    const password = passwordEl.value;
+
+    if (!identifier) { setFeedback(identifierFeedback, "Enter your email or username"); markInput(identifierEl, true); return; }
+    if (!password) { setFeedback(passwordFeedback, "Enter your password"); markInput(passwordEl, true); return; }
+
+    submitBtn.disabled = true; submitBtn.classList.add("loading");
+
+    try {
+      await setPersistence(auth, rememberEl.checked ? browserLocalPersistence : browserSessionPersistence);
+      const email = await resolveEmail(identifier);
+      if (!email) { showToast("Account not found with that email/username", "error"); markInput(identifierEl, true); submitBtn.disabled = false; submitBtn.classList.remove("loading"); return; }
+
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+
+      const statusSnap = await getDoc(doc(db, "users", cred.user.uid));
+      if (!statusSnap.exists()) { await auth.signOut(); showToast("This account no longer exists.", "error"); submitBtn.disabled = false; submitBtn.classList.remove("loading"); return; }
+
+      const statusData = statusSnap.data();
+      const suspendedMs = statusData.suspendedUntil ? (statusData.suspendedUntil.toMillis ? statusData.suspendedUntil.toMillis() : new Date(statusData.suspendedUntil).getTime()) : 0;
+      if (suspendedMs > Date.now()) {
+        await auth.signOut();
+        showToast(`Account suspended until ${new Date(suspendedMs).toLocaleString("en-NG",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}.`, "error", 6000);
+        submitBtn.disabled = false; submitBtn.classList.remove("loading"); return;
+      }
+
+      sessionStorage.setItem("veltrix_show_welcome", "1");
+      showToast("Welcome back! Redirecting…", "success");
+      setTimeout(() => { window.location.href = "dashboard.html"; }, 1200);
+    } catch (err) {
+      let msg = "Login failed. Try again.";
+      if (["auth/invalid-credential","auth/wrong-password","auth/user-not-found"].includes(err.code)) msg = "Incorrect email/username or password";
+      else if (err.code === "auth/too-many-requests") msg = "Too many attempts. Wait a moment.";
+      showToast(msg, "error");
+      submitBtn.disabled = false; submitBtn.classList.remove("loading");
+    }
+  });
+
+  // Forgot password modal
+  const resetModal = document.getElementById("resetModal");
+  const resetEmailEl = document.getElementById("resetEmail");
+  const resetFeedback = document.getElementById("resetFeedback");
+
+  document.getElementById("forgotBtn").addEventListener("click", () => {
+    resetEmailEl.value = emailPattern.test(identifierEl.value.trim()) ? identifierEl.value.trim() : "";
+    setFeedback(resetFeedback, "");
+    resetModal.classList.add("show");
+  });
+  document.getElementById("resetCancel").addEventListener("click", () => resetModal.classList.remove("show"));
+  resetModal.addEventListener("click", (e) => { if (e.target === resetModal) resetModal.classList.remove("show"); });
+
+  document.getElementById("resetConfirm").addEventListener("click", async () => {
+    const email = resetEmailEl.value.trim();
+    if (!emailPattern.test(email)) { setFeedback(resetFeedback, "Enter a valid email address"); return; }
+    const btn = document.getElementById("resetConfirm");
+    btn.disabled = true; btn.textContent = "Sending…";
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showToast("Reset link sent — check your inbox", "success");
+      resetModal.classList.remove("show");
+    } catch (err) {
+      setFeedback(resetFeedback, "Couldn't send reset link. Check the email.");
+    } finally { btn.disabled = false; btn.textContent = "Send Link"; }
+  });
+
+  console.log("🚀 Veltrix Login - Ready");
+</script>
+</body>
+</html>
