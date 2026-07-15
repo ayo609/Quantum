@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>VELTRIX — Admin Referrals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0c; --surface: #111915; --surface-2: #1a241e; --surface-3: #243028;
+    --primary: #22c55e; --primary-dark: #16a34a; --primary-glow: rgba(34,197,94,0.25);
+    --gold: #f59e0b; --text: #f0fdf4; --text-bright: #ffffff; --muted: #9ca3a0;
+    --success: #22c55e; --warning: #f59e0b; --error: #ef4444;
+    --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+    --shadow-lg: 0 30px 60px rgba(0,0,0,0.6); --shadow-md: 0 15px 35px rgba(0,0,0,0.4);
+    --radius: 18px; --radius-sm: 13px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;position:relative;padding-bottom:40px;background-image:radial-gradient(ellipse at 50% 0%,rgba(34,197,94,0.04) 0%,transparent 50%);}
+  a{text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;}
+
+  .floating-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(90px);opacity:0.18;}
+  .floating-orb.orb-1{width:240px;height:240px;background:rgba(245,158,11,0.06);bottom:-60px;right:-50px;animation:float1 15s ease-in-out infinite;}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-20px,-15px) scale(1.05);}}
+
+  .container{position:relative;z-index:1;max-width:580px;margin:0 auto;padding:20px 18px 60px;animation:fadeUp 0.5s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:translateY(0);}}
+
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:16px;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .back-btn,.icon-btn{width:38px;height:38px;border-radius:11px;flex:none;background:var(--surface);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all 0.25s;}
+  .back-btn:hover,.icon-btn:hover{background:var(--surface-2);border-color:var(--border-hover);color:var(--text-bright);}
+  .back-btn svg,.icon-btn svg{width:17px;height:17px;}
+  .icon-btn.spinning{animation:spin 0.7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .topbar h1{font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;color:var(--text-bright);}
+
+  .search-row{display:flex;gap:8px;margin-bottom:6px;}
+  .search-row input{flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px;color:var(--text);font-size:13.5px;font-family:'Inter',sans-serif;outline:none;transition:all 0.3s;}
+  .search-row input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow);}
+  .search-row button{background:linear-gradient(135deg,var(--primary),#16a34a);border:none;border-radius:var(--radius-sm);padding:0 15px;color:#fff;font-weight:700;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+  .hint{font-size:11.5px;color:var(--muted);margin-bottom:16px;}
+
+  .profile-card{background:linear-gradient(135deg,#0f1a12,#1a2215);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;display:none;box-shadow:var(--shadow-md);}
+  .profile-card.show{display:block;animation:fadeUp 0.4s ease;}
+  .profile-top{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+  .p-avatar{width:44px;height:44px;border-radius:50%;flex:none;background:linear-gradient(135deg,var(--primary),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-weight:700;color:#fff;font-size:17px;box-shadow:0 4px 12px var(--primary-glow);}
+  .profile-top p.name{font-size:15px;font-weight:700;color:var(--text-bright);}
+  .profile-top p.username{font-size:11.5px;color:var(--muted);}
+  .profile-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+  .profile-stats .cell{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:9px;padding:8px 6px;text-align:center;}
+  .profile-stats .cell p.k{font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px;font-weight:600;}
+  .profile-stats .cell p.v{font-family:'DM Sans',sans-serif;font-size:12.5px;font-weight:800;color:var(--text-bright);}
+
+  .tabs{display:flex;gap:5px;margin-bottom:12px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:5px;}
+  .tab{flex:1;text-align:center;padding:9px 6px;border-radius:10px;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.3s;}
+  .tab:hover{color:var(--text);}
+  .tab.active{background:linear-gradient(135deg,var(--primary),#16a34a);color:#fff;box-shadow:0 4px 12px var(--primary-glow);}
+
+  .ref-item{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:8px;transition:all 0.3s;}
+  .ref-item:hover{border-color:var(--border-hover);}
+  .ref-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .ref-avatar{width:36px;height:36px;border-radius:50%;flex:none;background:linear-gradient(135deg,var(--primary),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-weight:700;color:#fff;font-size:14px;}
+  .ref-name{flex:1;min-width:0;}
+  .ref-name p.n{font-size:13px;font-weight:700;color:var(--text-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ref-name p.t{font-size:10.5px;color:var(--muted);margin-top:2px;}
+  .level-badge{font-size:9.5px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(34,197,94,0.12);color:var(--primary);flex:none;}
+  .level-badge.l2{background:rgba(245,158,11,0.12);color:var(--gold);}
+  .level-badge.l3{background:rgba(156,163,160,0.15);color:var(--muted);}
+  .ref-detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;}
+  .ref-detail{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:8px 10px;}
+  .ref-detail p.k{font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:2px;font-weight:600;}
+  .ref-detail p.v{font-size:12px;font-weight:700;color:var(--text-bright);}
+
+  .empty-state{text-align:center;padding:50px 20px;color:var(--muted);}
+  .empty-state .empty-icon{font-size:36px;margin-bottom:10px;}
+  .skeleton{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);height:110px;margin-bottom:8px;background-image:linear-gradient(90deg,var(--surface) 0%,var(--surface-2) 50%,var(--surface) 100%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+  @keyframes shimmer{from{background-position:200% 0;}to{background-position:-200% 0;}}
+
+  .toast-container{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:380px;}
+  .toast{background:var(--surface-3);border:1px solid var(--border);padding:13px 15px;border-radius:var(--radius-sm);font-size:13px;box-shadow:var(--shadow-lg);animation:slideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);display:flex;align-items:center;gap:9px;}
+  .toast.error{border-left:4px solid var(--error);}
+  .toast.success{border-left:4px solid var(--success);}
+  @keyframes slideIn{from{opacity:0;transform:translateX(80px);}to{opacity:1;transform:translateX(0);}}
+
+  @media(max-width:480px){.container{padding:16px 12px 60px;}}
+</style>
+</head>
+<body>
+
+<div class="floating-orb orb-1"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="admin-dashboard.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg></a>
+      <h1>Referrals</h1>
+    </div>
+    <button class="icon-btn" id="refreshBtn" style="display:none;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+  </div>
+
+  <div class="search-row">
+    <input type="text" id="searchInput" placeholder="Search by username, email or phone">
+    <button id="searchBtn">Search</button>
+  </div>
+  <p class="hint">Look up any user to see their full 3-level downline.</p>
+
+  <div class="profile-card" id="profileCard">
+    <div class="profile-top"><div class="p-avatar" id="pAvatar">V</div><div><p class="name" id="pName">—</p><p class="username" id="pUsername">@—</p></div></div>
+    <div class="profile-stats">
+      <div class="cell"><p class="k">Total Refs</p><p class="v" id="pTotalRefs">0</p></div>
+      <div class="cell"><p class="k">Bonus Paid</p><p class="v" id="pBonus">₦0</p></div>
+      <div class="cell"><p class="k">Level 1</p><p class="v" id="pL1">0</p></div>
+      <div class="cell"><p class="k">L2 / L3</p><p class="v" id="pL23">0/0</p></div>
+    </div>
+  </div>
+
+  <div id="resultsArea" style="display:none;">
+    <div class="tabs">
+      <div class="tab active" data-level="all">All</div>
+      <div class="tab" data-level="1">Level 1</div>
+      <div class="tab" data-level="2">Level 2</div>
+      <div class="tab" data-level="3">Level 3</div>
+    </div>
+    <div id="listContainer"></div>
+  </div>
+
+  <div id="idleState" class="empty-state"><div class="empty-icon">🔍</div><p>Search for a user above to view their downline.</p></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI", authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0", storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094", appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentDownline = [], currentUid = null, activeLevel = "all";
+
+  function showToast(m, t = "info", d = 4000) {
+    const c = document.getElementById("toastContainer");
+    const el = document.createElement("div");
+    el.className = `toast ${t}`;
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    el.innerHTML = `<span>${icons[t]||icons.info}</span>${m}`;
+    if (c.children.length >= 3) c.removeChild(c.firstChild);
+    c.appendChild(el);
+    setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateX(80px)"; el.style.transition = "all 0.3s"; setTimeout(() => { if (el.parentNode) el.remove(); }, 300); }, d);
+  }
+
+  function formatNaira(v) { return "₦" + (Number(v) || 0).toLocaleString("en-NG"); }
+  function formatTime(ts) { if(!ts)return"Join time unavailable"; const d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString("en-NG",{day:"numeric",month:"short",year:"numeric"})+" · "+d.toLocaleTimeString("en-NG",{hour:"2-digit",minute:"2-digit"}); }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+  // ✅ AUTH
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "admin-login.html"; return; }
+    try { const snap = await getDoc(doc(db, "users", user.uid)); if (!snap.exists()||snap.data().role!=="admin"){await signOut(auth);window.location.href="admin-login.html";return;} }
+    catch(e) { window.location.href = "admin-login.html"; }
+  });
+
+  // ✅ SEARCH
+  async function findUser(term) {
+    const t = term.trim();
+    const uSnap = await getDoc(doc(db, "usernames", t.toLowerCase()));
+    if (uSnap.exists()) { const s = await getDoc(doc(db, "users", uSnap.data().uid)); if (s.exists()) return { id: s.id, ...s.data() }; }
+    const eSnap = await getDocs(query(collection(db, "users"), where("email", "==", t))); if (!eSnap.empty) return { id: eSnap.docs[0].id, ...eSnap.docs[0].data() };
+    const pSnap = await getDocs(query(collection(db, "users"), where("phone", "==", t))); if (!pSnap.empty) return { id: pSnap.docs[0].id, ...pSnap.docs[0].data() };
+    return null;
+  }
+
+  document.getElementById("searchBtn").addEventListener("click", runSearch);
+  document.getElementById("searchInput").addEventListener("keydown", e => { if (e.key === "Enter") runSearch(); });
+
+  async function runSearch() {
+    const term = document.getElementById("searchInput").value; if (!term.trim()) return;
+    document.getElementById("idleState").innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>';
+    document.getElementById("idleState").style.display = "block";
+    document.getElementById("profileCard").classList.remove("show");
+    document.getElementById("resultsArea").style.display = "none";
+    document.getElementById("refreshBtn").style.display = "none";
+    try {
+      const user = await findUser(term);
+      if (!user) { document.getElementById("idleState").innerHTML = '<div class="empty-icon">🚫</div><p>No user found.</p>'; return; }
+      currentUid = user.id; renderProfile(user); await loadDownline(user.id);
+      document.getElementById("idleState").style.display = "none";
+      document.getElementById("resultsArea").style.display = "block";
+      document.getElementById("refreshBtn").style.display = "flex";
+    } catch(e) { document.getElementById("idleState").innerHTML = '<div class="empty-icon">⚠️</div><p>Search failed.</p>'; }
+  }
+
+  function renderProfile(user) {
+    document.getElementById("pAvatar").textContent = (user.name||"V").trim().charAt(0).toUpperCase();
+    document.getElementById("pName").textContent = user.name||"Unnamed";
+    document.getElementById("pUsername").textContent = "@"+(user.username||"—");
+    document.getElementById("pBonus").textContent = formatNaira(user.referralEarnings);
+    document.getElementById("profileCard").classList.add("show");
+  }
+
+  // ✅ CHAIN-WALK (no limit)
+  async function loadDownline(uid) {
+    const ref = collection(db, "users");
+    const l1Snap = await getDocs(query(ref, where("referredBy", "==", uid)));
+    const l1 = l1Snap.docs.map(d => ({ id: d.id, level: 1, ...d.data() }));
+    let l2 = []; if (l1.length) { const r = await Promise.all(l1.map(u => getDocs(query(ref, where("referredBy", "==", u.id))))); r.forEach(s => s.docs.forEach(d => l2.push({ id: d.id, level: 2, ...d.data() }))); }
+    let l3 = []; if (l2.length) { const r = await Promise.all(l2.map(u => getDocs(query(ref, where("referredBy", "==", u.id))))); r.forEach(s => s.docs.forEach(d => l3.push({ id: d.id, level: 3, ...d.data() }))); }
+    currentDownline = [...l1, ...l2, ...l3];
+    document.getElementById("pTotalRefs").textContent = currentDownline.length;
+    document.getElementById("pL1").textContent = l1.length;
+    document.getElementById("pL23").textContent = `${l2.length}/${l3.length}`;
+    renderList();
+  }
+
+  // ✅ TABS
+  document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => { document.querySelectorAll(".tab").forEach(x => x.classList.remove("active")); t.classList.add("active"); activeLevel = t.dataset.level; renderList(); }));
+
+  function renderList() {
+    const container = document.getElementById("listContainer");
+    const filtered = activeLevel === "all" ? currentDownline : currentDownline.filter(u => String(u.level) === activeLevel);
+    if (!filtered.length) { container.innerHTML = '<div class="empty-state"><div class="empty-icon">🌱</div><p>No referrals at this level.</p></div>'; return; }
+    container.innerHTML = filtered.map(u => `
+      <div class="ref-item">
+        <div class="ref-top"><div class="ref-avatar">${(u.name||"V").trim().charAt(0).toUpperCase()}</div><div class="ref-name"><p class="n">${escapeHtml(u.name||u.username||"Unnamed")} · @${escapeHtml(u.username||"—")}</p><p class="t">${formatTime(u.createdAt)}</p></div><span class="level-badge ${u.level===2?'l2':u.level===3?'l3':''}">L${u.level}</span></div>
+        <div class="ref-detail-grid"><div class="ref-detail"><p class="k">Total Deposit</p><p class="v">${formatNaira(u.totalDeposit||0)}</p></div><div class="ref-detail"><p class="k">Invested</p><p class="v">${formatNaira(u.totalInvested||0)}</p></div></div>
+      </div>`).join("");
+  }
+
+  document.getElementById("refreshBtn").addEventListener("click", async () => {
+    if (!currentUid) return;
+    const btn = document.getElementById("refreshBtn"); btn.classList.add("spinning");
+    const snap = await getDoc(doc(db, "users", currentUid)); if (snap.exists()) renderProfile({ id: snap.id, ...snap.data() });
+    await loadDownline(currentUid); btn.classList.remove("spinning"); showToast("Updated", "success", 2000);
+  });
+
+  console.log("🚀 Veltrix Admin Referrals - Ready");
+</script>
+</body>
+</html>
