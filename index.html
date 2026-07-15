@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>VELTRIX — Create Account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0c; --surface: #111915; --surface-2: #1a241e; --surface-3: #243028;
+    --primary: #22c55e; --primary-dark: #16a34a; --primary-glow: rgba(34,197,94,0.25);
+    --gold: #f59e0b; --gold-dark: #d97706; --gold-glow: rgba(245,158,11,0.25);
+    --text: #f0fdf4; --text-bright: #ffffff; --muted: #9ca3a0;
+    --success: #22c55e; --warning: #f59e0b; --error: #ef4444;
+    --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+    --shadow-lg: 0 30px 60px rgba(0,0,0,0.6); --shadow-md: 0 15px 35px rgba(0,0,0,0.4);
+    --radius: 20px; --radius-sm: 14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
+    min-height:100vh;overflow-x:hidden;position:relative;
+    background-image:
+      radial-gradient(ellipse at 10% 0%,rgba(34,197,94,0.06) 0%,transparent 50%),
+      radial-gradient(ellipse at 90% 100%,rgba(245,158,11,0.05) 0%,transparent 50%),
+      radial-gradient(ellipse at 50% 50%,rgba(34,197,94,0.03) 0%,transparent 70%);
+  }
+
+  /* Floating orbs */
+  .floating-orb{
+    position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+    filter:blur(80px);opacity:0.4;
+  }
+  .floating-orb.orb-1{width:300px;height:300px;background:rgba(34,197,94,0.15);top:-100px;left:-80px;animation:float1 12s ease-in-out infinite;}
+  .floating-orb.orb-2{width:250px;height:250px;background:rgba(245,158,11,0.12);bottom:-80px;right:-60px;animation:float2 15s ease-in-out infinite;}
+  .floating-orb.orb-3{width:180px;height:180px;background:rgba(34,197,94,0.1);top:50%;left:60%;animation:float3 10s ease-in-out infinite;}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(40px,-30px) scale(1.1);}66%{transform:translate(-20px,20px) scale(0.9);}}
+  @keyframes float2{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(-30px,-20px) scale(1.15);}66%{transform:translate(20px,30px) scale(0.85);}}
+  @keyframes float3{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-25px,-15px) scale(1.1);}}
+
+  .main-container{
+    position:relative;z-index:1;max-width:440px;margin:0 auto;
+    min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+    padding:32px 20px;
+  }
+
+  /* Header */
+  .header-section{text-align:center;margin-bottom:32px;animation:fadeUp 0.7s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+  .logo-mark{
+    width:56px;height:56px;margin:0 auto 16px;
+    background:linear-gradient(135deg,var(--primary),var(--gold));
+    border-radius:18px;display:flex;align-items:center;justify-content:center;
+    box-shadow:0 12px 35px rgba(34,197,94,0.3);
+  }
+  .logo-mark svg{width:28px;height:28px;color:#fff;}
+  .header-section h2{
+    font-family:'DM Sans',sans-serif;font-size:28px;font-weight:800;
+    color:var(--text-bright);letter-spacing:-0.5px;margin-bottom:6px;
+  }
+  .header-section h2 span{color:var(--primary);}
+  .header-section p{color:var(--muted);font-size:14px;}
+
+  /* Form Card */
+  .form-card{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:28px 22px;
+    box-shadow:var(--shadow-lg);animation:fadeUp 0.7s ease 0.15s both;
+  }
+  form{display:flex;flex-direction:column;gap:16px;}
+
+  .input-group{display:flex;flex-direction:column;gap:5px;}
+  .input-group label{
+    font-size:11.5px;font-weight:700;color:var(--muted);
+    letter-spacing:0.6px;text-transform:uppercase;
+  }
+  .input-wrapper{position:relative;}
+  .input-wrapper input{
+    width:100%;background:var(--surface-2);border:1.5px solid var(--border);
+    border-radius:var(--radius-sm);padding:14px 16px;color:var(--text);
+    font-size:14.5px;font-family:'Inter',sans-serif;outline:none;
+    transition:all 0.3s ease;
+  }
+  .input-wrapper input::placeholder{color:#4a524d;}
+  .input-wrapper input:focus{
+    border-color:var(--primary);background:var(--surface-3);
+    box-shadow:0 0 0 4px var(--primary-glow);
+  }
+  .input-wrapper input.error{border-color:var(--error);box-shadow:0 0 0 4px rgba(239,68,68,0.15);}
+  .input-wrapper input.success{border-color:var(--success);box-shadow:0 0 0 4px rgba(34,197,94,0.15);}
+  .input-wrapper .eye-toggle{
+    position:absolute;right:8px;top:50%;transform:translateY(-50%);
+    background:none;border:none;cursor:pointer;padding:8px;color:var(--muted);
+    border-radius:8px;transition:all 0.2s;
+  }
+  .input-wrapper .eye-toggle:hover{color:var(--text-bright);background:var(--surface-3);}
+
+  .phone-wrap{display:flex;gap:8px;}
+  .phone-prefix{
+    background:var(--surface-2);border:1.5px solid var(--border);
+    border-radius:var(--radius-sm);padding:14px 12px;font-size:14px;
+    color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:700;
+    flex:none;width:65px;text-align:center;
+  }
+
+  .feedback-text{font-size:11px;min-height:14px;display:flex;align-items:center;gap:5px;}
+  .feedback-text.ok{color:var(--success);}
+  .feedback-text.err{color:var(--error);}
+  .feedback-text.check{color:var(--gold);}
+
+  .strength-bar{display:flex;gap:3px;margin-top:2px;}
+  .strength-bar span{flex:1;height:3px;border-radius:2px;background:var(--surface-2);transition:all 0.4s ease;}
+
+  .ref-input{letter-spacing:1.5px;text-transform:uppercase;font-weight:600;}
+
+  .checkbox-row{
+    display:flex;align-items:flex-start;gap:10px;padding:14px;
+    background:var(--surface-2);border-radius:var(--radius-sm);
+    border:1px solid var(--border);margin-top:4px;
+  }
+  .checkbox-row input{margin-top:2px;accent-color:var(--primary);width:17px;height:17px;flex:none;cursor:pointer;}
+  .checkbox-row label{font-size:12.5px;color:var(--muted);line-height:1.5;cursor:pointer;}
+  .checkbox-row label a{color:var(--primary);text-decoration:none;font-weight:600;}
+
+  .submit-btn{
+    width:100%;padding:15px;border:none;border-radius:var(--radius-sm);
+    background:linear-gradient(135deg,var(--primary),#16a34a);
+    color:#fff;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+    transition:all 0.3s ease;box-shadow:0 8px 30px var(--primary-glow);
+    position:relative;overflow:hidden;margin-top:6px;
+  }
+  .submit-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 15px 40px var(--primary-glow);}
+  .submit-btn:active:not(:disabled){transform:scale(0.97);}
+  .submit-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .btn-spinner{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;animation:spin 0.7s linear infinite;display:none;}
+  .submit-btn.loading .btn-spinner{display:inline-block;}
+  .submit-btn.loading .btn-label{display:none;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .footer-text{text-align:center;margin-top:24px;font-size:13.5px;color:var(--muted);animation:fadeUp 0.7s ease 0.3s both;}
+  .footer-text a{color:var(--primary);text-decoration:none;font-weight:700;}
+  .footer-text a:hover{text-decoration:underline;}
+
+  /* Toast */
+  .toast-container{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:380px;}
+  .toast{
+    background:var(--surface-3);border:1px solid var(--border);
+    padding:14px 16px;border-radius:var(--radius-sm);font-size:13px;
+    box-shadow:var(--shadow-lg);animation:slideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);
+    display:flex;align-items:center;gap:10px;
+  }
+  .toast.error{border-left:4px solid var(--error);}
+  .toast.success{border-left:4px solid var(--success);}
+  .toast-icon{font-size:18px;flex:none;}
+  @keyframes slideIn{from{opacity:0;transform:translateX(80px);}to{opacity:1;transform:translateX(0);}}
+
+  /* Confirmation Modal */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,0.8);backdrop-filter:blur(6px);
+    display:none;align-items:center;justify-content:center;z-index:150;
+    padding:20px;animation:fadeIn 0.3s ease;
+  }
+  .modal-overlay.show{display:flex;}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  .modal-box{
+    background:var(--surface-2);border:1px solid var(--border);
+    border-radius:var(--radius);padding:30px 24px;max-width:380px;width:100%;
+    text-align:center;box-shadow:var(--shadow-lg);
+    animation:popIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);
+  }
+  @keyframes popIn{from{opacity:0;transform:scale(0.85) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+  .modal-box .modal-icon{
+    width:60px;height:60px;border-radius:50%;margin:0 auto 16px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .modal-box .modal-icon.success{background:rgba(34,197,94,0.15);}
+  .modal-box .modal-icon.success svg{color:var(--success);width:28px;height:28px;}
+  .modal-box h3{font-family:'DM Sans',sans-serif;font-size:20px;font-weight:800;color:var(--text-bright);margin-bottom:8px;}
+  .modal-box p{color:var(--muted);font-size:13.5px;line-height:1.5;margin-bottom:22px;}
+  .modal-box .modal-btn{
+    width:100%;padding:14px;border:none;border-radius:var(--radius-sm);
+    background:linear-gradient(135deg,var(--primary),#16a34a);
+    color:#fff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;
+    cursor:pointer;transition:all 0.3s ease;
+  }
+  .modal-box .modal-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px var(--primary-glow);}
+
+  @media(max-width:480px){.main-container{padding:24px 14px;}.form-card{padding:22px 16px;}}
+</style>
+</head>
+<body>
+
+<div class="floating-orb orb-1"></div>
+<div class="floating-orb orb-2"></div>
+<div class="floating-orb orb-3"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="main-container">
+  <!-- Header -->
+  <div class="header-section">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/>
+      </svg>
+    </div>
+    <h2>Join <span>Veltrix</span></h2>
+    <p>Start your investment journey in minutes</p>
+  </div>
+
+  <!-- Form Card -->
+  <div class="form-card">
+    <form id="registerForm" novalidate>
+      <div class="input-group">
+        <label for="fullName">Full Name</label>
+        <div class="input-wrapper"><input type="text" id="fullName" placeholder="Ade Johnson" autocomplete="name" required></div>
+        <div class="feedback-text" id="nameFeedback"></div>
+      </div>
+
+      <div class="input-group">
+        <label for="username">Username</label>
+        <div class="input-wrapper"><input type="text" id="username" placeholder="adejohnson" autocomplete="off" required></div>
+        <div class="feedback-text" id="usernameFeedback"></div>
+      </div>
+
+      <div class="input-group">
+        <label for="phone">Phone Number</label>
+        <div class="phone-wrap">
+          <span class="phone-prefix">+234</span>
+          <div class="input-wrapper" style="flex:1;"><input type="tel" id="phone" placeholder="8012345678" inputmode="numeric" maxlength="10" autocomplete="tel" required></div>
+        </div>
+        <div class="feedback-text" id="phoneFeedback"></div>
+      </div>
+
+      <div class="input-group">
+        <label for="email">Email Address</label>
+        <div class="input-wrapper"><input type="email" id="email" placeholder="you@example.com" autocomplete="email" required></div>
+        <div class="feedback-text" id="emailFeedback"></div>
+      </div>
+
+      <div class="input-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <input type="password" id="password" placeholder="Min. 8 characters" autocomplete="new-password" required>
+          <button type="button" class="eye-toggle" data-toggle="password" aria-label="Toggle password">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="strength-bar" id="strengthBar"><span></span><span></span><span></span><span></span></div>
+        <div class="feedback-text" id="passwordFeedback"></div>
+      </div>
+
+      <div class="input-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <div class="input-wrapper">
+          <input type="password" id="confirmPassword" placeholder="Re-enter password" autocomplete="new-password" required>
+          <button type="button" class="eye-toggle" data-toggle="confirmPassword" aria-label="Toggle password">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="feedback-text" id="confirmFeedback"></div>
+      </div>
+
+      <div class="input-group">
+        <label for="referral">Referral Code <span style="text-transform:none;opacity:0.6;font-weight:500;">(optional)</span></label>
+        <div class="input-wrapper"><input type="text" id="referral" class="ref-input" placeholder="e.g. VLX-4F2A9C" autocomplete="off"></div>
+        <div class="feedback-text" id="referralFeedback"></div>
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="terms" required>
+        <label for="terms">I agree to Veltrix's <a href="#" id="termsLink">Terms of Service</a> and <a href="#" id="privacyLink">Privacy Policy</a>.</label>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <span class="btn-label">Create Account</span>
+        <span class="btn-spinner"></span>
+      </button>
+    </form>
+  </div>
+
+  <div class="footer-text">
+    Already have an account? <a href="login.html">Sign in</a>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal-box">
+    <div class="modal-icon success">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20,6 9,17 4,12"/></svg>
+    </div>
+    <h3>Account Created!</h3>
+    <p>Your Veltrix account has been created successfully. You're being redirected to the login page.</p>
+    <button class="modal-btn" onclick="window.location.href='login.html'">Go to Login</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI",
+    authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0",
+    storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094",
+    appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  function showToast(msg, type = "info", dur = 4000) {
+    const container = document.getElementById("toastContainer");
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    toast.innerHTML = `<span class="toast-icon">${icons[type] || icons.info}</span>${msg}`;
+    if (container.children.length >= 3) container.removeChild(container.firstChild);
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = "0"; toast.style.transform = "translateX(80px)"; toast.style.transition = "all 0.3s"; setTimeout(() => { if (toast.parentNode) toast.remove(); }, 300); }, dur);
+  }
+
+  // Password toggle
+  document.querySelectorAll(".eye-toggle[data-toggle]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const input = document.getElementById(btn.dataset.toggle);
+      const isPwd = input.type === "password";
+      input.type = isPwd ? "text" : "password";
+      btn.innerHTML = isPwd
+        ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+        : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    });
+  });
+
+  // Prefill referral
+  const urlParams = new URLSearchParams(window.location.search);
+  const refFromUrl = urlParams.get("ref");
+  if (refFromUrl) document.getElementById("referral").value = refFromUrl.toUpperCase();
+
+  const els = {
+    fullName: document.getElementById("fullName"), username: document.getElementById("username"),
+    phone: document.getElementById("phone"), email: document.getElementById("email"),
+    password: document.getElementById("password"), confirmPassword: document.getElementById("confirmPassword"),
+    referral: document.getElementById("referral"), terms: document.getElementById("terms"),
+    submitBtn: document.getElementById("submitBtn")
+  };
+
+  function setFeedback(id, msg, type) {
+    const el = document.getElementById(id);
+    if (el) { el.textContent = msg; el.className = "feedback-text" + (type ? " " + type : ""); }
+  }
+  function markInput(el, state) {
+    if (el) { el.classList.remove("error", "success"); if (state) el.classList.add(state); }
+  }
+
+  const patterns = { username: /^[a-z0-9_]{3,20}$/, email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, phone: /^\d{10}$/ };
+
+  function validateName() { const v = els.fullName.value.trim(); const ok = v.length >= 3; setFeedback("nameFeedback", ok ? "✓ Looks good" : "Enter your full name", ok ? "ok" : "err"); markInput(els.fullName, ok ? "success" : "error"); return ok; }
+  function validatePhone() { const v = els.phone.value.trim(); const ok = patterns.phone.test(v) && v[0] !== "0"; setFeedback("phoneFeedback", ok ? "✓ Valid" : "10 digits, no leading 0", ok ? "ok" : "err"); markInput(els.phone, ok ? "success" : "error"); return ok; }
+  function validateEmail() { const v = els.email.value.trim(); const ok = patterns.email.test(v); setFeedback("emailFeedback", ok ? "✓ Valid email" : "Enter a valid email", ok ? "ok" : "err"); markInput(els.email, ok ? "success" : "error"); return ok; }
+  function pScore(v) { let s = 0; if (v.length >= 8) s++; if (/[A-Z]/.test(v) && /[a-z]/.test(v)) s++; if (/\d/.test(v)) s++; if (/[^A-Za-z0-9]/.test(v)) s++; return s; }
+  function updateStrength(s) { const bars = document.querySelectorAll("#strengthBar span"); const cols = ["#ef4444", "#f59e0b", "#eab308", "#22c55e"]; bars.forEach((b, i) => { b.style.background = i < s ? cols[Math.max(s - 1, 0)] : "var(--surface-2)"; b.style.boxShadow = i < s ? `0 0 8px ${cols[Math.max(s - 1, 0)]}` : "none"; }); }
+  function validatePassword() { const v = els.password.value; const s = pScore(v); updateStrength(s); let m = "", t = ""; if (v.length === 0) { } else if (v.length < 8) { m = "Min 8 chars"; t = "err"; } else if (s >= 3) { m = "✓ Strong password"; t = "ok"; } else { m = "Add numbers or symbols"; t = "check"; } setFeedback("passwordFeedback", m, t); markInput(els.password, t === "ok" ? "success" : t === "err" ? "error" : ""); return s >= 2 && v.length >= 8; }
+  function validateConfirm() { const v = els.confirmPassword.value; if (v.length === 0) { setFeedback("confirmFeedback", ""); return false; } const ok = v === els.password.value; setFeedback("confirmFeedback", ok ? "✓ Passwords match" : "Passwords don't match", ok ? "ok" : "err"); markInput(els.confirmPassword, ok ? "success" : "error"); return ok; }
+
+  els.fullName.addEventListener("blur", validateName);
+  els.phone.addEventListener("input", e => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10); });
+  els.phone.addEventListener("blur", validatePhone);
+  els.email.addEventListener("blur", validateEmail);
+  els.password.addEventListener("input", () => { validatePassword(); if (els.confirmPassword.value) validateConfirm(); });
+  els.confirmPassword.addEventListener("input", validateConfirm);
+
+  // Username check
+  const uCache = {}; let uTimeout, uAvail = false;
+  els.username.addEventListener("input", e => {
+    e.target.value = e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, "");
+    const v = e.target.value.trim(); clearTimeout(uTimeout); uAvail = false;
+    if (!patterns.username.test(v)) { setFeedback("usernameFeedback", v.length > 0 ? "3-20 chars: letters, numbers, underscore" : "", "err"); markInput(els.username, v.length > 0 ? "error" : ""); return; }
+    if (uCache[v] !== undefined) { applyU(v, uCache[v]); return; }
+    setFeedback("usernameFeedback", "Checking availability…", "check");
+    uTimeout = setTimeout(async () => { const snap = await getDoc(doc(db, "usernames", v)); uCache[v] = !snap.exists(); if (els.username.value.trim() === v) applyU(v, uCache[v]); }, 600);
+  });
+  function applyU(v, avail) { if (els.username.value.trim() !== v) return; if (avail) { setFeedback("usernameFeedback", "✓ Username available", "ok"); markInput(els.username, "success"); uAvail = true; } else { setFeedback("usernameFeedback", "Username taken", "err"); markInput(els.username, "error"); uAvail = false; } }
+
+  function genCode() { const ch = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let c = "VLX-"; for (let i = 0; i < 6; i++) c += ch[Math.floor(Math.random() * ch.length)]; return c; }
+  async function genUnique() { for (let i = 0; i < 5; i++) { const c = genCode(); if (!(await getDoc(doc(db, "referralCodes", c))).exists()) return c; } return genCode() + Date.now().toString(36).slice(-2).toUpperCase(); }
+
+  // SUBMIT
+  document.getElementById("registerForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    if (!validateName() || !validatePhone() || !validateEmail() || !validatePassword() || !validateConfirm()) { showToast("Please fix the highlighted fields", "error"); return; }
+    if (!patterns.username.test(els.username.value.trim())) { showToast("Choose a valid username", "error"); return; }
+    if (!uAvail) { showToast("Username is not available", "error"); return; }
+    if (!els.terms.checked) { showToast("You must accept the Terms of Service", "error"); return; }
+
+    els.submitBtn.disabled = true; els.submitBtn.classList.add("loading");
+    const username = els.username.value.trim();
+    const refCode = els.referral.value.trim().toUpperCase();
+
+    try {
+      let referrerUid = null;
+      if (refCode) { const refSnap = await getDoc(doc(db, "referralCodes", refCode)); if (refSnap.exists()) referrerUid = refSnap.data().uid; }
+
+      const cred = await createUserWithEmailAndPassword(auth, els.email.value.trim(), els.password.value);
+      const uid = cred.user.uid;
+      const myCode = await genUnique();
+
+      await Promise.all([
+        setDoc(doc(db, "users", uid), {
+          name: els.fullName.value.trim(), username, phone: "0" + els.phone.value.trim(),
+          email: els.email.value.trim(), referralCode: myCode, referredBy: referrerUid,
+          balance: 0, totalDeposit: 0, totalInvested: 0, totalEarnings: 0, referralEarnings: 0,
+          firstPurchaseDone: false, unlockedVipTier: 0, hasPremiumPlan: false, createdAt: serverTimestamp()
+        }),
+        setDoc(doc(db, "usernames", username), { uid, referralCode: myCode }),
+        setDoc(doc(db, "referralCodes", myCode), { uid, username })
+      ]);
+
+      sessionStorage.setItem("veltrix_user_cache", JSON.stringify({ uid, name: els.fullName.value.trim(), username, referralCode: myCode }));
+      sessionStorage.setItem("veltrix_show_welcome", "1");
+
+      // Show success modal
+      document.getElementById("successModal").classList.add("show");
+    } catch (err) {
+      let msg = "Registration failed. Try again.";
+      if (err.code === "auth/email-already-in-use") msg = "Email already registered.";
+      showToast(msg, "error");
+      els.submitBtn.disabled = false; els.submitBtn.classList.remove("loading");
+    }
+  });
+
+  // Terms/Privacy links
+  document.getElementById("termsLink")?.addEventListener("click", e => { e.preventDefault(); showToast("Terms page coming soon", "info"); });
+  document.getElementById("privacyLink")?.addEventListener("click", e => { e.preventDefault(); showToast("Privacy page coming soon", "info"); });
+
+  console.log("🚀 Veltrix Registration - Ready");
+</script>
+</body>
+</html>
