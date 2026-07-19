@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>VELTRIX — Referrals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0c; --surface: #111915; --surface-2: #1a241e; --surface-3: #243028;
+    --primary: #22c55e; --primary-dark: #16a34a; --primary-glow: rgba(34,197,94,0.25);
+    --gold: #f59e0b; --text: #f0fdf4; --text-bright: #ffffff; --muted: #9ca3a0;
+    --success: #22c55e; --warning: #f59e0b; --error: #ef4444;
+    --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+    --shadow-lg: 0 30px 60px rgba(0,0,0,0.6); --shadow-md: 0 15px 35px rgba(0,0,0,0.4);
+    --radius: 18px; --radius-sm: 13px; --nav-height: 72px; --safe-bottom: 120px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;position:relative;padding-bottom:var(--safe-bottom);overflow-x:hidden;background-image:radial-gradient(ellipse at 50% 0%,rgba(34,197,94,0.04) 0%,transparent 50%);}
+  a{text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;}
+
+  .floating-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(90px);opacity:0.18;}
+  .floating-orb.orb-1{width:240px;height:240px;background:rgba(245,158,11,0.06);bottom:-60px;right:-50px;animation:float1 15s ease-in-out infinite;}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-20px,-15px) scale(1.05);}}
+
+  .container{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:20px 18px var(--safe-bottom);animation:fadeUp 0.5s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:translateY(0);}}
+
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:18px;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .back-btn,.icon-btn{width:40px;height:40px;border-radius:12px;flex:none;background:var(--surface);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all 0.25s;}
+  .back-btn:hover,.icon-btn:hover{background:var(--surface-2);border-color:var(--border-hover);color:var(--text-bright);}
+  .back-btn svg,.icon-btn svg{width:18px;height:18px;}
+  .icon-btn.spinning{animation:spin 0.7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .topbar h1{font-family:'DM Sans',sans-serif;font-size:19px;font-weight:700;color:var(--text-bright);}
+
+  .link-card{background:linear-gradient(135deg,#0f1a12,#1a2215);border:1.5px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:18px;position:relative;overflow:hidden;box-shadow:var(--shadow-md);animation:fadeUp 0.5s ease 0.05s both;}
+  .link-card::before{content:"";position:absolute;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(34,197,94,0.1),transparent 70%);top:-60px;right:-60px;}
+  .link-card p.label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;font-weight:700;position:relative;z-index:1;}
+  .code-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:11px;padding:13px 15px;margin-bottom:12px;position:relative;z-index:1;}
+  .code-row span{font-family:'DM Sans',sans-serif;font-size:17px;font-weight:700;letter-spacing:0.5px;color:var(--primary);}
+  .code-row button{background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--muted);padding:8px 12px;border-radius:9px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:5px;}
+  .code-row button:hover{background:rgba(255,255,255,0.08);color:var(--text-bright);}
+  .share-row{display:flex;gap:8px;position:relative;z-index:1;}
+  .share-row button{flex:1;padding:12px;border-radius:11px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;gap:6px;transition:all 0.3s;}
+  .btn-copy{background:var(--surface-2);color:var(--text);border:1.5px solid var(--border)!important;}
+  .btn-copy:hover{background:var(--surface-3);border-color:var(--border-hover)!important;}
+  .btn-copy.copied{background:var(--success);color:#fff;border-color:var(--success)!important;}
+  .btn-share{background:linear-gradient(135deg,var(--primary),#16a34a);color:#fff;box-shadow:0 6px 20px var(--primary-glow);}
+  .btn-share:hover{transform:translateY(-2px);box-shadow:0 10px 25px var(--primary-glow);}
+
+  .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;animation:fadeUp 0.5s ease 0.1s both;}
+  .stat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:15px 10px;text-align:center;transition:all 0.3s;}
+  .stat-card:hover{border-color:var(--border-hover);transform:translateY(-2px);}
+  .stat-card .stat-icon{font-size:20px;margin-bottom:6px;}
+  .stat-card p.label{font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.4px;font-weight:700;}
+  .stat-card p.value{font-family:'DM Sans',sans-serif;font-size:18px;font-weight:800;color:var(--text-bright);}
+
+  .tabs{display:flex;gap:5px;margin-bottom:16px;overflow-x:auto;padding:2px;animation:fadeUp 0.5s ease 0.15s both;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{flex:none;padding:9px 17px;border-radius:20px;font-size:12.5px;font-weight:700;background:var(--surface);border:1.5px solid var(--border);color:var(--muted);cursor:pointer;white-space:nowrap;transition:all 0.3s;font-family:'DM Sans',sans-serif;}
+  .tab:hover{border-color:var(--border-hover);color:var(--text);}
+  .tab.active{background:var(--primary);border-color:var(--primary);color:#fff;box-shadow:0 4px 12px var(--primary-glow);}
+
+  .section-title{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;margin-bottom:12px;color:var(--text-bright);animation:fadeUp 0.5s ease 0.2s both;}
+
+  .ref-list{display:flex;flex-direction:column;gap:10px;animation:fadeUp 0.5s ease 0.25s both;}
+  .ref-item{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:15px;transition:all 0.3s;}
+  .ref-item:hover{border-color:var(--border-hover);box-shadow:var(--shadow-md);}
+  .ref-item-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .ref-avatar{width:40px;height:40px;border-radius:11px;flex:none;background:linear-gradient(135deg,var(--primary),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-weight:700;color:#fff;font-size:15px;box-shadow:0 4px 10px var(--primary-glow);}
+  .ref-name-wrap{flex:1;min-width:0;}
+  .ref-name-wrap p.name{font-size:14px;font-weight:700;color:var(--text-bright);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ref-name-wrap p.time{font-size:11px;color:var(--muted);margin-top:2px;}
+  .level-badge{flex:none;font-size:10px;font-weight:700;padding:4px 9px;border-radius:7px;background:rgba(34,197,94,0.15);color:var(--primary);font-family:'DM Sans',sans-serif;}
+  .level-badge.l2{background:rgba(245,158,11,0.15);color:var(--gold);}
+  .level-badge.l3{background:rgba(156,163,160,0.15);color:var(--muted);}
+  .ref-detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:10px;}
+  .ref-detail{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:9px;padding:9px 7px;text-align:center;}
+  .ref-detail p.k{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:2px;font-weight:600;}
+  .ref-detail p.v{font-size:12px;font-weight:700;color:var(--text-bright);}
+  .ref-status{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);padding:7px 11px;background:rgba(255,255,255,0.02);border-radius:8px;}
+  .status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;flex:none;}
+  .status-dot.active{background:var(--success);box-shadow:0 0 6px rgba(34,197,94,0.5);}
+  .status-dot.pending{background:var(--warning);box-shadow:0 0 6px rgba(245,158,11,0.3);}
+
+  .empty-state{text-align:center;padding:50px 20px;color:var(--muted);animation:fadeUp 0.5s ease;}
+  .empty-state .empty-icon{font-size:36px;margin-bottom:12px;}
+  .empty-state p{font-size:13.5px;line-height:1.5;}
+  .skeleton{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);height:105px;margin-bottom:10px;background-image:linear-gradient(90deg,var(--surface) 0%,var(--surface-2) 50%,var(--surface) 100%);background-size:200% 100%;animation:shimmer 1.5s infinite;}
+  @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+  .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(10,15,12,0.96);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;justify-content:space-around;align-items:center;padding:8px 8px calc(8px + env(safe-area-inset-bottom));height:var(--nav-height);}
+  .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:var(--muted);flex:1;padding:6px 4px;border-radius:12px;transition:all 0.3s;cursor:pointer;}
+  .nav-item svg{width:21px;height:21px;}
+  .nav-item span{font-weight:600;}
+  .nav-item.active{color:var(--primary);}
+  .nav-item.active::before{content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:20px;height:3px;background:var(--primary);border-radius:0 0 3px 3px;}
+
+  .toast-container{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:380px;}
+  .toast{background:var(--surface-3);border:1px solid var(--border);padding:13px 15px;border-radius:var(--radius-sm);font-size:13px;box-shadow:var(--shadow-lg);animation:slideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);display:flex;align-items:center;gap:9px;}
+  .toast.error{border-left:4px solid var(--error);}
+  .toast.success{border-left:4px solid var(--success);}
+  @keyframes slideIn{from{opacity:0;transform:translateX(80px);}to{opacity:1;transform:translateX(0);}}
+
+  @media(max-width:480px){.container{padding:16px 12px var(--safe-bottom);}}
+  @media(min-width:768px){.container{padding:28px 22px var(--safe-bottom);}}
+</style>
+</head>
+<body>
+
+<div class="floating-orb orb-1"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg></a>
+      <h1>My Referrals</h1>
+    </div>
+    <button class="icon-btn" id="refreshBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+  </div>
+
+  <div class="link-card">
+    <p class="label">Your Referral Code</p>
+    <div class="code-row"><span id="referralCodeText">—</span><button id="copyCodeBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+    <div class="share-row">
+      <button class="btn-copy" id="copyLinkBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Copy Link</button>
+      <button class="btn-share" id="shareBtn"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/></svg> Share</button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-icon">👥</div><p class="label">Total Refs</p><p class="value" id="totalReferrals">0</p></div>
+    <div class="stat-card"><div class="stat-icon">💰</div><p class="label">Bonus</p><p class="value" id="referralBonus">₦0</p></div>
+    <div class="stat-card"><div class="stat-icon">📊</div><p class="label">Active</p><p class="value" id="activeCount">0</p></div>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-level="all">All Levels</div>
+    <div class="tab" data-level="1">Level 1 (10%)</div>
+    <div class="tab" data-level="2">Level 2 (3%)</div>
+    <div class="tab" data-level="3">Level 3 (1%)</div>
+  </div>
+
+  <div class="section-title">Your Downline</div>
+  <div id="listContainer"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Home</span></a>
+  <a href="plans.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg><span>Plans</span></a>
+  <a href="history.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg><span>History</span></a>
+  <a href="profile.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></a>
+</nav>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI",
+    authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0",
+    storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094",
+    appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const CACHE_KEY = "veltrix_referral_cache";
+  let currentUser = null, allReferrals = [], activeLevel = "all";
+
+  function showToast(m, t = "info", d = 4000) {
+    const c = document.getElementById("toastContainer");
+    const el = document.createElement("div");
+    el.className = `toast ${t}`;
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    el.innerHTML = `<span>${icons[t]||icons.info}</span>${m}`;
+    if (c.children.length >= 3) c.removeChild(c.firstChild);
+    c.appendChild(el);
+    setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateX(80px)"; el.style.transition = "all 0.3s"; setTimeout(() => { if (el.parentNode) el.remove(); }, 300); }, d);
+  }
+
+  function formatNaira(v) { return "₦" + (Number(v) || 0).toLocaleString("en-NG"); }
+  function formatTime(ts) {
+    if (!ts) return "Recently joined";
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    const diff = Math.floor((new Date() - d) / 86400000);
+    if (diff === 0) return "Joined today";
+    if (diff === 1) return "Joined yesterday";
+    if (diff < 7) return `Joined ${diff} days ago`;
+    return "Joined " + d.toLocaleDateString("en-NG", { day: "numeric", month: "short", year: "numeric" });
+  }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+  function myLink(code) { return `${window.location.origin}${window.location.pathname.replace("referral.html","index.html")}?ref=${code}`; }
+
+  // Copy buttons
+  document.getElementById("copyCodeBtn").addEventListener("click", async () => {
+    const code = document.getElementById("referralCodeText").textContent;
+    if (code === "—") return;
+    try { await navigator.clipboard.writeText(code); showToast("Code copied!", "success", 2000); }
+    catch(e) { showToast("Your code: " + code, "info"); }
+  });
+  document.getElementById("copyLinkBtn").addEventListener("click", async () => {
+    const code = document.getElementById("referralCodeText").textContent;
+    if (code === "—") return;
+    const link = myLink(code);
+    try {
+      await navigator.clipboard.writeText(link);
+      const btn = document.getElementById("copyLinkBtn"); btn.classList.add("copied");
+      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20,6 9,17 4,12"/></svg> Copied!`;
+      showToast("Link copied!", "success", 2500);
+      setTimeout(() => { btn.classList.remove("copied"); btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Copy Link`; }, 2000);
+    } catch(e) { showToast("Couldn't copy", "error"); }
+  });
+  document.getElementById("shareBtn").addEventListener("click", () => {
+    const code = document.getElementById("referralCodeText").textContent;
+    if (code === "—") return;
+    const text = encodeURIComponent(`🚀 Join me on VELTRIX! Use my code: ${code}\nSign up: ${myLink(code)}\n\n💰 Earn bonuses on every referral!`);
+    window.open(`https://wa.me/?text=${text}`, "_blank", "noopener,noreferrer");
+  });
+
+  // Tabs
+  document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () => {
+    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
+    t.classList.add("active"); activeLevel = t.dataset.level; renderList();
+  }));
+
+  function renderList() {
+    const container = document.getElementById("listContainer");
+    const filtered = activeLevel === "all" ? allReferrals : allReferrals.filter(r => String(r.level) === activeLevel);
+    if (!filtered.length) {
+      container.innerHTML = `<div class="empty-state"><div class="empty-icon">🌱</div><p>No referrals ${activeLevel==="all"?"yet":"at this level"}.</p><p style="margin-top:6px;">Share your link to earn!</p></div>`;
+      return;
+    }
+    container.innerHTML = filtered.map(r => `
+      <div class="ref-item">
+        <div class="ref-item-top"><div class="ref-avatar">${(r.name||"V").charAt(0).toUpperCase()}</div><div class="ref-name-wrap"><p class="name">${escapeHtml(r.name||r.username||"User")}</p><p class="time">${formatTime(r.createdAt)}</p></div><div class="level-badge ${r.level===2?"l2":r.level===3?"l3":""}">L${r.level}</div></div>
+        <div class="ref-detail-grid">
+          <div class="ref-detail"><p class="k">Deposits</p><p class="v">${formatNaira(r.totalDeposit||0)}</p></div>
+          <div class="ref-detail"><p class="k">Invested</p><p class="v">${formatNaira(r.totalInvested||0)}</p></div>
+          <div class="ref-detail"><p class="k">Admin</p><p class="v">${formatNaira(r.adminFunded||r.totalDeposit||0)}</p></div>
+        </div>
+        <div class="ref-status"><span class="status-dot ${r.totalInvested>0?"active":"pending"}"></span>${r.totalInvested>0?"Active Investor":"Awaiting first investment"}</div>
+      </div>`).join("");
+  }
+
+  // ✅ Fetch ALL users, filter client-side (no index needed)
+  async function fetchDownline(uid) {
+    try {
+      const snap = await getDocs(collection(db, "users"));
+      const all = []; snap.forEach(d => all.push({ id: d.id, ...d.data() }));
+      const l1 = all.filter(u => u.referredBy === uid);
+      const l1Ids = l1.map(u => u.id);
+      const l2 = all.filter(u => l1Ids.includes(u.referredBy));
+      const l2Ids = l2.map(u => u.id);
+      const l3 = all.filter(u => l2Ids.includes(u.referredBy));
+      return [...l1.map(u=>({...u,level:1})),...l2.map(u=>({...u,level:2})),...l3.map(u=>({...u,level:3}))].map(u=>({name:u.name,username:u.username,level:u.level,createdAt:u.createdAt,totalDeposit:u.totalDeposit||0,totalInvested:u.totalInvested||0,adminFunded:u.adminFunded||u.totalDeposit||0}));
+    } catch(e) { showToast("Error loading referrals.", "error"); return []; }
+  }
+
+  async function loadData(uid, force = false) {
+    if (!force) { const c = sessionStorage.getItem(CACHE_KEY); if (c) { try { const p = JSON.parse(c); if (p.uid === uid) { allReferrals = p.refs; renderSummary(p.code, p.bonus); renderList(); return; } } catch(e){} } }
+    const snap = await getDoc(doc(db, "users", uid));
+    const data = snap.exists() ? snap.data() : {};
+    allReferrals = await fetchDownline(uid);
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify({ uid, refs: allReferrals, code: data.referralCode||"—", bonus: data.referralEarnings||0 }));
+    renderSummary(data.referralCode||"—", data.referralEarnings||0); renderList();
+  }
+
+  function renderSummary(code, bonus) {
+    document.getElementById("referralCodeText").textContent = code;
+    document.getElementById("totalReferrals").textContent = allReferrals.length;
+    document.getElementById("referralBonus").textContent = formatNaira(bonus);
+    document.getElementById("activeCount").textContent = allReferrals.filter(r => r.totalInvested > 0).length;
+  }
+
+  onAuthStateChanged(auth, (user) => { if (!user) { window.location.href = "login.html"; return; } currentUser = user; loadData(user.uid).catch(() => { document.getElementById("listContainer").innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Something went wrong.</p></div>'; }); });
+
+  document.getElementById("refreshBtn").addEventListener("click", async () => {
+    if (!currentUser) return;
+    const btn = document.getElementById("refreshBtn"); btn.classList.add("spinning");
+    try { await loadData(currentUser.uid, true); showToast("Updated!", "success", 2500); }
+    catch(e) { showToast("Couldn't refresh", "error"); }
+    finally { setTimeout(() => btn.classList.remove("spinning"), 600); }
+  });
+
+  console.log("🚀 Veltrix Referrals - Ready");
+</script>
+</body>
+</html>
