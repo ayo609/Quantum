@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>VELTRIX — Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0c; --surface: #111915; --surface-2: #1a241e; --surface-3: #243028;
+    --primary: #22c55e; --primary-dark: #16a34a; --primary-glow: rgba(34,197,94,0.25);
+    --gold: #f59e0b; --text: #f0fdf4; --text-bright: #ffffff; --muted: #9ca3a0;
+    --success: #22c55e; --warning: #f59e0b; --error: #ef4444;
+    --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+    --shadow-lg: 0 30px 60px rgba(0,0,0,0.6); --shadow-md: 0 15px 35px rgba(0,0,0,0.4);
+    --radius: 18px; --radius-sm: 13px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;position:relative;padding-bottom:40px;background-image:radial-gradient(ellipse at 50% 0%,rgba(34,197,94,0.05) 0%,transparent 50%);}
+  a{text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;}
+
+  .floating-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(100px);opacity:0.2;}
+  .floating-orb.orb-1{width:280px;height:280px;background:rgba(34,197,94,0.08);top:-80px;right:-60px;animation:float1 14s ease-in-out infinite;}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-30px,20px) scale(1.08);}}
+
+  .container{position:relative;z-index:1;max-width:580px;margin:0 auto;padding:20px 18px 60px;animation:fadeUp 0.5s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:translateY(0);}}
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .topbar-left{display:flex;align-items:center;gap:10px;}
+  .admin-badge{font-size:10px;font-weight:700;letter-spacing:0.5px;color:var(--gold);border:1.5px solid rgba(245,158,11,0.3);padding:4px 10px;border-radius:7px;text-transform:uppercase;background:rgba(245,158,11,0.08);}
+  .topbar h1{font-family:'DM Sans',sans-serif;font-size:19px;font-weight:700;color:var(--text-bright);}
+  .top-icons{display:flex;gap:8px;}
+  .icon-btn{width:38px;height:38px;border-radius:11px;background:var(--surface);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all 0.25s;}
+  .icon-btn:hover{background:var(--surface-2);border-color:var(--border-hover);color:var(--text-bright);}
+  .icon-btn svg{width:17px;height:17px;}
+  .icon-btn.spinning{animation:spin 0.7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .subhead{color:var(--muted);font-size:12.5px;margin-bottom:16px;}
+
+  .section-title{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:var(--muted);margin:18px 0 10px;text-transform:uppercase;letter-spacing:0.5px;display:flex;align-items:center;justify-content:space-between;}
+  .live-badge{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--success);text-transform:none;letter-spacing:0;font-weight:600;}
+  .live-dot{width:6px;height:6px;border-radius:50%;background:var(--success);display:inline-block;animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+  .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;}
+  .stat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:15px;transition:all 0.3s;}
+  .stat-card:hover{border-color:var(--border-hover);box-shadow:var(--shadow-md);}
+  .stat-card p.label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;font-weight:700;}
+  .stat-card p.value{font-family:'DM Sans',sans-serif;font-size:18px;font-weight:800;color:var(--text-bright);}
+  .skeleton-line{display:inline-block;width:70px;height:15px;border-radius:4px;background-image:linear-gradient(90deg,var(--surface-2) 0%,var(--surface-3) 50%,var(--surface-2) 100%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+  @keyframes shimmer{from{background-position:200% 0;}to{background-position:-200% 0;}}
+
+  /* Bar Chart */
+  .chart-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px;}
+  .chart-title{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:14px;text-transform:uppercase;letter-spacing:0.4px;}
+  .chart-bars{display:flex;align-items:flex-end;gap:12px;height:120px;padding:0 4px;}
+  .chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;}
+  .chart-bar{width:100%;max-width:50px;border-radius:6px 6px 0 0;transition:all 0.5s ease;min-height:4px;}
+  .chart-bar.c1{background:linear-gradient(180deg,var(--primary),#16a34a);}
+  .chart-bar.c2{background:linear-gradient(180deg,var(--gold),#d97706);}
+  .chart-bar.c3{background:linear-gradient(180deg,#3b82f6,#2563eb);}
+  .chart-bar.c4{background:linear-gradient(180deg,#ef4444,#dc2626);}
+  .chart-bar.c5{background:linear-gradient(180deg,#8b5cf6,#7c3aed);}
+  .chart-val{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:var(--text-bright);}
+  .chart-label{font-size:9px;color:var(--muted);text-align:center;font-weight:600;text-transform:uppercase;}
+
+  .pending-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:15px;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;transition:all 0.3s;}
+  .pending-card:hover{border-color:var(--border-hover);}
+  .pending-card .p-left{display:flex;align-items:center;gap:12px;}
+  .pending-card .p-icon{width:40px;height:40px;border-radius:10px;flex:none;display:flex;align-items:center;justify-content:center;}
+  .pending-card .p-icon.deposit{background:rgba(34,197,94,0.12);color:var(--primary);}
+  .pending-card .p-icon.withdraw{background:rgba(239,68,68,0.1);color:var(--error);}
+  .pending-card .p-icon svg{width:19px;height:19px;}
+  .pending-card p.count{font-family:'DM Sans',sans-serif;font-size:17px;font-weight:800;color:var(--text-bright);}
+  .pending-card p.label{font-size:10.5px;color:var(--muted);}
+  .review-btn{background:var(--surface-2);border:1.5px solid var(--border);color:var(--primary);font-size:11.5px;font-weight:700;padding:8px 14px;border-radius:8px;cursor:pointer;flex:none;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+  .review-btn:hover{background:var(--surface-3);border-color:var(--primary);}
+
+  .nav-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+  .nav-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:15px;display:flex;flex-direction:column;gap:7px;cursor:pointer;transition:all 0.3s;}
+  .nav-card:hover{border-color:var(--primary);transform:translateY(-2px);box-shadow:0 8px 25px var(--primary-glow);}
+  .nav-card .n-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;}
+  .nav-card .n-icon svg{width:17px;height:17px;}
+  .nav-card .n-icon.deposits{background:rgba(34,197,94,0.12);color:var(--primary);}
+  .nav-card .n-icon.withdrawals{background:rgba(239,68,68,0.1);color:var(--error);}
+  .nav-card .n-icon.users{background:rgba(245,158,11,0.12);color:var(--gold);}
+  .nav-card .n-icon.investments{background:rgba(34,197,94,0.1);color:var(--primary);}
+  .nav-card .n-icon.referrals{background:rgba(245,158,11,0.1);color:var(--gold);}
+  .nav-card .n-icon.settings{background:rgba(156,163,160,0.12);color:var(--muted);}
+  .nav-card .n-icon.activity{background:rgba(34,197,94,0.08);color:var(--primary);}
+  .nav-card p.title{font-size:12.5px;font-weight:700;color:var(--text-bright);}
+  .nav-card p.sub{font-size:10px;color:var(--muted);}
+
+  .logout-row{margin-top:22px;}
+  .logout-btn{width:100%;background:var(--surface);border:1.5px solid rgba(239,68,68,0.25);color:var(--error);padding:13px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;transition:all 0.3s;}
+  .logout-btn:hover{background:rgba(239,68,68,0.08);border-color:var(--error);}
+
+  .toast-container{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:380px;}
+  .toast{background:var(--surface-3);border:1px solid var(--border);padding:13px 15px;border-radius:var(--radius-sm);font-size:13px;box-shadow:var(--shadow-lg);animation:slideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);display:flex;align-items:center;gap:9px;}
+  .toast.error{border-left:4px solid var(--error);}
+  .toast.success{border-left:4px solid var(--success);}
+  @keyframes slideIn{from{opacity:0;transform:translateX(80px);}to{opacity:1;transform:translateX(0);}}
+
+  @media(max-width:480px){.container{padding:16px 12px 60px;}}
+</style>
+</head>
+<body>
+
+<div class="floating-orb orb-1"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Admin Dashboard</h1>
+      <span class="admin-badge">Admin</span>
+    </div>
+    <div class="top-icons">
+      <button class="icon-btn" id="refreshBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+    </div>
+  </div>
+  <p class="subhead">Platform overview and quick actions</p>
+
+  <!-- Stats -->
+  <div class="section-title">Overview</div>
+  <div class="stats-grid">
+    <div class="stat-card"><p class="label">Total Users</p><p class="value" id="statUsers">—</p></div>
+    <div class="stat-card"><p class="label">Total Invested</p><p class="value" id="statInvested">₦0</p></div>
+    <div class="stat-card"><p class="label">Deposits Approved</p><p class="value" id="statDeposits">₦0</p></div>
+    <div class="stat-card"><p class="label">Withdrawals Paid</p><p class="value" id="statWithdrawals">₦0</p></div>
+  </div>
+
+  <!-- Bar Chart -->
+  <div class="chart-card">
+    <div class="chart-title">📊 Platform Overview</div>
+    <div class="chart-bars">
+      <div class="chart-bar-wrap"><div class="chart-val" id="chartUsers">0</div><div class="chart-bar c1" id="barUsers" style="height:20px;"></div><div class="chart-label">Users</div></div>
+      <div class="chart-bar-wrap"><div class="chart-val" id="chartInvested">₦0</div><div class="chart-bar c2" id="barInvested" style="height:20px;"></div><div class="chart-label">Invested</div></div>
+      <div class="chart-bar-wrap"><div class="chart-val" id="chartDeposits">₦0</div><div class="chart-bar c3" id="barDeposits" style="height:20px;"></div><div class="chart-label">Deposits</div></div>
+      <div class="chart-bar-wrap"><div class="chart-val" id="chartWithdrawals">₦0</div><div class="chart-bar c4" id="barWithdrawals" style="height:20px;"></div><div class="chart-label">Paid</div></div>
+      <div class="chart-bar-wrap"><div class="chart-val" id="chartReferral">₦0</div><div class="chart-bar c5" id="barReferral" style="height:20px;"></div><div class="chart-label">Referrals</div></div>
+    </div>
+  </div>
+
+  <!-- Pending -->
+  <div class="section-title">
+    <span>Needs Attention</span>
+    <span class="live-badge"><span class="live-dot"></span> Live</span>
+  </div>
+  <div class="pending-card">
+    <div class="p-left">
+      <div class="p-icon deposit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19,12 12,19 5,12"/></svg></div>
+      <div><p class="count" id="pendingDeposits">0</p><p class="label">Pending Deposits</p></div>
+    </div>
+    <a href="admin-deposits.html"><button class="review-btn">Review →</button></a>
+  </div>
+  <div class="pending-card">
+    <div class="p-left">
+      <div class="p-icon withdraw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5,12 12,5 19,12"/></svg></div>
+      <div><p class="count" id="pendingWithdrawals">0</p><p class="label">Pending Withdrawals</p></div>
+    </div>
+    <a href="admin-withdrawals.html"><button class="review-btn">Review →</button></a>
+  </div>
+
+  <!-- Navigation -->
+  <div class="section-title">Manage</div>
+  <div class="nav-grid">
+    <a class="nav-card" href="admin-deposits.html"><div class="n-icon deposits"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19,12 12,19 5,12"/></svg></div><div><p class="title">Deposits</p><p class="sub">Approve or reject</p></div></a>
+    <a class="nav-card" href="admin-withdrawals.html"><div class="n-icon withdrawals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5,12 12,5 19,12"/></svg></div><div><p class="title">Withdrawals</p><p class="sub">Approve or reject</p></div></a>
+    <a class="nav-card" href="admin-users.html"><div class="n-icon users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div><p class="title">Users</p><p class="sub">Manage accounts</p></div></a>
+    <a class="nav-card" href="admin-investments.html"><div class="n-icon investments"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg></div><div><p class="title">Investments</p><p class="sub">Active & completed</p></div></a>
+    <a class="nav-card" href="admin-referrals.html"><div class="n-icon referrals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17,11 19,13 23,9"/></svg></div><div><p class="title">Referrals</p><p class="sub">Downline & payouts</p></div></a>
+    <a class="nav-card" href="admin-settings.html"><div class="n-icon settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></div><div><p class="title">Settings</p><p class="sub">Bank info, fees</p></div></a>
+    <a class="nav-card" href="admin-activity-log.html"><div class="n-icon activity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg></div><div><p class="title">Activity Log</p><p class="sub">Admin actions</p></div></a>
+  </div>
+
+  <div class="logout-row">
+    <button class="logout-btn" id="logoutBtn">Log Out</button>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, query, where, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI",
+    authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0",
+    storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094",
+    appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  function showToast(m, t = "info", d = 4000) {
+    const c = document.getElementById("toastContainer");
+    const el = document.createElement("div");
+    el.className = `toast ${t}`;
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    el.innerHTML = `<span>${icons[t]||icons.info}</span>${m}`;
+    if (c.children.length >= 3) c.removeChild(c.firstChild);
+    c.appendChild(el);
+    setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateX(80px)"; el.style.transition = "all 0.3s"; setTimeout(() => { if (el.parentNode) el.remove(); }, 300); }, d);
+  }
+
+  function formatNaira(v) { return "₦" + (Number(v) || 0).toLocaleString("en-NG"); }
+  function formatNairaShort(v) { return "₦" + (Number(v) || 0).toLocaleString("en-NG", { maximumFractionDigits: 0 }); }
+
+  // ✅ Animate bar chart
+  function animateBar(id, height) {
+    const bar = document.getElementById(id);
+    if (bar) { bar.style.height = "4px"; setTimeout(() => { bar.style.height = height + "px"; }, 100); }
+  }
+
+  function renderStats(data) {
+    document.getElementById("statUsers").textContent = data.users;
+    document.getElementById("statInvested").textContent = formatNairaShort(data.invested);
+    document.getElementById("statDeposits").textContent = formatNairaShort(data.deposits);
+    document.getElementById("statWithdrawals").textContent = formatNairaShort(data.withdrawals);
+
+    // Chart
+    const maxVal = Math.max(data.users, data.invested, data.deposits, data.withdrawals, data.referral, 1);
+    const scale = (v) => Math.max(8, (v / maxVal) * 100);
+
+    document.getElementById("chartUsers").textContent = data.users;
+    document.getElementById("chartInvested").textContent = formatNairaShort(data.invested);
+    document.getElementById("chartDeposits").textContent = formatNairaShort(data.deposits);
+    document.getElementById("chartWithdrawals").textContent = formatNairaShort(data.withdrawals);
+    document.getElementById("chartReferral").textContent = formatNairaShort(data.referral);
+
+    animateBar("barUsers", scale(data.users));
+    animateBar("barInvested", scale(data.invested));
+    animateBar("barDeposits", scale(data.deposits));
+    animateBar("barWithdrawals", scale(data.withdrawals));
+    animateBar("barReferral", scale(data.referral));
+
+    document.getElementById("pendingDeposits").textContent = data.pendingD;
+    document.getElementById("pendingWithdrawals").textContent = data.pendingW;
+  }
+
+  // ✅ Fetch all data without aggregate queries (avoids index issues)
+  async function fetchAllStats() {
+    try {
+      const [usersSnap, depositsSnap, withdrawalsSnap, investmentsSnap] = await Promise.all([
+        getDocs(collection(db, "users")),
+        getDocs(collection(db, "deposits")),
+        getDocs(collection(db, "withdrawals")),
+        getDocs(collection(db, "investments"))
+      ]);
+
+      // Count users
+      const users = usersSnap.size;
+
+      // Sum referral earnings
+      let referral = 0;
+      usersSnap.forEach(d => { referral += (d.data().referralEarnings || 0); });
+
+      // Deposits
+      let pendingD = 0, deposits = 0;
+      depositsSnap.forEach(d => {
+        if (d.data().status === "pending") pendingD++;
+        if (d.data().status === "approved") deposits += (d.data().amount || 0);
+      });
+
+      // Withdrawals
+      let pendingW = 0, withdrawals = 0;
+      withdrawalsSnap.forEach(d => {
+        if (d.data().status === "pending") pendingW++;
+        if (d.data().status === "approved") withdrawals += (d.data().netAmount || d.data().amount || 0);
+      });
+
+      // Investments
+      let invested = 0;
+      investmentsSnap.forEach(d => { invested += (d.data().amount || 0); });
+
+      return { users, invested, deposits, withdrawals, referral, pendingD, pendingW };
+    } catch (e) {
+      console.error("Fetch error:", e);
+      throw e;
+    }
+  }
+
+  async function loadStats() {
+    try {
+      const data = await fetchAllStats();
+      renderStats(data);
+    } catch (e) {
+      showToast("Couldn't load stats. Check console.", "error");
+    }
+  }
+
+  // ✅ Real-time pending counts
+  let unsubD = null, unsubW = null;
+  function startRealtime() {
+    unsubD = onSnapshot(query(collection(db, "deposits"), where("status", "==", "pending")), (s) => { document.getElementById("pendingDeposits").textContent = s.size; }, () => {});
+    unsubW = onSnapshot(query(collection(db, "withdrawals"), where("status", "==", "pending")), (s) => { document.getElementById("pendingWithdrawals").textContent = s.size; }, () => {});
+  }
+
+  window.addEventListener("beforeunload", () => { if(unsubD)unsubD(); if(unsubW)unsubW(); });
+
+  // ✅ Auth guard
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "admin-login.html"; return; }
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (!snap.exists() || snap.data().role !== "admin") { await signOut(auth); window.location.href = "admin-login.html"; return; }
+      await loadStats();
+      startRealtime();
+    } catch(e) { window.location.href = "admin-login.html"; }
+  });
+
+  document.getElementById("refreshBtn").addEventListener("click", async () => {
+    const btn = document.getElementById("refreshBtn"); btn.classList.add("spinning");
+    await loadStats(); btn.classList.remove("spinning");
+    showToast("Dashboard updated", "success", 2500);
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    try { await signOut(auth); sessionStorage.clear(); window.location.href = "admin-login.html"; }
+    catch(e) { showToast("Couldn't log out.", "error"); }
+  });
+
+  console.log("🚀 Veltrix Admin Dashboard - Ready");
+</script>
+</body>
+</html>
