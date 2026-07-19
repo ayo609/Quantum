@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>VELTRIX — Admin Users</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0c; --surface: #111915; --surface-2: #1a241e; --surface-3: #243028;
+    --primary: #22c55e; --primary-dark: #16a34a; --primary-glow: rgba(34,197,94,0.25);
+    --gold: #f59e0b; --text: #f0fdf4; --text-bright: #ffffff; --muted: #9ca3a0;
+    --success: #22c55e; --warning: #f59e0b; --error: #ef4444;
+    --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+    --shadow-lg: 0 30px 60px rgba(0,0,0,0.6); --shadow-md: 0 15px 35px rgba(0,0,0,0.4);
+    --radius: 18px; --radius-sm: 13px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;position:relative;padding-bottom:40px;background-image:radial-gradient(ellipse at 50% 0%,rgba(34,197,94,0.04) 0%,transparent 50%);}
+  a{text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;}
+  .floating-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(90px);opacity:0.18;}
+  .floating-orb.orb-1{width:240px;height:240px;background:rgba(245,158,11,0.06);bottom:-60px;right:-50px;animation:float1 15s ease-in-out infinite;}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-20px,-15px) scale(1.05);}}
+  .container{position:relative;z-index:1;max-width:580px;margin:0 auto;padding:20px 18px 60px;animation:fadeUp 0.5s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:translateY(0);}}
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:14px;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .back-btn,.icon-btn{width:38px;height:38px;border-radius:11px;flex:none;background:var(--surface);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all 0.25s;}
+  .back-btn:hover,.icon-btn:hover{background:var(--surface-2);border-color:var(--border-hover);color:var(--text-bright);}
+  .back-btn svg,.icon-btn svg{width:17px;height:17px;}
+  .icon-btn.spinning{animation:spin 0.7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .topbar h1{font-family:'DM Sans',sans-serif;font-size:18px;font-weight:700;color:var(--text-bright);}
+
+  .search-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:16px;}
+  .search-row{display:flex;gap:8px;}
+  .search-row input{flex:1;background:var(--surface-2);border:1.5px solid var(--border);border-radius:10px;padding:11px 13px;color:var(--text);font-size:13.5px;font-family:'Inter',sans-serif;outline:none;transition:all 0.3s;}
+  .search-row input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-glow);}
+  .search-row button{background:linear-gradient(135deg,var(--primary),#16a34a);border:none;border-radius:10px;padding:0 15px;color:#fff;font-weight:700;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+  .no-result{font-size:12px;color:var(--muted);padding:8px 2px;display:none;}
+
+  /* User Profile Card */
+  .profile-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;display:none;}
+  .profile-card.show{display:block;animation:fadeUp 0.4s ease;}
+  .profile-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .p-avatar{width:48px;height:48px;border-radius:14px;flex:none;background:linear-gradient(135deg,var(--primary),var(--gold));display:flex;align-items:center;justify-content:center;font-family:'DM Sans',sans-serif;font-weight:700;color:#fff;font-size:19px;box-shadow:0 4px 12px var(--primary-glow);}
+  .p-info{flex:1;}
+  .p-info h2{font-family:'DM Sans',sans-serif;font-size:17px;font-weight:800;color:var(--text-bright);}
+  .p-info p{font-size:11.5px;color:var(--muted);}
+  .p-role{flex:none;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px;background:rgba(156,163,160,0.15);color:var(--muted);}
+  .p-role.admin{background:rgba(245,158,11,0.15);color:var(--gold);}
+
+  .info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:14px;}
+  .info-cell{background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;}
+  .info-cell p.k{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:3px;font-weight:600;}
+  .info-cell p.v{font-size:13px;font-weight:700;color:var(--text-bright);word-break:break-all;}
+  .info-cell.full{grid-column:1/-1;}
+
+  .section-title{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:var(--muted);margin:16px 0 8px;text-transform:uppercase;letter-spacing:0.4px;}
+
+  .action-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .action-btn{padding:10px 14px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:12px;transition:all 0.2s;background:var(--surface-2);color:var(--text);}
+  .action-btn:hover{border-color:var(--border-hover);background:var(--surface-3);}
+  .action-btn.promote{background:rgba(34,197,94,0.1);border-color:rgba(34,197,94,0.3);color:var(--primary);}
+  .action-btn.demote{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.25);color:var(--error);}
+  .action-btn.impersonate{background:rgba(245,158,11,0.1);border-color:rgba(245,158,11,0.3);color:var(--gold);}
+
+  /* Mini transaction list */
+  .mini-tx{background:var(--surface-2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:6px;display:flex;align-items:center;gap:10px;font-size:12px;}
+  .mini-tx .mt-amount{font-weight:700;flex:none;}
+  .mini-tx .mt-amount.credit{color:var(--success);}
+  .mini-tx .mt-amount.debit{color:var(--error);}
+  .mini-tx .mt-info{flex:1;min-width:0;}
+  .mini-tx .mt-info .mt-title{font-weight:600;color:var(--text-bright);}
+  .mini-tx .mt-info .mt-date{font-size:10.5px;color:var(--muted);}
+
+  .empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+  .skeleton{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);height:60px;margin-bottom:8px;background-image:linear-gradient(90deg,var(--surface) 0%,var(--surface-2) 50%,var(--surface) 100%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+  @keyframes shimmer{from{background-position:200% 0;}to{background-position:-200% 0;}}
+
+  .confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);display:none;align-items:center;justify-content:center;z-index:90;padding:20px;}
+  .confirm-overlay.show{display:flex;}
+  .confirm-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 20px;max-width:380px;width:100%;box-shadow:var(--shadow-lg);animation:popIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);}
+  @keyframes popIn{from{opacity:0;transform:scale(0.88) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+  .confirm-box p{font-size:13.5px;line-height:1.5;margin-bottom:16px;color:var(--text);}
+  .confirm-actions{display:flex;gap:8px;}
+  .confirm-actions button{flex:1;padding:11px;border-radius:9px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:13px;transition:all 0.2s;}
+  .confirm-actions .cancel{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
+  .confirm-actions .confirm-btn{background:linear-gradient(135deg,var(--primary),#16a34a);color:#fff;}
+
+  .toast-container{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:380px;}
+  .toast{background:var(--surface-3);border:1px solid var(--border);padding:13px 15px;border-radius:var(--radius-sm);font-size:13px;box-shadow:var(--shadow-lg);animation:slideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);display:flex;align-items:center;gap:9px;}
+  .toast.error{border-left:4px solid var(--error);}
+  .toast.success{border-left:4px solid var(--success);}
+  @keyframes slideIn{from{opacity:0;transform:translateX(80px);}to{opacity:1;transform:translateX(0);}}
+  @media(max-width:480px){.container{padding:16px 12px 60px;}}
+</style>
+</head>
+<body>
+
+<div class="floating-orb orb-1"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="admin-dashboard.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg></a>
+      <h1>User Management</h1>
+    </div>
+    <button class="icon-btn" id="refreshBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+  </div>
+
+  <!-- Search -->
+  <div class="search-card">
+    <div class="search-row">
+      <input type="text" id="searchInput" placeholder="Search by username, email or phone">
+      <button id="searchBtn">Search</button>
+    </div>
+    <div class="no-result" id="noResult">No user found with that information.</div>
+  </div>
+
+  <!-- User Profile (shown after search) -->
+  <div class="profile-card" id="profileCard">
+    <div class="profile-header">
+      <div class="p-avatar" id="pAvatar">V</div>
+      <div class="p-info"><h2 id="pName">—</h2><p id="pUsername">@—</p></div>
+      <span class="p-role" id="pRole">Member</span>
+    </div>
+
+    <!-- Account Info -->
+    <div class="section-title">📋 Account Details</div>
+    <div class="info-grid">
+      <div class="info-cell"><p class="k">Email</p><p class="v" id="pEmail">—</p></div>
+      <div class="info-cell"><p class="k">Phone</p><p class="v" id="pPhone">—</p></div>
+      <div class="info-cell"><p class="k">Balance</p><p class="v" style="color:var(--success);" id="pBalance">₦0</p></div>
+      <div class="info-cell"><p class="k">Referral Code</p><p class="v" style="color:var(--primary);" id="pRefCode">—</p></div>
+      <div class="info-cell"><p class="k">Total Deposits</p><p class="v" id="pDeposits">₦0</p></div>
+      <div class="info-cell"><p class="k">Total Invested</p><p class="v" id="pInvested">₦0</p></div>
+      <div class="info-cell"><p class="k">Total Earnings</p><p class="v" style="color:var(--success);" id="pEarnings">₦0</p></div>
+      <div class="info-cell"><p class="k">Referral Bonus</p><p class="v" style="color:var(--gold);" id="pRefBonus">₦0</p></div>
+      <div class="info-cell"><p class="k">Joined</p><p class="v" style="font-size:11px;" id="pJoined">—</p></div>
+      <div class="info-cell"><p class="k">Downline Count</p><p class="v" id="pDownline">0</p></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="section-title">🛠 Actions</div>
+    <div class="action-row">
+      <button class="action-btn promote" id="btnPromote">👑 Make Admin</button>
+      <button class="action-btn demote" id="btnDemote" style="display:none;">⬇️ Remove Admin</button>
+      <button class="action-btn" onclick="window.open('admin-users.html','_blank')">📝 Full Management</button>
+      <button class="action-btn impersonate" id="btnImpersonate">🔍 View as User</button>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="section-title">💳 Recent Transactions</div>
+    <div id="txList"><div class="empty-state"><p>Search for a user to see their transactions.</p></div></div>
+
+    <!-- Downline Summary -->
+    <div class="section-title">👥 Downline Summary</div>
+    <div id="downlineInfo"><div class="empty-state"><p>Search for a user to see their downline.</p></div></div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <p id="confirmText">Are you sure?</p>
+    <div class="confirm-actions"><button class="cancel" id="confirmCancel">Cancel</button><button class="confirm-btn" id="confirmYes">Confirm</button></div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI", authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0", storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094", appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let adminUid = null, foundUserData = null;
+
+  function showToast(m, t = "info", d = 4000) {
+    const c = document.getElementById("toastContainer");
+    const el = document.createElement("div");
+    el.className = `toast ${t}`;
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    el.innerHTML = `<span>${icons[t]||icons.info}</span>${m}`;
+    if (c.children.length >= 3) c.removeChild(c.firstChild);
+    c.appendChild(el);
+    setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateX(80px)"; el.style.transition = "all 0.3s"; setTimeout(() => { if (el.parentNode) el.remove(); }, 300); }, d);
+  }
+
+  function formatNaira(v) { return "₦" + (Number(v) || 0).toLocaleString("en-NG"); }
+  function formatDate(ts) { if(!ts)return"—"; const d=ts.toDate?ts.toDate():new Date(ts); return d.toLocaleDateString("en-NG",{day:"numeric",month:"short",year:"numeric"})+" · "+d.toLocaleTimeString("en-NG",{hour:"2-digit",minute:"2-digit"}); }
+
+  // ✅ AUTH
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "admin-login.html"; return; }
+    try { const snap = await getDoc(doc(db, "users", user.uid)); if (!snap.exists()||snap.data().role!=="admin"){await signOut(auth);window.location.href="admin-login.html";return;} adminUid = user.uid; }
+    catch(e) { window.location.href = "admin-login.html"; }
+  });
+
+  // ✅ SEARCH USER
+  async function searchUser(term) {
+    const t = term.trim();
+    if (!t) return null;
+    // Try username
+    const uSnap = await getDoc(doc(db, "usernames", t.toLowerCase()));
+    if (uSnap.exists()) { const s = await getDoc(doc(db, "users", uSnap.data().uid)); if (s.exists()) return { id: s.id, ...s.data() }; }
+    // Try email
+    const eSnap = await getDocs(query(collection(db, "users"), where("email", "==", t)));
+    if (!eSnap.empty) return { id: eSnap.docs[0].id, ...eSnap.docs[0].data() };
+    // Try phone
+    const pSnap = await getDocs(query(collection(db, "users"), where("phone", "==", t)));
+    if (!pSnap.empty) return { id: pSnap.docs[0].id, ...pSnap.docs[0].data() };
+    return null;
+  }
+
+  document.getElementById("searchBtn").addEventListener("click", doSearch);
+  document.getElementById("searchInput").addEventListener("keydown", e => { if(e.key==="Enter") doSearch(); });
+
+  async function doSearch() {
+    const term = document.getElementById("searchInput").value;
+    document.getElementById("noResult").style.display = "none";
+    document.getElementById("profileCard").classList.remove("show");
+    if (!term.trim()) return;
+
+    const user = await searchUser(term);
+    if (!user) { document.getElementById("noResult").style.display = "block"; return; }
+    foundUserData = user;
+    renderProfile(user);
+    loadTransactions(user.id);
+    loadDownlineInfo(user.id);
+    document.getElementById("profileCard").classList.add("show");
+  }
+
+  // ✅ RENDER PROFILE
+  function renderProfile(user) {
+    const isAdmin = user.role === "admin";
+    document.getElementById("pAvatar").textContent = (user.name||"V").trim().charAt(0).toUpperCase();
+    document.getElementById("pName").textContent = user.name||"Unnamed";
+    document.getElementById("pUsername").textContent = "@"+(user.username||"—");
+    document.getElementById("pRole").textContent = isAdmin ? "Admin" : "Member";
+    document.getElementById("pRole").className = "p-role" + (isAdmin ? " admin" : "");
+    document.getElementById("pEmail").textContent = user.email||"—";
+    document.getElementById("pPhone").textContent = user.phone||"—";
+    document.getElementById("pBalance").textContent = formatNaira(user.balance);
+    document.getElementById("pRefCode").textContent = user.referralCode||"—";
+    document.getElementById("pDeposits").textContent = formatNaira(user.totalDeposit);
+    document.getElementById("pInvested").textContent = formatNaira(user.totalInvested);
+    document.getElementById("pEarnings").textContent = formatNaira(user.totalEarnings);
+    document.getElementById("pRefBonus").textContent = formatNaira(user.referralEarnings);
+    document.getElementById("pJoined").textContent = formatDate(user.createdAt);
+
+    // Promote/Demote buttons
+    document.getElementById("btnPromote").style.display = isAdmin ? "none" : "inline-block";
+    document.getElementById("btnDemote").style.display = isAdmin ? "inline-block" : "none";
+    const isSelf = user.id === adminUid;
+    document.getElementById("btnPromote").disabled = isSelf;
+    document.getElementById("btnDemote").disabled = isSelf;
+  }
+
+  // ✅ LOAD TRANSACTIONS
+  async function loadTransactions(uid) {
+    const container = document.getElementById("txList");
+    container.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div>';
+    try {
+      const [dSnap, wSnap, iSnap] = await Promise.all([
+        getDocs(query(collection(db,"deposits"),where("uid","==",uid))),
+        getDocs(query(collection(db,"withdrawals"),where("uid","==",uid))),
+        getDocs(query(collection(db,"investments"),where("uid","==",uid)))
+      ]);
+      const txs = [
+        ...dSnap.docs.map(d=>({type:"deposit",...d.data(),createdAt:d.data().createdAt})),
+        ...wSnap.docs.map(d=>({type:"withdrawal",...d.data(),createdAt:d.data().createdAt})),
+        ...iSnap.docs.map(d=>({type:"investment",...d.data(),createdAt:d.data().createdAt}))
+      ];
+      txs.sort((a,b)=>(b.createdAt?.toMillis?.()||0)-(a.createdAt?.toMillis?.()||0));
+      const recent = txs.slice(0, 15);
+
+      if (!recent.length) { container.innerHTML = '<div class="empty-state"><p>No transactions found.</p></div>'; return; }
+
+      container.innerHTML = recent.map(tx => {
+        const isCredit = tx.type === "deposit";
+        const amount = tx.type === "withdrawal" ? (tx.netAmount||tx.amount) : tx.amount;
+        const title = tx.type === "deposit" ? "Deposit" : tx.type === "withdrawal" ? "Withdrawal" : tx.planCategory === "premium" ? "Premium Plan" : "Company Plan";
+        const status = tx.status || (tx.type==="investment"?"active":"pending");
+        return `<div class="mini-tx">
+          <div class="mt-info"><div class="mt-title">${title} · <span style="font-size:10px;color:var(--muted);">${status}</span></div><div class="mt-date">${formatDate(tx.createdAt)}</div></div>
+          <div class="mt-amount ${isCredit?'credit':'debit'}">${isCredit?'+':'-'}${formatNaira(amount||0)}</div>
+        </div>`;
+      }).join("");
+    } catch(e) { container.innerHTML = '<div class="empty-state"><p>Couldn\'t load transactions.</p></div>'; }
+  }
+
+  // ✅ LOAD DOWNLINE
+  async function loadDownlineInfo(uid) {
+    const container = document.getElementById("downlineInfo");
+    try {
+      const snap = await getDocs(collection(db, "users"));
+      const all = []; snap.forEach(d => all.push({ id: d.id, ...d.data() }));
+      const l1 = all.filter(u => u.referredBy === uid);
+      container.innerHTML = `<div class="info-grid">
+        <div class="info-cell"><p class="k">Level 1 (Direct)</p><p class="v">${l1.length} users</p></div>
+        <div class="info-cell"><p class="k">Bonus Earned</p><p class="v" style="color:var(--gold);">${formatNaira(foundUserData?.referralEarnings||0)}</p></div>
+        ${l1.length > 0 ? l1.slice(0,6).map(u => `<div class="info-cell full"><p class="k">L1 · ${u.name||u.username||"User"}</p><p class="v" style="font-size:11px;">Invested: ${formatNaira(u.totalInvested||0)} · Balance: ${formatNaira(u.balance||0)}</p></div>`).join("") : '<div class="info-cell full"><p class="v" style="color:var(--muted);">No downline yet</p></div>'}
+      </div>`;
+    } catch(e) { container.innerHTML = '<div class="empty-state"><p>Couldn\'t load downline.</p></div>'; }
+  }
+
+  // ✅ PROMOTE/DEMOTE
+  document.getElementById("btnPromote").addEventListener("click", () => toggleRole("promote"));
+  document.getElementById("btnDemote").addEventListener("click", () => toggleRole("demote"));
+
+  function toggleRole(action) {
+    if (!foundUserData) return;
+    const isCurrentlyAdmin = foundUserData.role === "admin";
+    document.getElementById("confirmText").textContent = action === "promote" ? `Grant admin access to @${foundUserData.username}?` : `Remove admin access from @${foundUserData.username}?`;
+    document.getElementById("confirmOverlay").classList.add("show");
+    window._pendingRoleAction = action;
+  }
+
+  document.getElementById("confirmCancel").addEventListener("click", () => document.getElementById("confirmOverlay").classList.remove("show"));
+  document.getElementById("confirmOverlay").addEventListener("click", e => { if(e.target===e.currentTarget) e.currentTarget.classList.remove("show"); });
+  document.getElementById("confirmYes").addEventListener("click", async () => {
+    document.getElementById("confirmOverlay").classList.remove("show");
+    const action = window._pendingRoleAction;
+    if (!foundUserData || !action) return;
+    try {
+      const newRole = action === "promote" ? "admin" : null;
+      await updateDoc(doc(db, "users", foundUserData.id), { role: newRole });
+      await setDoc(doc(collection(db, "adminActions")), { adminUid, targetUid: foundUserData.id, targetUsername: foundUserData.username||null, action: action==="promote"?"promote_admin":"demote_admin", createdAt: serverTimestamp() });
+      foundUserData.role = newRole;
+      renderProfile(foundUserData);
+      showToast(`@${foundUserData.username} ${action==="promote"?"promoted":"demoted"}.`, "success");
+    } catch(e) { showToast("Couldn't update role.", "error"); }
+  });
+
+  // ✅ IMPERSONATE - Open user dashboard in new tab
+  document.getElementById("btnImpersonate").addEventListener("click", () => {
+    if (!foundUserData) return;
+    // Store admin's UID so they can return
+    sessionStorage.setItem("veltrix_admin_impersonating", "true");
+    sessionStorage.setItem("veltrix_admin_uid", adminUid);
+    // Set user cache to impersonate
+    sessionStorage.setItem("veltrix_dashboard_cache", JSON.stringify({ uid: foundUserData.id, data: foundUserData, fetchedAt: Date.now() }));
+    showToast(`Viewing as @${foundUserData.username}. Logout to return.`, "success", 5000);
+    window.open("dashboard.html", "_blank");
+  });
+
+  document.getElementById("refreshBtn").addEventListener("click", () => {
+    if (foundUserData) { renderProfile(foundUserData); loadTransactions(foundUserData.id); loadDownlineInfo(foundUserData.id); showToast("Refreshed", "success", 2000); }
+  });
+
+  console.log("🚀 Veltrix User Management - Ready");
+</script>
+</body>
+</html>
