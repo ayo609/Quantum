@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>VELTRIX — Investment Plans</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0c; --surface: #111915; --surface-2: #1a241e; --surface-3: #243028;
+    --primary: #22c55e; --primary-dark: #16a34a; --primary-glow: rgba(34,197,94,0.25);
+    --gold: #f59e0b; --text: #f0fdf4; --text-bright: #ffffff; --muted: #9ca3a0;
+    --success: #22c55e; --warning: #f59e0b; --error: #ef4444;
+    --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+    --shadow-lg: 0 30px 60px rgba(0,0,0,0.6); --shadow-md: 0 15px 35px rgba(0,0,0,0.4);
+    --radius: 18px; --radius-sm: 13px; --nav-height: 72px; --safe-bottom: 120px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;position:relative;padding-bottom:var(--safe-bottom);overflow-x:hidden;background-image:radial-gradient(ellipse at 50% 0%,rgba(34,197,94,0.04) 0%,transparent 50%);}
+  a{text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;}
+  .floating-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(90px);opacity:0.2;}
+  .floating-orb.orb-1{width:240px;height:240px;background:rgba(34,197,94,0.08);top:-60px;right:-60px;animation:float1 14s ease-in-out infinite;}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-20px,15px) scale(1.06);}}
+  .container{position:relative;z-index:1;max-width:520px;margin:0 auto;padding:20px 18px var(--safe-bottom);animation:fadeUp 0.5s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:translateY(0);}}
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:20px;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .back-btn,.icon-btn{width:40px;height:40px;border-radius:12px;flex:none;background:var(--surface);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all 0.25s;}
+  .back-btn:hover,.icon-btn:hover{background:var(--surface-2);border-color:var(--border-hover);color:var(--text-bright);}
+  .back-btn svg,.icon-btn svg{width:18px;height:18px;}
+  .icon-btn.spinning{animation:spin 0.7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .topbar h1{font-family:'DM Sans',sans-serif;font-size:19px;font-weight:700;color:var(--text-bright);}
+  .balance-strip{background:linear-gradient(135deg,#0f1a12,#1a2215);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow-md);animation:fadeUp 0.5s ease 0.05s both;}
+  .balance-strip p.k{font-size:11px;color:var(--muted);margin-bottom:3px;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;}
+  .balance-strip p.v{font-family:'DM Sans',sans-serif;font-size:22px;font-weight:800;color:var(--text-bright);}
+  .balance-icon{width:44px;height:44px;border-radius:12px;background:rgba(34,197,94,0.12);display:flex;align-items:center;justify-content:center;flex:none;}
+  .balance-icon svg{width:22px;height:22px;color:var(--primary);}
+  .main-tabs{display:flex;gap:6px;margin-bottom:18px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:5px;animation:fadeUp 0.5s ease 0.1s both;}
+  .main-tab{flex:1;text-align:center;padding:11px 8px;border-radius:10px;font-size:12.5px;font-weight:700;color:var(--muted);cursor:pointer;transition:all 0.3s;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .main-tab:hover{color:var(--text);}
+  .main-tab.active{background:linear-gradient(135deg,var(--primary),#16a34a);color:#fff;box-shadow:0 4px 15px var(--primary-glow);}
+  .main-tab svg{width:14px;height:14px;}
+  .section-title{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;margin:0 0 12px;color:var(--text-bright);}
+  .active-inv-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;transition:all 0.3s;}
+  .active-inv-card:hover{border-color:var(--border-hover);box-shadow:var(--shadow-md);}
+  .active-inv-card.company-active{border-color:rgba(34,197,94,0.2);}
+  .active-inv-card.premium-active{border-color:rgba(245,158,11,0.2);}
+  .active-inv-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+  .active-inv-header .plan-name{font-size:14px;font-weight:700;color:var(--text-bright);display:flex;align-items:center;gap:6px;}
+  .active-inv-header .plan-badge{font-size:10px;font-weight:700;padding:4px 9px;border-radius:7px;background:rgba(34,197,94,0.15);color:var(--success);}
+  .active-inv-header .plan-badge.premium-badge{background:rgba(245,158,11,0.15);color:var(--gold);}
+  .countdown-section{background:rgba(34,197,94,0.04);border:1px solid rgba(34,197,94,0.12);border-radius:var(--radius-sm);padding:14px;margin-bottom:10px;text-align:center;}
+  .countdown-label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px;font-weight:600;}
+  .countdown-timer{font-family:'DM Sans',sans-serif;font-size:26px;font-weight:800;color:var(--primary);letter-spacing:1px;}
+  .countdown-timer.urgent{color:var(--warning);animation:pulse 1s ease infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.5;}}
+  .progress-section{margin-bottom:8px;}
+  .progress-header{display:flex;justify-content:space-between;margin-bottom:5px;font-size:11px;color:var(--muted);}
+  .progress-track{background:var(--surface-2);border-radius:6px;height:7px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--gold));border-radius:6px;transition:width 0.5s ease;}
+  .active-inv-details{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+  .detail-pill{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:9px;padding:9px;text-align:center;}
+  .detail-pill p.k{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:2px;font-weight:600;}
+  .detail-pill p.v{font-size:12px;font-weight:700;color:var(--text-bright);}
+  .plan-tabs{display:flex;gap:6px;margin-bottom:18px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:5px;animation:fadeUp 0.5s ease 0.15s both;}
+  .plan-tab{flex:1;text-align:center;padding:11px 8px;border-radius:10px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;transition:all 0.3s;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .plan-tab:hover{color:var(--text);}
+  .plan-tab.active{background:linear-gradient(135deg,var(--primary),#16a34a);color:#fff;box-shadow:0 4px 15px var(--primary-glow);}
+  .plan-tab svg{width:15px;height:15px;}
+  .plan-grid{display:flex;flex-direction:column;gap:12px;animation:fadeUp 0.5s ease 0.2s both;}
+  .plan-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:18px;transition:all 0.3s;}
+  .plan-card:hover{border-color:var(--border-hover);transform:translateY(-3px);box-shadow:var(--shadow-lg);}
+  .plan-card.company-card{border-color:rgba(34,197,94,0.12);}
+  .plan-card.premium-card{border-color:rgba(245,158,11,0.15);}
+  .plan-card.locked{opacity:0.5;pointer-events:none;}
+  .plan-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;}
+  .plan-amount{font-family:'DM Sans',sans-serif;font-size:20px;font-weight:800;color:var(--text-bright);}
+  .plan-tag{font-size:10.5px;font-weight:700;padding:5px 10px;border-radius:7px;}
+  .plan-tag.company{background:rgba(34,197,94,0.12);color:var(--primary);}
+  .plan-tag.premium{background:rgba(245,158,11,0.12);color:var(--gold);}
+  .plan-detail-row{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;padding:7px 0;border-bottom:1px solid var(--border);}
+  .plan-detail-row:last-of-type{border-bottom:none;margin-bottom:12px;}
+  .plan-detail-row span.k{color:var(--muted);}
+  .plan-detail-row span.v{font-weight:600;color:var(--text-bright);}
+  .insufficient-warning{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:8px;font-size:12px;color:var(--error);display:flex;align-items:center;gap:8px;}
+  .insufficient-warning svg{flex:none;}
+  .plan-btn{width:100%;padding:13px;border-radius:11px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;transition:all 0.3s;}
+  .plan-btn.company-btn{background:linear-gradient(135deg,var(--primary),#16a34a);color:#fff;box-shadow:0 6px 20px var(--primary-glow);}
+  .plan-btn.company-btn:hover{transform:translateY(-2px);box-shadow:0 10px 25px var(--primary-glow);}
+  .plan-btn.premium-btn{background:linear-gradient(135deg,var(--gold),#d97706);color:#1a1a1a;box-shadow:0 6px 20px rgba(245,158,11,0.2);}
+  .plan-btn.premium-btn:hover{transform:translateY(-2px);}
+  .plan-btn:disabled{background:var(--surface-2);color:var(--muted);cursor:not-allowed;box-shadow:none;transform:none;}
+  .deposit-link{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:12px;margin-top:6px;background:var(--surface-2);border:1.5px dashed var(--border);border-radius:11px;color:var(--primary);font-weight:700;font-size:12.5px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.3s;}
+  .deposit-link:hover{background:var(--surface-3);border-color:var(--primary);}
+  .lock-note{font-size:11.5px;color:var(--muted);margin-top:8px;text-align:center;line-height:1.4;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .lock-note svg{flex:none;}
+  .empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+  .empty-state .empty-icon{font-size:36px;margin-bottom:10px;}
+  .bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:50;background:rgba(10,15,12,0.96);backdrop-filter:blur(20px);border-top:1px solid var(--border);display:flex;justify-content:space-around;align-items:center;padding:8px 8px calc(8px + env(safe-area-inset-bottom));height:var(--nav-height);}
+  .nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:var(--muted);flex:1;padding:6px 4px;border-radius:12px;transition:all 0.3s;cursor:pointer;}
+  .nav-item svg{width:21px;height:21px;}
+  .nav-item span{font-weight:600;}
+  .nav-item.active{color:var(--primary);}
+  .nav-item.active::before{content:'';position:absolute;top:-8px;left:50%;transform:translateX(-50%);width:20px;height:3px;background:var(--primary);border-radius:0 0 3px 3px;}
+  .toast-container{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:380px;}
+  .toast{background:var(--surface-3);border:1px solid var(--border);padding:13px 15px;border-radius:var(--radius-sm);font-size:13px;box-shadow:var(--shadow-lg);animation:slideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);display:flex;align-items:center;gap:9px;}
+  .toast.error{border-left:4px solid var(--error);}
+  .toast.success{border-left:4px solid var(--success);}
+  @keyframes slideIn{from{opacity:0;transform:translateX(80px);}to{opacity:1;transform:translateX(0);}}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(5px);display:none;align-items:center;justify-content:center;z-index:150;padding:20px;}
+  .modal-overlay.show{display:flex;animation:fadeIn 0.3s ease;}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  .modal-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px;max-width:400px;width:100%;box-shadow:var(--shadow-lg);animation:popIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);}
+  @keyframes popIn{from{opacity:0;transform:scale(0.88) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+  .modal-box h2{font-family:'DM Sans',sans-serif;font-size:19px;font-weight:800;margin-bottom:14px;color:var(--text-bright);}
+  .modal-row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;}
+  .modal-row:last-of-type{border-bottom:none;}
+  .modal-row span.k{color:var(--muted);}
+  .modal-row span.v{font-weight:700;color:var(--text-bright);}
+  .modal-actions{display:flex;gap:8px;margin-top:18px;}
+  .modal-actions button{flex:1;padding:12px;border-radius:11px;border:none;font-family:'DM Sans',sans-serif;font-weight:700;font-size:13.5px;cursor:pointer;transition:all 0.2s;}
+  .modal-actions .m-cancel{background:var(--surface-2);color:var(--text);border:1px solid var(--border);}
+  .modal-actions .m-confirm{background:linear-gradient(135deg,var(--primary),#16a34a);color:#fff;}
+  .modal-actions .m-confirm:disabled{opacity:0.5;cursor:not-allowed;}
+  .spinner-sm{width:15px;height:15px;border-radius:50%;border:2.5px solid rgba(255,255,255,0.3);border-top-color:#fff;animation:spin 0.7s linear infinite;display:none;}
+  .m-confirm.loading .spinner-sm{display:inline-block;}
+  .m-confirm.loading .btn-text{display:none;}
+  .upline-modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:26px 20px;max-width:400px;width:100%;text-align:center;box-shadow:var(--shadow-lg);animation:popIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);}
+  .upline-modal .upline-icon{width:56px;height:56px;border-radius:50%;margin:0 auto 14px;background:rgba(34,197,94,0.12);display:flex;align-items:center;justify-content:center;}
+  .upline-modal .upline-icon svg{width:28px;height:28px;color:var(--primary);}
+  .upline-modal h3{font-family:'DM Sans',sans-serif;font-size:18px;font-weight:800;color:var(--text-bright);margin-bottom:6px;}
+  .upline-modal p{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:6px;}
+  .upline-modal .bonus-amount{font-family:'DM Sans',sans-serif;font-size:22px;font-weight:800;color:var(--gold);margin-bottom:18px;}
+  .upline-modal button{width:100%;padding:13px;border-radius:11px;border:none;background:linear-gradient(135deg,var(--primary),#16a34a);color:#fff;font-family:'DM Sans',sans-serif;font-weight:700;font-size:14px;cursor:pointer;}
+  @media(max-width:480px){.container{padding:16px 12px var(--safe-bottom);}}
+  @media(min-width:768px){.container{padding:28px 22px var(--safe-bottom);}}
+</style>
+</head>
+<body>
+
+<div class="floating-orb orb-1"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="dashboard.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg></a>
+      <h1>Investment Plans</h1>
+    </div>
+    <button class="icon-btn" id="refreshBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+  </div>
+
+  <div class="balance-strip">
+    <div><p class="k">Available Balance</p><p class="v" id="availableBalance">₦0.00</p></div>
+    <div class="balance-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+  </div>
+
+  <div class="main-tabs">
+    <div class="main-tab active" data-main="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg> Active</div>
+    <div class="main-tab" data-main="buy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg> Buy Plans</div>
+  </div>
+
+  <div id="activeTabContent"><div id="activeInvList"></div></div>
+
+  <div id="buyTabContent" style="display:none;">
+    <div class="plan-tabs">
+      <div class="plan-tab active" data-tab="company"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg> Company</div>
+      <div class="plan-tab" data-tab="premium"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/></svg> Premium</div>
+    </div>
+    <div id="companyTab" class="plan-grid"></div>
+    <div id="premiumTab" class="plan-grid" style="display:none;"></div>
+  </div>
+  <div style="height:40px;"></div>
+</div>
+
+<nav class="bottom-nav">
+  <a href="dashboard.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg><span>Home</span></a>
+  <a href="plans.html" class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg><span>Plans</span></a>
+  <a href="history.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg><span>History</span></a>
+  <a href="profile.html" class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Profile</span></a>
+</nav>
+
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-box"><h2 id="modalTitle">Confirm Investment</h2>
+    <div class="modal-row"><span class="k">Plan</span><span class="v" id="modalPlanName">—</span></div>
+    <div class="modal-row"><span class="k">Amount</span><span class="v" id="modalAmount">₦0</span></div>
+    <div class="modal-row"><span class="k">Duration</span><span class="v" id="modalDuration">—</span></div>
+    <div class="modal-row"><span class="k">Total Return</span><span class="v" id="modalReturn">₦0</span></div>
+    <div class="modal-actions"><button class="m-cancel" id="modalCancel">Cancel</button><button class="m-confirm" id="modalConfirmBtn"><span class="btn-text">Confirm & Invest</span><span class="spinner-sm"></span></button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="uplineModal">
+  <div class="upline-modal"><div class="upline-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><polyline points="17,11 19,13 23,9"/></svg></div><h3>Referral Bonus Sent!</h3><p>Your upliner has been credited.</p><div class="bonus-amount" id="uplineBonusAmount">₦0</div><p style="font-size:11px;color:var(--muted);">L1: 10% · L2: 3% · L3: 1%</p><button onclick="document.getElementById('uplineModal').classList.remove('show')">Continue</button></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, addDoc, collection, writeBatch, increment, serverTimestamp, Timestamp, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = { apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI", authDomain: "affiliate-93bc0.firebaseapp.com", projectId: "affiliate-93bc0", storageBucket: "affiliate-93bc0.firebasestorage.app", messagingSenderId: "205243273094", appId: "1:205243273094:web:d45f306bdc10a69062a607" };
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+  const CACHE_KEY = "veltrix_dashboard_cache";
+
+  const COMPANY_PLANS = [4000,8000,10000,15000,20000,25000,30000,50000,70000,100000].map(a=>({amount:a,dailyROI:Math.round(a*0.10),days:25,total:Math.round(a*0.10)*25}));
+  const PREMIUM_PLANS = [{tier:1,amount:2000,days:3,total:3500},{tier:2,amount:5000,days:3,total:6500},{tier:3,amount:10000,days:3,total:13000},{tier:4,amount:20000,days:3,total:23000},{tier:5,amount:30000,days:3,total:33000},{tier:6,amount:50000,days:3,total:55000}];
+  const REFERRAL_RATES = {1:0.10,2:0.03,3:0.01};
+
+  function unlockedTierFor(a){const m=PREMIUM_PLANS.find(p=>p.amount===a);return m?m.tier:0;}
+  function minCompanyAmountForTier(t){const p=PREMIUM_PLANS.find(x=>x.tier===t);return p?p.amount:null;}
+
+  let currentUser=null,userData=null,investments=[],countdownIntervals=[];
+
+  function showToast(m,t="info",d=4000){const c=document.getElementById("toastContainer");const el=document.createElement("div");el.className=`toast ${t}`;const icons={success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};el.innerHTML=`<span>${icons[t]||icons.info}</span>${m}`;if(c.children.length>=3)c.removeChild(c.firstChild);c.appendChild(el);setTimeout(()=>{el.style.opacity="0";el.style.transform="translateX(80px)";el.style.transition="all 0.3s";setTimeout(()=>{if(el.parentNode)el.remove();},300);},d);}
+  function formatNaira(v){return"₦"+(Number(v)||0).toLocaleString("en-NG");}
+  function startOfDay(d){const nd=new Date(d);nd.setHours(0,0,0,0);return nd;}
+  function getTimeToMidnight(){const now=new Date(),midnight=new Date(now);midnight.setHours(24,0,0,0);const diff=midnight-now;return{hours:Math.floor(diff/3600000),minutes:Math.floor((diff%3600000)/60000),seconds:Math.floor((diff%60000)/1000),totalMs:diff};}
+  function getTimeRemaining(td){const diff=td-new Date();if(diff<=0)return{expired:true,hours:0,minutes:0,seconds:0};return{expired:false,hours:Math.floor(diff/3600000),minutes:Math.floor((diff%3600000)/60000),seconds:Math.floor((diff%60000)/1000)};}
+  function clearAllCountdowns(){countdownIntervals.forEach(id=>clearInterval(id));countdownIntervals=[];}
+
+  // ✅ LOAD USER - Always fresh from Firestore
+  async function loadUser(uid){
+    const snap=await getDoc(doc(db,"users",uid));
+    userData=snap.exists()?snap.data():{};
+    sessionStorage.setItem(CACHE_KEY,JSON.stringify({uid,data:userData,fetchedAt:Date.now()}));
+  }
+
+  // ✅ LOAD INVESTMENTS
+  async function loadInvestments(uid){
+    const q=query(collection(db,"investments"),where("uid","==",uid),where("status","==","active"));
+    const snap=await getDocs(q);
+    investments=snap.docs.map(d=>({id:d.id,...d.data()}));
+  }
+
+  // ✅ REFERRAL BONUS - First purchase only
+  async function distributeReferralBonus(batch,purchaserUid,purchaseAmount){
+    if(userData.firstPurchaseDone)return{distributed:false,levels:0,totalBonus:0};
+    let levelsCredited=0,uplinerUid=userData.referredBy||null,totalBonus=0;
+    for(let level=1;level<=3&&uplinerUid;level++){
+      const snap=await getDoc(doc(db,"users",uplinerUid));
+      if(!snap.exists())break;
+      const bonus=Math.round(purchaseAmount*REFERRAL_RATES[level]);
+      batch.update(doc(db,"users",uplinerUid),{balance:increment(bonus),referralEarnings:increment(bonus)});
+      totalBonus+=bonus;levelsCredited++;
+      uplinerUid=snap.data().referredBy||null;
+    }
+    batch.update(doc(db,"users",purchaserUid),{firstPurchaseDone:true});
+    return{distributed:levelsCredited>0,levels:levelsCredited,totalBonus};
+  }
+
+  function renderActiveInvestments(){
+    clearAllCountdowns();
+    const el=document.getElementById("activeInvList");
+    if(!investments.length){el.innerHTML='<div class="empty-state"><div class="empty-icon">📋</div><p>No active investments.</p></div>';return;}
+    el.innerHTML=investments.map(inv=>{
+      const isCo=inv.planCategory==="company";
+      const start=inv.startDate.toDate?.()||new Date(inv.startDate);
+      const prog=isCo?Math.min(100,Math.round(((inv.daysPaid||0)/inv.days)*100)):(inv.creditedAt?100:Math.min(100,Math.round((new Date()-start)/(inv.days*86400000)*100)));
+      return`<div class="active-inv-card ${isCo?'company-active':'premium-active'}">
+        <div class="active-inv-header"><span class="plan-name">${isCo?`Company·${formatNaira(inv.amount)}`:`Premium·${formatNaira(inv.amount)}`}</span><span class="plan-badge${!isCo?' premium-badge':''}">Active</span></div>
+        <div class="countdown-section"><div class="countdown-label">${isCo?'Next Drop (12AM)':'Auto-Drop'}</div><div class="countdown-timer" id="countdown-${inv.id}">...</div></div>
+        <div class="progress-section"><div class="progress-header"><span>Progress</span><span>${isCo?`Day ${inv.daysPaid||0}/${inv.days}`:(inv.creditedAt?'Completed':'In Progress')}</span></div><div class="progress-track"><div class="progress-fill" style="width:${prog}%;"></div></div></div>
+        <div class="active-inv-details"><div class="detail-pill"><p class="k">${isCo?'Daily ROI':'Payout'}</p><p class="v">${formatNaira(isCo?inv.dailyROI:inv.total)}</p></div><div class="detail-pill"><p class="k">Return</p><p class="v" style="color:var(--success);">${formatNaira(isCo?inv.dailyROI*inv.days:inv.total)}</p></div><div class="detail-pill"><p class="k">Duration</p><p class="v">${inv.days}d</p></div><div class="detail-pill"><p class="k">Earned</p><p class="v" style="color:var(--primary);">${formatNaira(isCo?(inv.daysPaid||0)*inv.dailyROI:(inv.creditedAt?inv.total:0))}</p></div></div>
+      </div>`;
+    }).join("");
+    investments.forEach(inv=>{const el=document.getElementById(`countdown-${inv.id}`);if(!el)return;const update=()=>{if(inv.planCategory==="company"){const t=getTimeToMidnight();el.textContent=`${String(t.hours).padStart(2,'0')}:${String(t.minutes).padStart(2,'0')}:${String(t.seconds).padStart(2,'0')}`;if(t.totalMs<600000)el.classList.add('urgent');}else{const s=inv.startDate.toDate?.()||new Date(inv.startDate);const tg=new Date(s.getTime()+inv.days*86400000);const t=getTimeRemaining(tg);el.textContent=t.expired?'Ready!🎉':`${String(t.hours).padStart(2,'0')}:${String(t.minutes).padStart(2,'0')}:${String(t.seconds).padStart(2,'0')}`;if(t.expired)el.classList.add('urgent');}};update();countdownIntervals.push(setInterval(update,1000));});
+  }
+
+  function renderCompanyPlans(){
+    const bal=Number(userData.balance)||0;
+    document.getElementById("companyTab").innerHTML=COMPANY_PLANS.map(p=>{
+      const can=bal>=p.amount,rem=p.amount-bal;
+      return`<div class="plan-card company-card">
+        <div class="plan-card-top"><span class="plan-amount">${formatNaira(p.amount)}</span><span class="plan-tag company">Company</span></div>
+        <div class="plan-detail-row"><span class="k">Daily ROI</span><span class="v">${formatNaira(p.dailyROI)}</span></div>
+        <div class="plan-detail-row"><span class="k">Duration</span><span class="v">${p.days} days</span></div>
+        <div class="plan-detail-row"><span class="k">Total Return</span><span class="v" style="color:var(--success);">${formatNaira(p.total)}</span></div>
+        ${!can?`<div class="insufficient-warning"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Need ${formatNaira(rem)} more. <a href="deposit.html" style="color:var(--primary);font-weight:700;">Deposit →</a></div>`:''}
+        <button class="plan-btn company-btn" data-category="company" data-amount="${p.amount}">Invest Now</button>
+      </div>`;
+    }).join("");
+  }
+
+  function renderPremiumPlans(){
+    const bal=Number(userData.balance)||0;
+    const counts=userData.premiumPurchaseCount||{};
+    document.getElementById("premiumTab").innerHTML=PREMIUM_PLANS.map(p=>{
+      const tc=counts[p.tier]||0,unlocked=(userData.totalInvested||0)>=p.amount,maxed=tc>=2,locked=!unlocked||maxed;
+      const can=bal>=p.amount,rem=p.amount-bal;
+      let note="";
+      if(maxed)note=`<p class="lock-note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Max 2 (${tc}/2)</p>`;
+      else if(!unlocked)note=`<p class="lock-note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Buy Company Plan of ${formatNaira(p.amount)}+</p>`;
+      else if(tc===1)note='<p class="lock-note" style="color:var(--warning);">1/2 — can buy 1 more</p>';
+      return`<div class="plan-card premium-card ${locked?'locked':''}">
+        <div class="plan-card-top"><span class="plan-amount">${formatNaira(p.amount)}</span><span class="plan-tag premium">★ Premium</span></div>
+        <div class="plan-detail-row"><span class="k">Investment</span><span class="v">${formatNaira(p.amount)}</span></div>
+        <div class="plan-detail-row"><span class="k">Duration</span><span class="v">${p.days} days</span></div>
+        <div class="plan-detail-row"><span class="k">Total Payout</span><span class="v" style="color:var(--gold);">${formatNaira(p.total)}</span></div>
+        <div class="plan-detail-row"><span class="k">Profit</span><span class="v" style="color:var(--success);">${formatNaira(p.total-p.amount)}</span></div>
+        <div class="plan-detail-row"><span class="k">Purchases</span><span class="v">${tc}/2</span></div>
+        ${!locked&&!can?`<div class="insufficient-warning"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Need ${formatNaira(rem)} more. <a href="deposit.html" style="color:var(--primary);font-weight:700;">Deposit →</a></div>`:''}
+        <button class="plan-btn premium-btn" data-category="premium" data-tier="${p.tier}" ${locked?'disabled':''}>${maxed?'Max Reached':isUnlocked?'Invest Now':'Locked'}</button>${note}
+      </div>`;
+    }).join("");
+  }
+
+  function renderAll(){document.getElementById("availableBalance").textContent=formatNaira(userData.balance)+".00";renderActiveInvestments();renderCompanyPlans();renderPremiumPlans();attachHandlers();}
+
+  document.querySelectorAll(".main-tab").forEach(t=>t.addEventListener("click",()=>{document.querySelectorAll(".main-tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");document.getElementById("activeTabContent").style.display=t.dataset.main==="active"?"block":"none";document.getElementById("buyTabContent").style.display=t.dataset.main==="buy"?"block":"none";if(t.dataset.main==="active")renderActiveInvestments();}));
+  document.querySelectorAll(".plan-tab").forEach(t=>t.addEventListener("click",()=>{document.querySelectorAll(".plan-tab").forEach(x=>x.classList.remove("active"));t.classList.add("active");document.getElementById("companyTab").style.display=t.dataset.tab==="company"?"flex":"none";document.getElementById("premiumTab").style.display=t.dataset.tab==="premium"?"flex":"none";}));
+
+  const confirmModal=document.getElementById("confirmModal"),uplineModal=document.getElementById("uplineModal");
+  let pendingPurchase=null;
+
+  function attachHandlers(){
+    document.querySelectorAll(".plan-btn[data-category]").forEach(b=>b.addEventListener("click",()=>{
+      if(b.disabled)return;
+      if(b.dataset.category==="company"){const p=COMPANY_PLANS.find(x=>x.amount===Number(b.dataset.amount));openConfirm({category:"company",amount:p.amount,dailyROI:p.dailyROI,days:p.days,total:p.total,name:`Company·${formatNaira(p.amount)}`,durLabel:`${p.days} days (12AM)`});}
+      else{const p=PREMIUM_PLANS.find(x=>x.tier===Number(b.dataset.tier));openConfirm({category:"premium",amount:p.amount,vipTier:p.tier,days:p.days,total:p.total,name:`Premium·${formatNaira(p.amount)}`,durLabel:`${p.days} days (auto)`});}
+    }));
+  }
+
+  function openConfirm(plan){pendingPurchase=plan;document.getElementById("modalPlanName").textContent=plan.name;document.getElementById("modalAmount").textContent=formatNaira(plan.amount);document.getElementById("modalDuration").textContent=plan.durLabel;document.getElementById("modalReturn").textContent=formatNaira(plan.total);confirmModal.classList.add("show");}
+
+  document.getElementById("modalCancel").addEventListener("click",()=>confirmModal.classList.remove("show"));
+  confirmModal.addEventListener("click",e=>{if(e.target===confirmModal)confirmModal.classList.remove("show");});
+  uplineModal.addEventListener("click",e=>{if(e.target===uplineModal)uplineModal.classList.remove("show");});
+
+  // ✅ PURCHASE - Deducts balance properly, clears all caches
+  document.getElementById("modalConfirmBtn").addEventListener("click",async()=>{
+    if(!pendingPurchase||!currentUser)return;
+    const plan=pendingPurchase;
+    const bal=Number(userData.balance)||0;
+    if(bal<plan.amount){showToast(`Need ${formatNaira(plan.amount-bal)} more.`,"error");confirmModal.classList.remove("show");return;}
+    if(plan.category==="premium"){const c=userData.premiumPurchaseCount||{};if((c[plan.vipTier]||0)>=2){showToast("Max 2 purchases.","error");confirmModal.classList.remove("show");return;}}
+
+    const btn=document.getElementById("modalConfirmBtn");btn.disabled=true;btn.classList.add("loading");
+    try{
+      const batch=writeBatch(db),ref=doc(collection(db,"investments")),now=new Date();
+      const docData=plan.category==="company"?{uid:currentUser.uid,username:userData.username||null,planCategory:"company",amount:plan.amount,dailyROI:plan.dailyROI,days:plan.days,daysPaid:0,startDate:Timestamp.fromDate(now),lastDropDate:Timestamp.fromDate(now),status:"active",createdAt:serverTimestamp()}:{uid:currentUser.uid,username:userData.username||null,planCategory:"premium",amount:plan.amount,vipTier:plan.vipTier,days:plan.days,total:plan.total,startDate:Timestamp.fromDate(now),creditedAt:null,status:"active",createdAt:serverTimestamp()};
+      batch.set(ref,docData);
+      // ✅ Deduct balance using increment (safe, atomic)
+      batch.update(doc(db,"users",currentUser.uid),{balance:increment(-plan.amount),totalInvested:increment(plan.amount),...(plan.category==="company"?{unlockedVipTier:Math.max(userData.unlockedVipTier||0,unlockedTierFor(plan.amount))}:{}),...(plan.category==="premium"?{[`premiumPurchaseCount.${plan.vipTier}`]:increment(1),hasPremiumPlan:true}:{})});
+      const refResult=await distributeReferralBonus(batch,currentUser.uid,plan.amount);
+      await batch.commit();
+
+      // ✅ Clear ALL caches so fresh data loads everywhere
+      sessionStorage.removeItem(CACHE_KEY);
+      sessionStorage.removeItem("veltrix_investments_cache");
+
+      const newBal=bal-plan.amount;
+      confirmModal.classList.remove("show");
+      if(refResult.distributed&&refResult.totalBonus>0){document.getElementById("uplineBonusAmount").textContent=formatNaira(refResult.totalBonus);uplineModal.classList.add("show");}
+      showToast(`✅ ${formatNaira(plan.amount)} invested! Remaining: ${formatNaira(newBal)}`,"success",5000);
+
+      await loadUser(currentUser.uid);await loadInvestments(currentUser.uid);
+      document.querySelector(".main-tab[data-main='active']").click();
+      renderAll();
+    }catch(err){console.error(err);showToast("Couldn't complete.","error");}
+    finally{btn.disabled=false;btn.classList.remove("loading");}
+  });
+
+  onAuthStateChanged(auth,async(user)=>{if(!user){window.location.href="login.html";return;}currentUser=user;try{await loadUser(user.uid);await loadInvestments(user.uid);renderAll();}catch(e){showToast("Couldn't load plans.","error");}});
+
+  document.getElementById("refreshBtn").addEventListener("click",async()=>{if(!currentUser)return;const btn=document.getElementById("refreshBtn");btn.classList.add("spinning");try{await loadUser(currentUser.uid);await loadInvestments(currentUser.uid);renderAll();showToast("Refreshed","success",2500);}catch(e){showToast("Couldn't refresh.","error");}finally{setTimeout(()=>btn.classList.remove("spinning"),600);}});
+
+  console.log("🚀 Veltrix Plans - Ready (No ROI crediting here)");
+</script>
+</body>
+</html>
