@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>VELTRIX — Fix User Balance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0c; --surface: #111915; --surface-2: #1a241e; --surface-3: #243028;
+    --primary: #22c55e; --primary-dark: #16a34a; --primary-glow: rgba(34,197,94,0.25);
+    --gold: #f59e0b; --text: #f0fdf4; --text-bright: #ffffff; --muted: #9ca3a0;
+    --success: #22c55e; --warning: #f59e0b; --error: #ef4444;
+    --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+    --shadow-lg: 0 30px 60px rgba(0,0,0,0.6); --shadow-md: 0 15px 35px rgba(0,0,0,0.4);
+    --radius: 18px; --radius-sm: 13px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;position:relative;padding-bottom:40px;background-image:radial-gradient(ellipse at 50% 0%,rgba(34,197,94,0.04) 0%,transparent 50%);}
+  a{text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;}
+  .container{position:relative;z-index:1;max-width:620px;margin:0 auto;padding:20px 18px 60px;animation:fadeUp 0.5s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:translateY(0);}}
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+  .back-btn{width:38px;height:38px;border-radius:11px;flex:none;background:var(--surface);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all 0.25s;}
+  .back-btn:hover{background:var(--surface-2);border-color:var(--border-hover);color:var(--text-bright);}
+  .back-btn svg{width:17px;height:17px;}
+  .topbar h1{font-family:'DM Sans',sans-serif;font-size:17px;font-weight:700;color:var(--text-bright);}
+
+  .info-banner{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:var(--muted);background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);padding:12px 14px;border-radius:var(--radius-sm);margin-bottom:14px;line-height:1.5;}
+  .info-banner svg{flex:none;margin-top:2px;color:var(--warning);}
+
+  .search-wrap{position:relative;margin-bottom:14px;}
+  .search-wrap input{width:100%;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px 14px 48px;color:var(--text);font-size:15px;font-family:'Inter',sans-serif;outline:none;transition:all 0.3s;}
+  .search-wrap input::placeholder{color:#4a524d;}
+  .search-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 4px var(--primary-glow);}
+  .search-wrap svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);width:20px;height:20px;color:var(--muted);}
+  .search-results{display:none;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-sm);margin-top:-8px;overflow:hidden;max-height:250px;overflow-y:auto;}
+  .search-results.show{display:block;}
+  .search-item{padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--border);transition:all 0.2s;display:flex;align-items:center;gap:10px;}
+  .search-item:hover{background:var(--surface-2);}
+  .search-item:last-child{border-bottom:none;}
+  .search-item .user-avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex:none;}
+  .search-item .user-info{flex:1;min-width:0;}
+  .search-item .user-name{font-size:14px;font-weight:600;color:var(--text-bright);}
+  .search-item .user-email{font-size:11px;color:var(--muted);margin-top:2px;}
+
+  .user-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:14px;display:none;}
+  .user-card.show{display:block;}
+  .user-card-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+  .uc-avatar{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:18px;flex:none;}
+  .uc-name{font-size:15px;font-weight:700;color:var(--text-bright);}
+  .uc-uid{font-size:11px;color:var(--muted);margin-top:2px;}
+
+  .balance-compare{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+  .bal-box{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center;}
+  .bal-box .bal-label{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:4px;}
+  .bal-box .bal-value{font-family:'DM Sans',sans-serif;font-size:16px;font-weight:800;}
+  .bal-box.current .bal-value{color:var(--error);}
+  .bal-box.calculated .bal-value{color:var(--warning);}
+  .bal-box.difference .bal-value{color:var(--primary);}
+
+  .breakdown-section{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:var(--radius-sm);padding:14px;margin-bottom:14px;max-height:250px;overflow-y:auto;}
+  .breakdown-section h3{font-size:13px;font-weight:700;color:var(--text-bright);margin-bottom:10px;}
+  .breakdown-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:11.5px;}
+  .breakdown-row:last-child{border-bottom:none;}
+  .breakdown-row .br-desc{flex:1;color:var(--text);}
+  .breakdown-row .br-amount{font-weight:700;flex:none;margin-left:10px;}
+  .breakdown-row .br-amount.plus{color:var(--success);}
+  .breakdown-row .br-amount.minus{color:var(--error);}
+
+  .fix-btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--warning),#d97706);border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;color:#1a1a1a;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.3s;box-shadow:0 8px 25px rgba(245,158,11,0.2);display:flex;align-items:center;justify-content:center;gap:8px;}
+  .fix-btn:hover:not(:disabled){transform:translateY(-2px);}
+  .fix-btn:disabled{opacity:0.4;cursor:not-allowed;}
+  .fix-btn.fixed{background:var(--success);color:#fff;}
+  .btn-spinner{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(0,0,0,0.3);border-top-color:#1a1a1a;animation:spin 0.7s linear infinite;display:none;}
+  .fix-btn.loading .btn-spinner{display:inline-block;}
+  .fix-btn.loading .btn-text{display:none;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+  .skeleton{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);height:80px;margin-bottom:10px;background-image:linear-gradient(90deg,var(--surface) 0%,var(--surface-2) 50%,var(--surface) 100%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+  @keyframes shimmer{from{background-position:200% 0;}to{background-position:-200% 0;}}
+
+  .toast-container{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:380px;}
+  .toast{background:var(--surface-3);border:1px solid var(--border);padding:13px 15px;border-radius:var(--radius-sm);font-size:13px;box-shadow:var(--shadow-lg);animation:slideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);display:flex;align-items:center;gap:9px;}
+  .toast.error{border-left:4px solid var(--error);}
+  .toast.success{border-left:4px solid var(--success);}
+  @keyframes slideIn{from{opacity:0;transform:translateX(80px);}to{opacity:1;transform:translateX(0);}}
+  @media(max-width:480px){.container{padding:16px 12px 60px;}}
+</style>
+</head>
+<body>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container">
+  <div class="topbar">
+    <a href="admin-dashboard.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg></a>
+    <h1>Fix User Balance</h1>
+  </div>
+
+  <div class="info-banner">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <span>Search a user to recalculate their balance from actual transactions. This fixes corrupted balances.</span>
+  </div>
+
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="Search user by name, email or username..." autocomplete="off">
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <div class="user-card" id="userCard">
+    <div class="user-card-header">
+      <div class="uc-avatar" id="ucAvatar">U</div>
+      <div>
+        <div class="uc-name" id="ucName">—</div>
+        <div class="uc-uid" id="ucUid">—</div>
+      </div>
+    </div>
+
+    <div class="balance-compare">
+      <div class="bal-box current">
+        <div class="bal-label">Current Balance</div>
+        <div class="bal-value" id="currentBalance">₦0</div>
+      </div>
+      <div class="bal-box calculated">
+        <div class="bal-label">Calculated</div>
+        <div class="bal-value" id="calculatedBalance">₦0</div>
+      </div>
+      <div class="bal-box difference">
+        <div class="bal-label">Difference</div>
+        <div class="bal-value" id="difference">₦0</div>
+      </div>
+    </div>
+
+    <div class="breakdown-section" id="breakdownSection">
+      <h3>📊 Transaction Breakdown</h3>
+      <div id="breakdownContent">Calculating...</div>
+    </div>
+
+    <button class="fix-btn" id="fixBtn" disabled>
+      <span class="btn-text">🔧 Fix Balance to Match Calculated Amount</span>
+      <span class="btn-spinner"></span>
+    </button>
+    <div style="text-align:center;margin-top:8px;font-size:11px;color:var(--muted);" id="fixMsg"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs, serverTimestamp, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI",
+    authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0",
+    storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094",
+    appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let selectedUser = null, calculatedBalance = 0, currentBalance = 0;
+  let searchTimeout = null;
+
+  function showToast(m, t = "info", d = 4000) {
+    const c = document.getElementById("toastContainer");
+    const el = document.createElement("div");
+    el.className = `toast ${t}`;
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    el.innerHTML = `<span>${icons[t]||icons.info}</span>${m}`;
+    if (c.children.length >= 3) c.removeChild(c.firstChild);
+    c.appendChild(el);
+    setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateX(80px)"; el.style.transition = "all 0.3s"; setTimeout(() => { if (el.parentNode) el.remove(); }, 300); }, d);
+  }
+
+  function formatNaira(v) { return "₦" + (Number(v) || 0).toLocaleString("en-NG"); }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+  // ✅ AUTH GUARD
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "admin-login.html"; return; }
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (!snap.exists() || snap.data().role !== "admin") {
+        await signOut(auth);
+        window.location.href = "admin-login.html";
+        return;
+      }
+    } catch(e) { window.location.href = "admin-login.html"; }
+  });
+
+  // ✅ SEARCH
+  const searchInput = document.getElementById("searchInput");
+  const searchResults = document.getElementById("searchResults");
+
+  searchInput.addEventListener("input", () => {
+    clearTimeout(searchTimeout);
+    const term = searchInput.value.trim();
+    if (term.length < 2) { searchResults.classList.remove("show"); searchResults.innerHTML = ""; return; }
+    searchTimeout = setTimeout(() => searchUsers(term), 400);
+  });
+
+  async function searchUsers(term) {
+    searchResults.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);">Searching...</div>';
+    searchResults.classList.add("show");
+    try {
+      const tl = term.toLowerCase();
+      const [bU, bE, bN] = await Promise.all([
+        getDocs(query(collection(db, "users"), where("username", ">=", tl), where("username", "<=", tl + "\uf8ff"), limit(10))),
+        getDocs(query(collection(db, "users"), where("email", ">=", tl), where("email", "<=", tl + "\uf8ff"), limit(10))),
+        getDocs(query(collection(db, "users"), where("nameLower", ">=", tl), where("nameLower", "<=", tl + "\uf8ff"), limit(10)))
+      ]);
+      const all = new Map();
+      [...bU.docs, ...bE.docs, ...bN.docs].forEach(d => { if (!all.has(d.id)) all.set(d.id, { id: d.id, ...d.data() }); });
+      const users = Array.from(all.values()).slice(0, 10);
+      if (!users.length) { searchResults.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);">No users found.</div>'; return; }
+      searchResults.innerHTML = users.map(u => `
+        <div class="search-item" data-uid="${u.id}">
+          <div class="user-avatar">${(u.name||"U").charAt(0).toUpperCase()}</div>
+          <div class="user-info">
+            <div class="user-name">${escapeHtml(u.name||"Unknown")}</div>
+            <div class="user-email">@${escapeHtml(u.username||"—")} · Bal: ${formatNaira(u.balance||0)}</div>
+          </div>
+        </div>
+      `).join("");
+      searchResults.querySelectorAll(".search-item").forEach(i => i.addEventListener("click", () => calculateUserBalance(i.dataset.uid)));
+    } catch(e) { searchResults.innerHTML = '<div style="padding:16px;text-align:center;color:var(--muted);">Search failed.</div>'; }
+  }
+
+  // ✅ CALCULATE BALANCE FROM TRANSACTIONS
+  async function calculateUserBalance(uid) {
+    searchResults.classList.remove("show");
+    document.getElementById("userCard").classList.add("show");
+    document.getElementById("fixBtn").disabled = true;
+    document.getElementById("fixBtn").classList.remove("fixed");
+    document.getElementById("fixMsg").textContent = "";
+    document.getElementById("breakdownContent").innerHTML = "Calculating from all transactions...";
+
+    try {
+      // Get user data
+      const userSnap = await getDoc(doc(db, "users", uid));
+      if (!userSnap.exists()) { showToast("User not found.", "error"); return; }
+      selectedUser = { id: uid, ...userSnap.data() };
+      currentBalance = Number(selectedUser.balance) || 0;
+
+      document.getElementById("ucAvatar").textContent = (selectedUser.name||"U").charAt(0).toUpperCase();
+      document.getElementById("ucName").textContent = selectedUser.name || "Unknown";
+      document.getElementById("ucUid").textContent = `@${selectedUser.username||"—"} · ${selectedUser.email||"—"}`;
+      document.getElementById("currentBalance").textContent = formatNaira(currentBalance);
+
+      const breakdown = [];
+      let runningBalance = 0;
+
+      // 1. APPROVED DEPOSITS
+      const depositSnap = await getDocs(query(collection(db, "deposits"), where("uid", "==", uid), where("status", "==", "approved")));
+      let totalDeposits = 0;
+      depositSnap.docs.forEach(d => {
+        const amt = Number(d.data().amount) || 0;
+        totalDeposits += amt;
+        runningBalance += amt;
+      });
+      if (totalDeposits > 0) {
+        breakdown.push({ desc: `📥 Approved Deposits (${depositSnap.size} transactions)`, amount: totalDeposits, type: "plus" });
+      }
+
+      // 2. ROI EARNINGS (from investments)
+      const invSnap = await getDocs(query(collection(db, "investments"), where("uid", "==", uid)));
+      let totalROI = 0;
+      invSnap.docs.forEach(d => {
+        const inv = d.data();
+        if (inv.planCategory === "company") {
+          const earned = (inv.daysPaid || 0) * (inv.dailyROI || 0);
+          totalROI += earned;
+          runningBalance += earned;
+        }
+        if (inv.planCategory === "premium" && inv.creditedAt) {
+          totalROI += Number(inv.total) || 0;
+          runningBalance += Number(inv.total) || 0;
+        }
+      });
+      if (totalROI > 0) {
+        breakdown.push({ desc: `💰 ROI Earnings from Investments`, amount: totalROI, type: "plus" });
+      }
+
+      // 3. REFERRAL EARNINGS
+      const refEarnings = Number(selectedUser.referralEarnings) || 0;
+      if (refEarnings > 0) {
+        runningBalance += refEarnings;
+        breakdown.push({ desc: `🎁 Referral Bonuses`, amount: refEarnings, type: "plus" });
+      }
+
+      // 4. APPROVED WITHDRAWALS (subtract)
+      const withdrawalSnap = await getDocs(query(collection(db, "withdrawals"), where("uid", "==", uid), where("status", "==", "approved")));
+      let totalWithdrawn = 0;
+      withdrawalSnap.docs.forEach(d => {
+        const amt = Number(d.data().amount) || 0;
+        totalWithdrawn += amt;
+        runningBalance -= amt;
+      });
+      if (totalWithdrawn > 0) {
+        breakdown.push({ desc: `📤 Approved Withdrawals (${withdrawalSnap.size} transactions)`, amount: totalWithdrawn, type: "minus" });
+      }
+
+      // 5. PENDING WITHDRAWALS (already deducted, so they're accounted for in current balance)
+      const pendingWithdrawalSnap = await getDocs(query(collection(db, "withdrawals"), where("uid", "==", uid), where("status", "==", "pending")));
+      let totalPendingWithdrawals = 0;
+      pendingWithdrawalSnap.docs.forEach(d => {
+        const amt = Number(d.data().amount) || 0;
+        totalPendingWithdrawals += amt;
+      });
+      if (totalPendingWithdrawals > 0) {
+        breakdown.push({ desc: `⏳ Pending Withdrawals (already deducted)`, amount: totalPendingWithdrawals, type: "minus" });
+      }
+
+      calculatedBalance = runningBalance;
+
+      // Render breakdown
+      if (breakdown.length === 0) {
+        document.getElementById("breakdownContent").innerHTML = "<div style='color:var(--muted);text-align:center;padding:10px;'>No transactions found.</div>";
+      } else {
+        document.getElementById("breakdownContent").innerHTML = breakdown.map(b => `
+          <div class="breakdown-row">
+            <span class="br-desc">${b.desc}</span>
+            <span class="br-amount ${b.type}">${b.type==='plus'?'+':'-'}${formatNaira(b.amount)}</span>
+          </div>
+        `).join("") + `
+          <div class="breakdown-row" style="border-top:2px solid var(--primary);margin-top:8px;padding-top:10px;font-weight:700;">
+            <span class="br-desc" style="color:var(--text-bright);">Calculated Balance</span>
+            <span class="br-amount" style="color:var(--primary);font-size:14px;">${formatNaira(calculatedBalance)}</span>
+          </div>
+        `;
+      }
+
+      // Update comparison
+      document.getElementById("calculatedBalance").textContent = formatNaira(calculatedBalance);
+      const diff = currentBalance - calculatedBalance;
+      document.getElementById("difference").textContent = (diff >= 0 ? "+" : "") + formatNaira(diff);
+      document.getElementById("difference").style.color = diff === 0 ? "var(--success)" : "var(--warning)";
+
+      // Enable fix button if there's a difference
+      if (diff !== 0) {
+        document.getElementById("fixBtn").disabled = false;
+        document.getElementById("fixMsg").textContent = `Balance is off by ${formatNaira(Math.abs(diff))}. Click to fix.`;
+      } else {
+        document.getElementById("fixBtn").disabled = true;
+        document.getElementById("fixBtn").classList.add("fixed");
+        document.getElementById("fixMsg").textContent = "✅ Balance is correct! No fix needed.";
+      }
+
+    } catch(e) {
+      console.error("Calculation error:", e);
+      document.getElementById("breakdownContent").innerHTML = "<div style='color:var(--error);text-align:center;'>Failed to calculate.</div>";
+    }
+  }
+
+  // ✅ FIX BALANCE BUTTON
+  document.getElementById("fixBtn").addEventListener("click", async () => {
+    if (!selectedUser) return;
+    
+    const btn = document.getElementById("fixBtn");
+    btn.disabled = true;
+    btn.classList.add("loading");
+
+    try {
+      // Update user balance to calculated amount
+      await setDoc(doc(db, "users", selectedUser.id), { balance: calculatedBalance }, { merge: true });
+
+      // Log action
+      const { getFirestore, doc: d, collection: c, serverTimestamp: st } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      const db2 = getFirestore(app);
+      const { setDoc: sd } = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+      
+      const actionRef = doc(db, "adminActions", Date.now().toString());
+      await setDoc(actionRef, {
+        adminUid: auth.currentUser.uid,
+        targetUid: selectedUser.id,
+        action: "fix_balance",
+        oldBalance: currentBalance,
+        newBalance: calculatedBalance,
+        difference: currentBalance - calculatedBalance,
+        createdAt: serverTimestamp()
+      });
+
+      // Update display
+      currentBalance = calculatedBalance;
+      document.getElementById("currentBalance").textContent = formatNaira(currentBalance);
+      document.getElementById("difference").textContent = "₦0";
+      document.getElementById("difference").style.color = "var(--success)";
+      document.getElementById("fixBtn").classList.add("fixed");
+      document.getElementById("fixMsg").textContent = "✅ Balance fixed successfully!";
+      
+      showToast(`✅ Balance fixed to ${formatNaira(calculatedBalance)}`, "success", 5000);
+
+    } catch(e) {
+      console.error("Fix error:", e);
+      showToast("Couldn't fix balance.", "error");
+    } finally {
+      btn.classList.remove("loading");
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".search-wrap")) searchResults.classList.remove("show");
+  });
+
+  console.log("🚀 Veltrix Admin Fix Balance - Ready");
+</script>
+</body>
+</html>
