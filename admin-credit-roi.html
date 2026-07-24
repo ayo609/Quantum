@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>VELTRIX — Admin Credit Missing ROI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f0c; --surface: #111915; --surface-2: #1a241e; --surface-3: #243028;
+    --primary: #22c55e; --primary-dark: #16a34a; --primary-glow: rgba(34,197,94,0.25);
+    --gold: #f59e0b; --text: #f0fdf4; --text-bright: #ffffff; --muted: #9ca3a0;
+    --success: #22c55e; --warning: #f59e0b; --error: #ef4444;
+    --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.12);
+    --shadow-lg: 0 30px 60px rgba(0,0,0,0.6); --shadow-md: 0 15px 35px rgba(0,0,0,0.4);
+    --radius: 18px; --radius-sm: 13px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;position:relative;padding-bottom:40px;background-image:radial-gradient(ellipse at 50% 0%,rgba(34,197,94,0.04) 0%,transparent 50%);}
+  a{text-decoration:none;color:inherit;-webkit-tap-highlight-color:transparent;}
+  .floating-orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(90px);opacity:0.2;}
+  .floating-orb.orb-1{width:240px;height:240px;background:rgba(34,197,94,0.07);top:-60px;right:-50px;animation:float1 14s ease-in-out infinite;}
+  @keyframes float1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-20px,15px) scale(1.05);}}
+  .container{position:relative;z-index:1;max-width:620px;margin:0 auto;padding:20px 18px 60px;animation:fadeUp 0.5s ease;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(15px);}to{opacity:1;transform:translateY(0);}}
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:16px;justify-content:space-between;}
+  .topbar-left{display:flex;align-items:center;gap:12px;}
+  .back-btn,.refresh-btn{width:38px;height:38px;border-radius:11px;flex:none;background:var(--surface);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all 0.25s;}
+  .back-btn:hover,.refresh-btn:hover{background:var(--surface-2);border-color:var(--border-hover);color:var(--text-bright);}
+  .back-btn svg,.refresh-btn svg{width:17px;height:17px;}
+  .refresh-btn.spinning{animation:spin 0.7s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .topbar h1{font-family:'DM Sans',sans-serif;font-size:17px;font-weight:700;color:var(--text-bright);}
+
+  /* Summary Bar */
+  .summary-bar{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+  .summary-item{text-align:center;flex:1;min-width:60px;}
+  .summary-item .sum-num{font-family:'DM Sans',sans-serif;font-size:20px;font-weight:800;color:var(--text-bright);}
+  .summary-item .sum-label{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin-top:2px;}
+  .summary-item.warning .sum-num{color:var(--warning);}
+  .summary-item.success .sum-num{color:var(--success);}
+
+  /* Credit All Button */
+  .credit-all-btn{width:100%;padding:14px;margin-bottom:14px;background:linear-gradient(135deg,var(--warning),#d97706);border:none;border-radius:var(--radius-sm);font-size:14px;font-weight:700;color:#1a1a1a;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.3s;box-shadow:0 6px 20px rgba(245,158,11,0.2);display:flex;align-items:center;justify-content:center;gap:8px;}
+  .credit-all-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 30px rgba(245,158,11,0.3);}
+  .credit-all-btn:disabled{opacity:0.4;cursor:not-allowed;}
+  .credit-all-btn.loading .btn-text{display:none;}
+  .btn-spinner{width:18px;height:18px;border-radius:50%;border:2.5px solid rgba(0,0,0,0.3);border-top-color:#1a1a1a;animation:spin 0.7s linear infinite;display:none;}
+  .credit-all-btn.loading .btn-spinner{display:inline-block;}
+
+  /* List */
+  .missing-list{display:flex;flex-direction:column;gap:10px;}
+  .missing-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;transition:all 0.3s;border-left:3px solid var(--warning);}
+  .missing-card:hover{border-color:var(--border-hover);box-shadow:var(--shadow-md);}
+  .missing-card.credited{opacity:0.5;border-left-color:var(--success);pointer-events:none;}
+  .mc-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+  .mc-user{display:flex;align-items:center;gap:10px;}
+  .mc-avatar{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--gold));display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:14px;flex:none;}
+  .mc-user-info .mc-name{font-size:13px;font-weight:700;color:var(--text-bright);}
+  .mc-user-info .mc-uid{font-size:10px;color:var(--muted);}
+  .mc-missed{text-align:right;}
+  .mc-missed .missed-days{font-family:'DM Sans',sans-serif;font-size:18px;font-weight:800;color:var(--warning);}
+  .mc-missed .missed-label{font-size:9px;color:var(--muted);text-transform:uppercase;}
+  .mc-details{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
+  .mc-detail{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:8px;padding:7px;text-align:center;}
+  .mc-detail .dl{font-size:8.5px;color:var(--muted);text-transform:uppercase;margin-bottom:1px;}
+  .mc-detail .dv{font-size:11px;font-weight:700;color:var(--text-bright);}
+  .credit-single-btn{width:100%;padding:9px;border-radius:8px;border:none;background:var(--warning);color:#1a1a1a;font-family:'DM Sans',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:5px;}
+  .credit-single-btn:hover:not(:disabled){background:#fbbf24;}
+  .credit-single-btn:disabled{opacity:0.4;cursor:not-allowed;}
+  .credit-single-btn.credited-btn{background:var(--success);color:#fff;}
+  .credit-single-btn .mini-spinner{width:13px;height:13px;border-radius:50%;border:2px solid rgba(0,0,0,0.3);border-top-color:#1a1a1a;animation:spin 0.7s linear infinite;display:none;}
+  .credit-single-btn.loading .mini-spinner{display:inline-block;}
+  .credit-single-btn.loading .mini-btn-text{display:none;}
+
+  .empty-state{text-align:center;padding:40px 20px;color:var(--muted);}
+  .empty-state .empty-icon{font-size:40px;margin-bottom:10px;}
+  .skeleton{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);height:110px;margin-bottom:10px;background-image:linear-gradient(90deg,var(--surface) 0%,var(--surface-2) 50%,var(--surface) 100%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+  @keyframes shimmer{from{background-position:200% 0;}to{background-position:-200% 0;}}
+
+  .toast-container{position:fixed;top:16px;right:16px;z-index:200;display:flex;flex-direction:column;gap:8px;width:calc(100% - 32px);max-width:380px;}
+  .toast{background:var(--surface-3);border:1px solid var(--border);padding:13px 15px;border-radius:var(--radius-sm);font-size:13px;box-shadow:var(--shadow-lg);animation:slideIn 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);display:flex;align-items:center;gap:9px;}
+  .toast.error{border-left:4px solid var(--error);}
+  .toast.success{border-left:4px solid var(--success);}
+  @keyframes slideIn{from{opacity:0;transform:translateX(80px);}to{opacity:1;transform:translateX(0);}}
+  @media(max-width:480px){.container{padding:16px 12px 60px;}.topbar h1{font-size:15px;}}
+</style>
+</head>
+<body>
+
+<div class="floating-orb orb-1"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="container">
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="admin-dashboard.html" class="back-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12,19 5,12 12,5"/></svg></a>
+      <h1>Missing ROI Credits</h1>
+    </div>
+    <button class="refresh-btn" id="refreshBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23,4 23,10 17,10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></button>
+  </div>
+
+  <div class="summary-bar">
+    <div class="summary-item warning"><div class="sum-num" id="totalMissing">0</div><div class="sum-label">Missing Credits</div></div>
+    <div class="summary-item"><div class="sum-num" id="totalDays">0</div><div class="sum-label">Missed Days</div></div>
+    <div class="summary-item"><div class="sum-num" id="totalAmount">₦0</div><div class="sum-label">Total Amount</div></div>
+    <div class="summary-item success"><div class="sum-num" id="totalUsers">0</div><div class="sum-label">Affected Users</div></div>
+  </div>
+
+  <button class="credit-all-btn" id="creditAllBtn" disabled>
+    <span class="btn-text">💰 Credit All Missing ROI</span>
+    <span class="btn-spinner"></span>
+  </button>
+
+  <div id="missingList" class="missing-list">
+    <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc, collection, query, where, getDocs, writeBatch, increment, serverTimestamp, Timestamp, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDs5w4DtbEOE1mthVxvSW-DZKKhfAORdxI",
+    authDomain: "affiliate-93bc0.firebaseapp.com",
+    projectId: "affiliate-93bc0",
+    storageBucket: "affiliate-93bc0.firebasestorage.app",
+    messagingSenderId: "205243273094",
+    appId: "1:205243273094:web:d45f306bdc10a69062a607"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let missingInvestments = [];
+  let creditedIds = new Set();
+
+  function showToast(m, t = "info", d = 4000) {
+    const c = document.getElementById("toastContainer");
+    const el = document.createElement("div");
+    el.className = `toast ${t}`;
+    const icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+    el.innerHTML = `<span>${icons[t]||icons.info}</span>${m}`;
+    if (c.children.length >= 3) c.removeChild(c.firstChild);
+    c.appendChild(el);
+    setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateX(80px)"; el.style.transition = "all 0.3s"; setTimeout(() => { if (el.parentNode) el.remove(); }, 300); }, d);
+  }
+
+  function formatNaira(v) { return "₦" + (Number(v) || 0).toLocaleString("en-NG"); }
+  function startOfDay(d) { const nd = new Date(d); nd.setHours(0, 0, 0, 0); return nd; }
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+  // ✅ AUTH GUARD
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) { window.location.href = "admin-login.html"; return; }
+    try {
+      const snap = await getDoc(doc(db, "users", user.uid));
+      if (!snap.exists() || snap.data().role !== "admin") {
+        await signOut(auth);
+        window.location.href = "admin-login.html";
+        return;
+      }
+      await scanForMissingROI();
+    } catch (e) {
+      window.location.href = "admin-login.html";
+    }
+  });
+
+  // ✅ SCAN ALL ACTIVE COMPANY INVESTMENTS
+  async function scanForMissingROI() {
+    const container = document.getElementById("missingList");
+    container.innerHTML = '<div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>';
+    
+    try {
+      // Get ALL active company investments
+      const invSnap = await getDocs(query(collection(db, "investments"), where("status", "==", "active"), where("planCategory", "==", "company")));
+      
+      if (invSnap.empty) {
+        container.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>No active company investments found.</p></div>';
+        updateSummary();
+        return;
+      }
+
+      const today = startOfDay(new Date());
+      missingInvestments = [];
+
+      // Check each investment
+      for (const docSnap of invSnap.docs) {
+        const inv = docSnap.data();
+        const invId = docSnap.id;
+        
+        const lastDrop = inv.lastDropDate 
+          ? startOfDay(inv.lastDropDate.toDate?.() || new Date(inv.lastDropDate)) 
+          : startOfDay(inv.startDate.toDate?.() || new Date(inv.startDate));
+        
+        const remaining = inv.days - (inv.daysPaid || 0);
+        if (remaining <= 0) continue;
+
+        const daysPassed = Math.floor((today - lastDrop) / 86400000);
+        if (daysPassed <= 0) continue;
+
+        const toCredit = Math.min(daysPassed, remaining);
+        const amount = toCredit * inv.dailyROI;
+
+        // Get user info
+        let userData = null;
+        try {
+          const userSnap = await getDoc(doc(db, "users", inv.uid));
+          if (userSnap.exists()) userData = userSnap.data();
+        } catch (e) {}
+
+        missingInvestments.push({
+          id: invId,
+          uid: inv.uid,
+          username: inv.username || userData?.username || "Unknown",
+          name: userData?.name || inv.username || "Unknown",
+          amount: inv.amount,
+          dailyROI: inv.dailyROI,
+          days: inv.days,
+          daysPaid: inv.daysPaid || 0,
+          remaining: remaining,
+          missedDays: toCredit,
+          missedAmount: amount,
+          lastDropDate: inv.lastDropDate,
+          startDate: inv.startDate
+        });
+      }
+
+      // Sort by most missed days first
+      missingInvestments.sort((a, b) => b.missedDays - a.missedDays);
+      
+      renderMissingList();
+      updateSummary();
+
+    } catch (e) {
+      console.error("Scan error:", e);
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">⚠️</div><p>Failed to scan. Check console.</p></div>';
+    }
+  }
+
+  // ✅ RENDER LIST
+  function renderMissingList() {
+    const container = document.getElementById("missingList");
+
+    if (missingInvestments.length === 0) {
+      container.innerHTML = '<div class="empty-state"><div class="empty-icon">✅</div><p>All ROI credits are up to date! No missing drops.</p></div>';
+      document.getElementById("creditAllBtn").disabled = true;
+      return;
+    }
+
+    container.innerHTML = missingInvestments.map((inv, index) => {
+      const isCredited = creditedIds.has(inv.id);
+      return `
+        <div class="missing-card ${isCredited ? 'credited' : ''}" id="card-${index}">
+          <div class="mc-top">
+            <div class="mc-user">
+              <div class="mc-avatar">${(inv.name||"U").charAt(0).toUpperCase()}</div>
+              <div class="mc-user-info">
+                <div class="mc-name">${escapeHtml(inv.name)}</div>
+                <div class="mc-uid">@${escapeHtml(inv.username)} · Plan: ${formatNaira(inv.amount)}</div>
+              </div>
+            </div>
+            <div class="mc-missed">
+              <div class="missed-days">${inv.missedDays} day${inv.missedDays>1?'s':''}</div>
+              <div class="missed-label">Missed</div>
+            </div>
+          </div>
+          <div class="mc-details">
+            <div class="mc-detail"><div class="dl">Daily ROI</div><div class="dv">${formatNaira(inv.dailyROI)}</div></div>
+            <div class="mc-detail"><div class="dl">Progress</div><div class="dv">Day ${inv.daysPaid}/${inv.days}</div></div>
+            <div class="mc-detail"><div class="dl">To Credit</div><div class="dv" style="color:var(--warning);">${formatNaira(inv.missedAmount)}</div></div>
+          </div>
+          <button class="credit-single-btn ${isCredited?'credited-btn':''}" data-index="${index}" ${isCredited?'disabled':''}>
+            <span class="mini-btn-text">${isCredited ? '✅ Credited' : `💰 Credit ${formatNaira(inv.missedAmount)}`}</span>
+            <span class="mini-spinner"></span>
+          </button>
+        </div>
+      `;
+    }).join("");
+
+    // Single credit buttons
+    container.querySelectorAll(".credit-single-btn:not(.credited-btn)").forEach(btn => {
+      btn.addEventListener("click", () => creditSingleInvestment(parseInt(btn.dataset.index), btn));
+    });
+
+    document.getElementById("creditAllBtn").disabled = false;
+  }
+
+  // ✅ UPDATE SUMMARY
+  function updateSummary() {
+    const uncredited = missingInvestments.filter(inv => !creditedIds.has(inv.id));
+    document.getElementById("totalMissing").textContent = uncredited.length;
+    document.getElementById("totalDays").textContent = uncredited.reduce((sum, inv) => sum + inv.missedDays, 0);
+    document.getElementById("totalAmount").textContent = formatNaira(uncredited.reduce((sum, inv) => sum + inv.missedAmount, 0));
+    document.getElementById("totalUsers").textContent = new Set(uncredited.map(inv => inv.uid)).size;
+    
+    if (uncredited.length === 0) {
+      document.getElementById("creditAllBtn").disabled = true;
+    }
+  }
+
+  // ✅ CREDIT SINGLE INVESTMENT
+  async function creditSingleInvestment(index, btn) {
+    const inv = missingInvestments[index];
+    if (!inv || creditedIds.has(inv.id)) return;
+
+    btn.disabled = true;
+    btn.classList.add("loading");
+
+    try {
+      const invRef = doc(db, "investments", inv.id);
+      const userRef = doc(db, "users", inv.uid);
+      const today = startOfDay(new Date());
+
+      await runTransaction(db, async (transaction) => {
+        const freshInv = await transaction.get(invRef);
+        if (!freshInv.exists()) throw new Error("Investment not found");
+        
+        const fData = freshInv.data();
+        if (fData.status !== "active") throw new Error("Investment not active");
+
+        // Recalculate
+        const lastDrop = fData.lastDropDate 
+          ? startOfDay(fData.lastDropDate.toDate?.() || new Date(fData.lastDropDate)) 
+          : startOfDay(fData.startDate.toDate?.() || new Date(fData.startDate));
+        
+        const remaining = fData.days - (fData.daysPaid || 0);
+        const daysPassed = Math.floor((today - lastDrop) / 86400000);
+        const toCredit = Math.min(daysPassed, remaining);
+        
+        if (toCredit <= 0) throw new Error("No credit needed");
+
+        const amount = toCredit * fData.dailyROI;
+        const newPaid = (fData.daysPaid || 0) + toCredit;
+
+        transaction.update(invRef, {
+          daysPaid: newPaid,
+          lastDropDate: Timestamp.fromDate(today),
+          status: newPaid >= fData.days ? "completed" : "active",
+          lastCreditedBy: auth.currentUser.uid,
+          lastCreditedAt: serverTimestamp()
+        });
+
+        transaction.update(userRef, {
+          balance: increment(amount),
+          totalEarnings: increment(amount)
+        });
+
+        // Log action
+        const actionRef = doc(collection(db, "adminActions"));
+        transaction.set(actionRef, {
+          adminUid: auth.currentUser.uid,
+          targetUid: inv.uid,
+          action: "manual_roi_credit",
+          investmentId: inv.id,
+          amount: amount,
+          daysCredited: toCredit,
+          createdAt: serverTimestamp()
+        });
+      });
+
+      creditedIds.add(inv.id);
+      
+      // Update card
+      const card = document.getElementById(`card-${index}`);
+      if (card) {
+        card.classList.add("credited");
+        const cardBtn = card.querySelector(".credit-single-btn");
+        if (cardBtn) {
+          cardBtn.classList.add("credited-btn");
+          cardBtn.disabled = true;
+          cardBtn.innerHTML = '<span class="mini-btn-text">✅ Credited</span>';
+        }
+      }
+
+      updateSummary();
+      showToast(`✅ Credited ${formatNaira(inv.missedAmount)} (${inv.missedDays} days) to ${inv.name}`, "success", 4000);
+
+    } catch (e) {
+      console.error("Credit error:", e);
+      showToast(e.message || "Couldn't credit.", "error");
+      btn.disabled = false;
+      btn.classList.remove("loading");
+    }
+  }
+
+  // ✅ CREDIT ALL
+  document.getElementById("creditAllBtn").addEventListener("click", async () => {
+    const uncredited = missingInvestments.filter(inv => !creditedIds.has(inv.id));
+    if (uncredited.length === 0) return;
+
+    const btn = document.getElementById("creditAllBtn");
+    btn.disabled = true;
+    btn.classList.add("loading");
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const inv of uncredited) {
+      try {
+        const invRef = doc(db, "investments", inv.id);
+        const userRef = doc(db, "users", inv.uid);
+        const today = startOfDay(new Date());
+
+        await runTransaction(db, async (transaction) => {
+          const freshInv = await transaction.get(invRef);
+          if (!freshInv.exists()) return;
+          
+          const fData = freshInv.data();
+          if (fData.status !== "active") return;
+
+          const lastDrop = fData.lastDropDate 
+            ? startOfDay(fData.lastDropDate.toDate?.() || new Date(fData.lastDropDate)) 
+            : startOfDay(fData.startDate.toDate?.() || new Date(fData.startDate));
+          
+          const remaining = fData.days - (fData.daysPaid || 0);
+          const daysPassed = Math.floor((today - lastDrop) / 86400000);
+          const toCredit = Math.min(daysPassed, remaining);
+          
+          if (toCredit <= 0) return;
+
+          const amount = toCredit * fData.dailyROI;
+          const newPaid = (fData.daysPaid || 0) + toCredit;
+
+          transaction.update(invRef, {
+            daysPaid: newPaid,
+            lastDropDate: Timestamp.fromDate(today),
+            status: newPaid >= fData.days ? "completed" : "active",
+            lastCreditedBy: auth.currentUser.uid,
+            lastCreditedAt: serverTimestamp()
+          });
+
+          transaction.update(userRef, {
+            balance: increment(amount),
+            totalEarnings: increment(amount)
+          });
+
+          const actionRef = doc(collection(db, "adminActions"));
+          transaction.set(actionRef, {
+            adminUid: auth.currentUser.uid,
+            targetUid: inv.uid,
+            action: "bulk_roi_credit",
+            investmentId: inv.id,
+            amount: amount,
+            daysCredited: toCredit,
+            createdAt: serverTimestamp()
+          });
+        });
+
+        creditedIds.add(inv.id);
+        successCount++;
+      } catch (e) {
+        failCount++;
+      }
+    }
+
+    // Re-render
+    renderMissingList();
+    updateSummary();
+    
+    btn.classList.remove("loading");
+    
+    if (successCount > 0) {
+      showToast(`✅ Credited ${successCount} investments! ${failCount > 0 ? `(${failCount} failed)` : ''}`, "success", 5000);
+    } else {
+      showToast("No credits processed.", "error");
+    }
+  });
+
+  // ✅ REFRESH
+  document.getElementById("refreshBtn").addEventListener("click", async () => {
+    const btn = document.getElementById("refreshBtn");
+    btn.classList.add("spinning");
+    creditedIds.clear();
+    await scanForMissingROI();
+    setTimeout(() => btn.classList.remove("spinning"), 600);
+    showToast("Scan complete", "success", 2000);
+  });
+
+  console.log("🚀 Veltrix Admin Missing ROI - Ready");
+</script>
+</body>
+</html>
